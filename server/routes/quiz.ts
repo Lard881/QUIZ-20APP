@@ -42,6 +42,9 @@ let quizzes: Quiz[] = [
     ],
     roomCode: "JS2024",
     isActive: false,
+    allowRetries: false,
+    randomizeQuestions: false,
+    maxAttempts: 1,
     createdAt: "2024-01-15T10:00:00Z",
     updatedAt: "2024-01-15T10:00:00Z"
   },
