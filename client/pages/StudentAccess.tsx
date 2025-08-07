@@ -114,24 +114,42 @@ export default function StudentAccess() {
         participantName: participantName.trim()
       };
 
-      // TODO: Replace with actual API call
-      // const response = await fetch("/api/quiz/join", {
-      //   method: "POST", 
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(joinData)
-      // });
-
-      toast({
-        title: "Joined Successfully!",
-        description: `Welcome to ${selectedQuiz.title}`
+      const response = await fetch("/api/quiz/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(joinData)
       });
 
-      // Navigate to quiz taking page
-      navigate(`/quiz/session-${selectedQuiz.id}/take`);
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.success) {
+          toast({
+            title: "Joined Successfully!",
+            description: `Welcome to ${selectedQuiz.title}`
+          });
+
+          // Navigate to quiz taking page with session ID
+          navigate(`/quiz/${data.sessionId}/take`);
+        } else {
+          toast({
+            title: "Failed to Join",
+            description: data.message || "Could not join the quiz",
+            variant: "destructive"
+          });
+        }
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Error",
+          description: errorData.message || "Failed to join quiz",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to join quiz. Please try again.",
+        description: "Network error. Please check your connection and try again.",
         variant: "destructive"
       });
     } finally {
