@@ -1,6 +1,15 @@
 import "./global.css";
 import React from "react";
 
+// Suppress ResizeObserver loop warning (common with Radix UI components)
+const resizeObserverError = console.error;
+console.error = (...args: any[]) => {
+  if (args[0]?.includes?.('ResizeObserver loop completed with undelivered notifications')) {
+    return;
+  }
+  resizeObserverError(...args);
+};
+
 import { Toaster } from "@/components/ui/toaster";
 import { createRoot } from "react-dom/client";
 import { Toaster as Sonner } from "@/components/ui/sonner";
