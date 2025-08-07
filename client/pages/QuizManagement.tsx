@@ -116,7 +116,8 @@ export default function QuizManagement() {
         allowRetries,
         randomizeQuestions,
         maxAttempts,
-        expirationDays
+        durationValue,
+        durationUnit
       };
 
       const headers: Record<string, string> = {
