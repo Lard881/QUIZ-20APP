@@ -12,7 +12,9 @@ import {
   updateQuizStatus,
   getQuiz,
   updateQuiz,
-  deleteQuiz
+  deleteQuiz,
+  checkQuiz,
+  getActiveQuizzes
 } from "./routes/quiz";
 import { login, signup, updateProfile, getProfile } from "./routes/auth";
 
