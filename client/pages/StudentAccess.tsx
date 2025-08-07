@@ -74,6 +74,8 @@ export default function StudentAccess() {
               setRoomCode(code.toUpperCase());
             }
           } else {
+            // Show the quiz info but indicate it's not active
+            setSelectedQuiz(data.quiz);
             toast({
               title: "Quiz Not Active",
               description: `"${data.quiz.title}" exists but is not currently accepting participants. Please wait for the instructor to start the quiz.`,
