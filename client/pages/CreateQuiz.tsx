@@ -379,6 +379,63 @@ export default function CreateQuiz() {
             </CardContent>
           </Card>
 
+          {/* Quiz Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quiz Settings</CardTitle>
+              <CardDescription>
+                Configure advanced options for your quiz
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="allowRetries" className="text-base">Allow Retries</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Let students take the quiz multiple times
+                  </p>
+                </div>
+                <Switch
+                  id="allowRetries"
+                  checked={allowRetries}
+                  onCheckedChange={setAllowRetries}
+                />
+              </div>
+
+              {allowRetries && (
+                <div>
+                  <Label htmlFor="maxAttempts">Maximum Attempts</Label>
+                  <Input
+                    id="maxAttempts"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={maxAttempts}
+                    onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 1)}
+                    className="w-24 mt-1"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Number of times students can attempt the quiz
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="randomizeQuestions" className="text-base">Randomize Questions</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Shuffle question order for each participant
+                  </p>
+                </div>
+                <Switch
+                  id="randomizeQuestions"
+                  checked={randomizeQuestions}
+                  onCheckedChange={setRandomizeQuestions}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Questions Section */}
           <div>
             <div className="flex items-center justify-between mb-4">
