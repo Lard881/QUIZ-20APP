@@ -104,6 +104,7 @@ export interface CreateQuizRequest {
   allowRetries?: boolean;
   randomizeQuestions?: boolean;
   maxAttempts?: number;
+  expirationDays?: number;
 }
 
 export interface UpdateQuizRequest {
@@ -114,6 +115,7 @@ export interface UpdateQuizRequest {
   allowRetries?: boolean;
   randomizeQuestions?: boolean;
   maxAttempts?: number;
+  expirationDays?: number;
   isActive?: boolean;
 }
 
