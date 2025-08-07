@@ -66,25 +66,42 @@ export default function StudentAccess() {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.quiz && data.quiz.isActive) {
-          setSelectedQuiz(data.quiz);
-          setShowNameInput(true);
-          if (!codeToSubmit) {
-            setRoomCode(code.toUpperCase());
+        if (data.quiz) {
+          if (data.quiz.isActive) {
+            setSelectedQuiz(data.quiz);
+            setShowNameInput(true);
+            if (!codeToSubmit) {
+              setRoomCode(code.toUpperCase());
+            }
+          } else {
+            toast({
+              title: "Quiz Not Active",
+              description: `"${data.quiz.title}" exists but is not currently accepting participants. Please wait for the instructor to start the quiz.`,
+              variant: "destructive"
+            });
           }
         } else {
           toast({
-            title: "Quiz Not Available",
-            description: "This quiz is not currently active",
+            title: "Quiz Not Found",
+            description: "Invalid room code or quiz does not exist",
             variant: "destructive"
           });
         }
       } else {
-        toast({
-          title: "Quiz Not Found",
-          description: "Invalid room code or quiz does not exist",
-          variant: "destructive"
-        });
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        if (response.status === 410) {
+          toast({
+            title: "Quiz Expired",
+            description: errorData.message || "This quiz has expired and is no longer available",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Quiz Not Found",
+            description: errorData.message || "Invalid room code or quiz does not exist",
+            variant: "destructive"
+          });
+        }
       }
     } catch (error) {
       toast({
