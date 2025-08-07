@@ -25,6 +25,9 @@ export default function CreateQuiz() {
   const [description, setDescription] = useState("");
   const [timeLimit, setTimeLimit] = useState(30);
   const [questions, setQuestions] = useState<QuestionForm[]>([]);
+  const [allowRetries, setAllowRetries] = useState(false);
+  const [randomizeQuestions, setRandomizeQuestions] = useState(false);
+  const [maxAttempts, setMaxAttempts] = useState(1);
   const [saving, setSaving] = useState(false);
 
   const addQuestion = () => {
