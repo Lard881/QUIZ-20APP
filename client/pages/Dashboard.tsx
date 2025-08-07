@@ -73,11 +73,16 @@ export default function Dashboard() {
             headers['Authorization'] = `Bearer ${token}`;
           }
 
+          // Create timeout controller for better browser compatibility
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+
           const response = await fetch(`/api/quiz/${quiz.id}/results`, {
             headers,
-            // Add timeout to prevent hanging requests
-            signal: AbortSignal.timeout(5000)
+            signal: controller.signal
           });
+
+          clearTimeout(timeoutId);
 
           if (response.ok) {
             const data = await response.json();
