@@ -341,43 +341,46 @@ export default function QuizTaking() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header with Timer */}
       <header className="bg-white/90 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 quiz-gradient rounded-lg flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-white" />
+            <div className="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
+              <div className="w-6 h-6 md:w-8 md:h-8 quiz-gradient rounded-lg flex items-center justify-center flex-shrink-0">
+                <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">{quiz.title}</h1>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0">
+                <h1 className="text-sm md:text-lg font-semibold text-foreground truncate">{quiz.title}</h1>
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Question {currentQuestionIndex + 1} of {quiz.questions.length}
                 </p>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-4">
+
+            <div className="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
               <div className="text-right">
-                <div className="flex items-center space-x-2">
-                  <Clock className={`w-4 h-4 ${getTimerColor()}`} />
-                  <span className={`font-mono font-semibold ${getTimerColor()} ${timeRemaining <= 60 ? 'animate-pulse' : ''}`}>
+                <div className="flex items-center space-x-1 md:space-x-2">
+                  <Clock className={`w-3 h-3 md:w-4 md:h-4 ${getTimerColor()}`} />
+                  <span className={`text-sm md:text-base font-mono font-semibold ${getTimerColor()} ${timeRemaining <= 60 ? 'animate-pulse' : ''}`}>
                     {formatTime(timeRemaining)}
                   </span>
                 </div>
-                <div className="w-24 mt-1">
+                <div className="w-16 md:w-24 mt-1">
                   <Progress
                     value={getTimeProgress()}
                     className="h-1"
                   />
                 </div>
                 {timeRemaining <= 60 && (
-                  <p className="text-xs text-destructive mt-1 font-medium">
+                  <p className="text-xs text-destructive mt-1 font-medium hidden md:block">
                     Time running out!
                   </p>
                 )}
               </div>
-              
-              <Badge variant="outline">
-                {getAnsweredCount()} / {quiz.questions.length} answered
+
+              <Badge variant="outline" className="text-xs md:text-sm hidden sm:inline-flex">
+                {getAnsweredCount()} / {quiz.questions.length}
+              </Badge>
+              <Badge variant="outline" className="text-xs sm:hidden">
+                {getAnsweredCount()}/{quiz.questions.length}
               </Badge>
             </div>
           </div>
