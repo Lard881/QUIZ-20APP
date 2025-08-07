@@ -39,9 +39,16 @@ export default function QuizManagement() {
       navigate("/auth/login");
       return;
     }
-    if (quizId) {
-      fetchQuizData();
+    if (!quizId) {
+      toast({
+        title: "Error",
+        description: "No quiz ID provided",
+        variant: "destructive"
+      });
+      navigate("/dashboard");
+      return;
     }
+    fetchQuizData();
   }, [instructor, quizId, navigate]);
 
   const fetchQuizData = async () => {
