@@ -516,16 +516,27 @@ export const checkQuiz: RequestHandler = (req, res) => {
   try {
     const { roomCode } = req.params;
 
-    const quiz = quizzes.find(q => q.roomCode === roomCode && q.isActive);
+    const quiz = quizzes.find(q => q.roomCode === roomCode);
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
-        message: "Quiz not found or not active"
+        message: "Quiz not found"
       };
       return res.status(404).json(errorResponse);
     }
 
-    // Return quiz without questions for security
+    // Check if quiz is expired
+    if (isQuizExpired(quiz)) {
+      // Auto-deactivate expired quiz
+      quiz.isActive = false;
+      const errorResponse: ErrorResponse = {
+        error: "QUIZ_EXPIRED",
+        message: "This quiz has expired"
+      };
+      return res.status(410).json(errorResponse);
+    }
+
+    // Return quiz without questions for security, regardless of active status
     const { questions, ...quizWithoutQuestions } = quiz;
     res.json({ quiz: quizWithoutQuestions, success: true });
   } catch (error) {
