@@ -66,6 +66,9 @@ let quizzes: Quiz[] = [
     ],
     roomCode: "REACT45",
     isActive: true,
+    allowRetries: true,
+    randomizeQuestions: true,
+    maxAttempts: 3,
     createdAt: "2024-01-16T14:30:00Z",
     updatedAt: "2024-01-16T14:30:00Z"
   }
