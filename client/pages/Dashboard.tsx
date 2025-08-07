@@ -59,19 +59,27 @@ export default function Dashboard() {
 
     try {
       const token = localStorage.getItem('quiz_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/quiz/${quizId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers
       });
 
       if (response.ok) {
         setQuizzes(quizzes.filter(q => q.id !== quizId));
       } else {
-        alert("Failed to delete quiz. Please try again.");
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        alert(`Failed to delete quiz: ${errorData.message || response.statusText}`);
       }
     } catch (error) {
+      console.error("Error deleting quiz:", error);
       alert("Failed to delete quiz. Please check your connection.");
     }
   };
