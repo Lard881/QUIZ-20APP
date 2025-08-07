@@ -38,6 +38,8 @@ export default function QuizEdit() {
   const [allowRetries, setAllowRetries] = useState(false);
   const [randomizeQuestions, setRandomizeQuestions] = useState(false);
   const [maxAttempts, setMaxAttempts] = useState(1);
+  const [durationValue, setDurationValue] = useState(30);
+  const [durationUnit, setDurationUnit] = useState<'minutes' | 'days'>('days');
   const [questions, setQuestions] = useState<QuestionForm[]>([]);
 
   useEffect(() => {
