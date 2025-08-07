@@ -544,19 +544,111 @@ export default function QuizManagement() {
           <TabsContent value="analytics" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Quiz Analytics</CardTitle>
-                <CardDescription>
-                  Performance insights and statistics
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Student Performance Analytics</CardTitle>
+                    <CardDescription>
+                      Detailed scores and grades for all quiz participants
+                    </CardDescription>
+                  </div>
+                  <Button onClick={downloadExcel} variant="outline">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Download Excel Report
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Analytics Coming Soon</h3>
-                  <p className="text-muted-foreground">
-                    Detailed analytics and reporting features will be available here
-                  </p>
-                </div>
+                {participants.length === 0 ? (
+                  <div className="text-center py-8">
+                    <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No Data Available</h3>
+                    <p className="text-muted-foreground">
+                      No students have completed this quiz yet
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Summary Statistics */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="bg-muted/30 rounded-lg p-4 text-center">
+                        <div className="text-2xl font-bold text-quiz-success">{participants.length}</div>
+                        <div className="text-sm text-muted-foreground">Total Students</div>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg p-4 text-center">
+                        <div className="text-2xl font-bold text-primary">
+                          {calculateAverageScore().toFixed(1)}%
+                        </div>
+                        <div className="text-sm text-muted-foreground">Average Score</div>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg p-4 text-center">
+                        <div className="text-2xl font-bold text-quiz-success">
+                          {participants.filter(p => getGrade(calculateStudentScore(p)) !== 'F').length}
+                        </div>
+                        <div className="text-sm text-muted-foreground">Passed</div>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg p-4 text-center">
+                        <div className="text-2xl font-bold text-destructive">
+                          {participants.filter(p => getGrade(calculateStudentScore(p)) === 'F').length}
+                        </div>
+                        <div className="text-sm text-muted-foreground">Failed</div>
+                      </div>
+                    </div>
+
+                    {/* Student Results Table */}
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="bg-muted/50 px-4 py-3 border-b">
+                        <h4 className="font-medium">Student Results</h4>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-muted/30">
+                            <tr>
+                              <th className="text-left p-3 font-medium">Student Name</th>
+                              <th className="text-left p-3 font-medium">Score</th>
+                              <th className="text-left p-3 font-medium">Percentage</th>
+                              <th className="text-left p-3 font-medium">Grade</th>
+                              <th className="text-left p-3 font-medium">Questions Answered</th>
+                              <th className="text-left p-3 font-medium">Submission Time</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {participants.map((participant) => {
+                              const score = calculateStudentScore(participant);
+                              const percentage = ((score / getTotalPossiblePoints()) * 100);
+                              const grade = getGrade(percentage);
+
+                              return (
+                                <tr key={participant.id} className="border-b hover:bg-muted/20">
+                                  <td className="p-3 font-medium">{participant.name}</td>
+                                  <td className="p-3">{score} / {getTotalPossiblePoints()}</td>
+                                  <td className="p-3">
+                                    <span className={`font-medium ${getScoreColor(percentage)}`}>
+                                      {percentage.toFixed(1)}%
+                                    </span>
+                                  </td>
+                                  <td className="p-3">
+                                    <Badge variant={getGradeVariant(grade)} className="font-bold">
+                                      {grade}
+                                    </Badge>
+                                  </td>
+                                  <td className="p-3">
+                                    {participant.answers.length} / {quiz?.questions.length || 0}
+                                  </td>
+                                  <td className="p-3 text-sm text-muted-foreground">
+                                    {participant.submittedAt
+                                      ? new Date(participant.submittedAt).toLocaleString()
+                                      : 'In Progress'
+                                    }
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
