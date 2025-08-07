@@ -110,12 +110,15 @@ export default function CreateQuiz() {
         questions: questions.map(({ tempId, ...q }) => q)
       };
 
-      // TODO: Replace with actual API call
-      // const response = await fetch("/api/quiz", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(quizData)
-      // });
+      const response = await fetch("/api/quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(quizData)
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create quiz");
+      }
 
       toast({
         title: "Quiz Created!",
