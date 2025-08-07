@@ -53,6 +53,7 @@ export default function QuizManagement() {
 
   const fetchQuizData = async () => {
     try {
+      console.log('Fetching quiz data for ID:', quizId);
       const token = localStorage.getItem('quiz_token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json'
@@ -61,6 +62,9 @@ export default function QuizManagement() {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
+
+      console.log('Making request to:', `/api/quiz/${quizId}`);
+      console.log('With headers:', headers);
 
       // Fetch quiz details
       const quizResponse = await fetch(`/api/quiz/${quizId}`, {
