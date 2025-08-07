@@ -117,6 +117,10 @@ export const createQuiz: RequestHandler = (req, res) => {
       return res.status(400).json(errorResponse);
     }
 
+    const now = new Date();
+    const expirationDays = quizData.expirationDays || 30;
+    const expiresAt = new Date(now.getTime() + (expirationDays * 24 * 60 * 60 * 1000));
+
     const newQuiz: Quiz = {
       id: Date.now().toString(),
       title: quizData.title,
@@ -132,8 +136,10 @@ export const createQuiz: RequestHandler = (req, res) => {
       allowRetries: quizData.allowRetries || false,
       randomizeQuestions: quizData.randomizeQuestions || false,
       maxAttempts: quizData.maxAttempts || 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      expirationDays,
+      expiresAt: expiresAt.toISOString(),
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
     };
 
     quizzes.push(newQuiz);
