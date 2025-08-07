@@ -366,6 +366,49 @@ export default function StudentAccess() {
               </CardContent>
             </Card>
           </div>
+        ) : selectedQuiz && !selectedQuiz.isActive ? (
+          /* Waiting for Quiz to Start */
+          <div className="max-w-md mx-auto">
+            <Card>
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-quiz-warning/10 rounded-full flex items-center justify-center">
+                  <Clock className="w-8 h-8 text-quiz-warning" />
+                </div>
+                <CardTitle>Quiz Found: "{selectedQuiz.title}"</CardTitle>
+                <CardDescription>
+                  This quiz is not currently active. Please wait for your instructor to start the quiz.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
+                    <div className="flex items-center">
+                      <Hash className="w-4 h-4 mr-1" />
+                      {selectedQuiz.roomCode}
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {selectedQuiz.timeLimit} minutes
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    The quiz will become available once your instructor activates it. You can refresh this page or try again later.
+                  </p>
+                  <div className="flex space-x-3">
+                    <Button variant="outline" onClick={resetForm} className="flex-1">
+                      Try Different Code
+                    </Button>
+                    <Button onClick={() => window.location.reload()} className="flex-1">
+                      Refresh Page
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         ) : (
           /* Name Input Section */
           <div className="max-w-md mx-auto">
