@@ -785,7 +785,8 @@ export default function QuizManagement() {
                           </thead>
                           <tbody>
                             {participants.map((participant) => {
-                              const score = calculateStudentScore(participant);
+                              const scoreData = calculateStudentScore(participant);
+                              const score = scoreData.score;
                               const percentage = ((score / getTotalPossiblePoints()) * 100);
                               const grade = getGrade(percentage);
 
