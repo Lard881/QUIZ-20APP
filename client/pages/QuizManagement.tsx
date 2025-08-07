@@ -113,7 +113,8 @@ export default function QuizManagement() {
       const updateData: UpdateQuizRequest = {
         allowRetries,
         randomizeQuestions,
-        maxAttempts
+        maxAttempts,
+        expirationDays
       };
 
       const headers: Record<string, string> = {
