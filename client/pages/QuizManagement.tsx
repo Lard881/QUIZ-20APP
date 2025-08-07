@@ -222,28 +222,48 @@ export default function QuizManagement() {
   };
 
   // Analytics helper functions
-  const calculateStudentScore = (participant: QuizParticipant): number => {
-    if (!quiz) return 0;
+  const calculateStudentScore = (participant: QuizParticipant): { score: number; details: any[] } => {
+    if (!quiz) return { score: 0, details: [] };
 
     let totalScore = 0;
-    participant.answers.forEach(answer => {
-      const question = quiz.questions.find(q => q.id === answer.questionId);
-      if (question) {
+    const details: any[] = [];
+
+    quiz.questions.forEach(question => {
+      const studentAnswer = participant.answers.find(a => a.questionId === question.id);
+      let isCorrect = false;
+      let pointsEarned = 0;
+
+      if (studentAnswer) {
         if (question.type === 'multiple-choice' || question.type === 'true-false') {
-          if (answer.answer === question.correctAnswer) {
-            totalScore += question.points;
-          }
+          isCorrect = studentAnswer.answer === question.correctAnswer;
+          pointsEarned = isCorrect ? question.points : 0;
         } else if (question.type === 'short-answer') {
           // For short answer, we'll assume it's correct if there's an answer
           // In a real system, this would need manual grading
-          if (answer.answer && answer.answer.toString().trim()) {
-            totalScore += question.points;
-          }
+          isCorrect = studentAnswer.answer && studentAnswer.answer.toString().trim() !== '';
+          pointsEarned = isCorrect ? question.points : 0;
         }
       }
+
+      totalScore += pointsEarned;
+      details.push({
+        questionId: question.id,
+        question: question.question,
+        studentAnswer: studentAnswer?.answer,
+        correctAnswer: question.correctAnswer,
+        options: question.options,
+        type: question.type,
+        isCorrect,
+        pointsEarned,
+        maxPoints: question.points
+      });
     });
 
-    return totalScore;
+    return { score: totalScore, details };
+  };
+
+  const getStudentScoreOnly = (participant: QuizParticipant): number => {
+    return calculateStudentScore(participant).score;
   };
 
   const getTotalPossiblePoints = (): number => {
@@ -663,7 +683,7 @@ export default function QuizManagement() {
                             {participant.answers.length} / {quiz.questions.length} answered
                             {participant.submittedAt && (
                               <span className="ml-2">
-                                • Submitted {new Date(participant.submittedAt).toLocaleTimeString()}
+                                �� Submitted {new Date(participant.submittedAt).toLocaleTimeString()}
                               </span>
                             )}
                           </p>
