@@ -43,11 +43,15 @@ export default function Dashboard() {
         const fetchedQuizzes = data.quizzes || [];
         setQuizzes(fetchedQuizzes);
 
-        // Calculate total participants across all quizzes
-        await calculateTotalParticipants(fetchedQuizzes);
+        // Calculate total participants across all quizzes (non-blocking)
+        calculateTotalParticipants(fetchedQuizzes).catch(error => {
+          console.warn("Failed to calculate total participants:", error);
+          setTotalParticipants(0);
+        });
       } else {
         console.error("Failed to fetch quizzes:", response.statusText);
         setQuizzes([]);
+        setTotalParticipants(0);
       }
     } catch (error) {
       console.error("Error fetching quizzes:", error);
