@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { ArrowLeft, BookOpen, Construction } from "lucide-react";
 
 interface PlaceholderPageProps {
@@ -23,7 +29,9 @@ export default function PlaceholderPage({ pageName }: PlaceholderPageProps) {
             <div className="w-8 h-8 quiz-gradient rounded-lg flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-semibold text-foreground">QuizMaster</h1>
+            <h1 className="text-xl font-semibold text-foreground">
+              QuizMaster
+            </h1>
           </div>
         </div>
       </header>
@@ -36,19 +44,24 @@ export default function PlaceholderPage({ pageName }: PlaceholderPageProps) {
               <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
                 <Construction className="w-8 h-8 text-muted-foreground" />
               </div>
-              <CardTitle className="text-2xl">{pageName} - Coming Soon</CardTitle>
+              <CardTitle className="text-2xl">
+                {pageName} - Coming Soon
+              </CardTitle>
               <CardDescription className="text-base">
-                This page is under development. Continue prompting to have us implement this specific functionality for your quiz management system.
+                This page is under development. Continue prompting to have us
+                implement this specific functionality for your quiz management
+                system.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-muted/30 rounded-lg p-4 text-sm text-muted-foreground">
                 <p>
-                  The <strong>{pageName}</strong> page will include advanced functionality for managing your quizzes.
-                  Ask us to implement specific features you need for this section.
+                  The <strong>{pageName}</strong> page will include advanced
+                  functionality for managing your quizzes. Ask us to implement
+                  specific features you need for this section.
                 </p>
               </div>
-              
+
               <div className="flex justify-center space-x-3">
                 <Button asChild>
                   <Link to="/">
@@ -57,9 +70,7 @@ export default function PlaceholderPage({ pageName }: PlaceholderPageProps) {
                   </Link>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link to="/quiz/create">
-                    Create New Quiz
-                  </Link>
+                  <Link to="/quiz/create">Create New Quiz</Link>
                 </Button>
               </div>
             </CardContent>

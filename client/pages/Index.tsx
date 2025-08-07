@@ -2,9 +2,23 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Quiz, GetQuizzesResponse } from "@shared/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Clock, Users, Play, QrCode, Settings, BookOpen } from "lucide-react";
+import {
+  Plus,
+  Clock,
+  Users,
+  Play,
+  QrCode,
+  Settings,
+  BookOpen,
+} from "lucide-react";
 
 export default function Index() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -27,10 +41,10 @@ export default function Index() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -58,8 +72,12 @@ export default function Index() {
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">QuizMaster</h1>
-                <p className="text-sm text-muted-foreground">Instructor Dashboard</p>
+                <h1 className="text-2xl font-bold text-foreground">
+                  QuizMaster
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Instructor Dashboard
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -84,40 +102,44 @@ export default function Index() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="quiz-card-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Quizzes</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Quizzes
+              </CardTitle>
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{quizzes.length}</div>
               <p className="text-xs text-muted-foreground">
-                {quizzes.filter(q => q.isActive).length} active
+                {quizzes.filter((q) => q.isActive).length} active
               </p>
             </CardContent>
           </Card>
-          
+
           <Card className="quiz-card-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Sessions</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Active Sessions
+              </CardTitle>
               <Play className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{quizzes.filter(q => q.isActive).length}</div>
-              <p className="text-xs text-muted-foreground">
-                Currently running
-              </p>
+              <div className="text-2xl font-bold">
+                {quizzes.filter((q) => q.isActive).length}
+              </div>
+              <p className="text-xs text-muted-foreground">Currently running</p>
             </CardContent>
           </Card>
-          
+
           <Card className="quiz-card-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Participants</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Participants
+              </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">142</div>
-              <p className="text-xs text-muted-foreground">
-                All time
-              </p>
+              <p className="text-xs text-muted-foreground">All time</p>
             </CardContent>
           </Card>
         </div>
@@ -163,7 +185,10 @@ export default function Index() {
                         {quiz.description}
                       </CardDescription>
                     </div>
-                    <Badge variant={quiz.isActive ? "default" : "secondary"} className="ml-2">
+                    <Badge
+                      variant={quiz.isActive ? "default" : "secondary"}
+                      className="ml-2"
+                    >
                       {quiz.isActive ? "Active" : "Draft"}
                     </Badge>
                   </div>
@@ -180,19 +205,22 @@ export default function Index() {
                         {quiz.roomCode}
                       </div>
                     </div>
-                    
+
                     <div className="text-xs text-muted-foreground">
                       Created {formatDate(quiz.createdAt)}
                     </div>
 
                     <div className="flex space-x-2 pt-2">
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <Link to={`/quiz/${quiz.id}/edit`}>
-                          Edit
-                        </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        asChild
+                      >
+                        <Link to={`/quiz/${quiz.id}/edit`}>Edit</Link>
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="flex-1"
                         variant={quiz.isActive ? "secondary" : "default"}
                         asChild

@@ -2,12 +2,26 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { JoinQuizRequest } from "@shared/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, QrCode, Hash, Users, Clock, BookOpen, User } from "lucide-react";
+import {
+  ArrowLeft,
+  QrCode,
+  Hash,
+  Users,
+  Clock,
+  BookOpen,
+  User,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function StudentAccess() {
@@ -25,7 +39,7 @@ export default function StudentAccess() {
 
   useEffect(() => {
     // Check for room code in URL parameters
-    const codeFromUrl = searchParams.get('code');
+    const codeFromUrl = searchParams.get("code");
     if (codeFromUrl) {
       setRoomCode(codeFromUrl.toUpperCase());
       handleRoomCodeSubmit(codeFromUrl.toUpperCase());
@@ -55,7 +69,7 @@ export default function StudentAccess() {
       toast({
         title: "Error",
         description: "Please enter a room code",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -79,29 +93,34 @@ export default function StudentAccess() {
             toast({
               title: "Quiz Not Active",
               description: `"${data.quiz.title}" exists but is not currently accepting participants. Please wait for the instructor to start the quiz.`,
-              variant: "destructive"
+              variant: "destructive",
             });
           }
         } else {
           toast({
             title: "Quiz Not Found",
             description: "Invalid room code or quiz does not exist",
-            variant: "destructive"
+            variant: "destructive",
           });
         }
       } else {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
         if (response.status === 410) {
           toast({
             title: "Quiz Expired",
-            description: errorData.message || "This quiz has expired and is no longer available",
-            variant: "destructive"
+            description:
+              errorData.message ||
+              "This quiz has expired and is no longer available",
+            variant: "destructive",
           });
         } else {
           toast({
             title: "Quiz Not Found",
-            description: errorData.message || "Invalid room code or quiz does not exist",
-            variant: "destructive"
+            description:
+              errorData.message || "Invalid room code or quiz does not exist",
+            variant: "destructive",
           });
         }
       }
@@ -109,7 +128,7 @@ export default function StudentAccess() {
       toast({
         title: "Error",
         description: "Failed to check quiz. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -119,7 +138,7 @@ export default function StudentAccess() {
       toast({
         title: "Error",
         description: "Please enter your name",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -130,13 +149,13 @@ export default function StudentAccess() {
     try {
       const joinData: JoinQuizRequest = {
         roomCode: selectedQuiz.roomCode,
-        participantName: participantName.trim()
+        participantName: participantName.trim(),
       };
 
       const response = await fetch("/api/quiz/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(joinData)
+        body: JSON.stringify(joinData),
       });
 
       if (response.ok) {
@@ -145,7 +164,7 @@ export default function StudentAccess() {
         if (data.success) {
           toast({
             title: "Joined Successfully!",
-            description: `Welcome to ${selectedQuiz.title}`
+            description: `Welcome to ${selectedQuiz.title}`,
           });
 
           // Navigate to quiz taking page with session ID
@@ -154,37 +173,44 @@ export default function StudentAccess() {
           toast({
             title: "Failed to Join",
             description: data.message || "Could not join the quiz",
-            variant: "destructive"
+            variant: "destructive",
           });
         }
       } else {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
 
         let title = "Error";
         let description = errorData.message || "Failed to join quiz";
 
         if (response.status === 429) {
           title = "Maximum Attempts Reached";
-          description = errorData.message || "You have reached the maximum number of attempts for this quiz";
+          description =
+            errorData.message ||
+            "You have reached the maximum number of attempts for this quiz";
         } else if (response.status === 410) {
           title = "Quiz Expired";
           description = errorData.message || "This quiz has expired";
         } else if (response.status === 400) {
           title = "Quiz Not Available";
-          description = errorData.message || "This quiz is not currently accepting participants";
+          description =
+            errorData.message ||
+            "This quiz is not currently accepting participants";
         }
 
         toast({
           title,
           description,
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Network error. Please check your connection and try again.",
-        variant: "destructive"
+        description:
+          "Network error. Please check your connection and try again.",
+        variant: "destructive",
       });
     } finally {
       setJoining(false);
@@ -223,10 +249,12 @@ export default function StudentAccess() {
               <div className="w-8 h-8 quiz-gradient rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-semibold text-foreground">Student Access</h1>
+              <h1 className="text-xl font-semibold text-foreground">
+                Student Access
+              </h1>
             </div>
             <Badge variant="secondary">
-              {availableQuizzes.filter(q => q.isActive).length} Active Quizzes
+              {availableQuizzes.filter((q) => q.isActive).length} Active Quizzes
             </Badge>
           </div>
         </div>
@@ -242,16 +270,19 @@ export default function StudentAccess() {
                 <div className="w-16 h-16 mx-auto mb-4 quiz-gradient rounded-full flex items-center justify-center">
                   <QrCode className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">Join Quiz with QR Code</CardTitle>
+                <CardTitle className="text-2xl">
+                  Join Quiz with QR Code
+                </CardTitle>
                 <CardDescription>
-                  Students can scan this QR code to quickly access the quiz portal
+                  Students can scan this QR code to quickly access the quiz
+                  portal
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="bg-white rounded-lg p-6 inline-block shadow-sm border">
-                  <img 
-                    src={qrCodeUrl} 
-                    alt="QR Code for Quiz Access" 
+                  <img
+                    src={qrCodeUrl}
+                    alt="QR Code for Quiz Access"
                     className="w-48 h-48 mx-auto"
                   />
                 </div>
@@ -292,11 +323,16 @@ export default function StudentAccess() {
                       id="roomCode"
                       placeholder="e.g., JS2024"
                       value={roomCode}
-                      onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setRoomCode(e.target.value.toUpperCase())
+                      }
                       className="flex-1 text-center font-mono text-lg"
                       maxLength={10}
                     />
-                    <Button onClick={handleRoomCodeSubmit} disabled={!roomCode.trim()}>
+                    <Button
+                      onClick={handleRoomCodeSubmit}
+                      disabled={!roomCode.trim()}
+                    >
                       Join Quiz
                     </Button>
                   </div>
@@ -309,7 +345,9 @@ export default function StudentAccess() {
               <CardHeader>
                 <CardTitle>Active Quizzes</CardTitle>
                 <CardDescription>
-                  {loading ? "Loading available quizzes..." : "Click on any quiz below to join directly"}
+                  {loading
+                    ? "Loading available quizzes..."
+                    : "Click on any quiz below to join directly"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -344,7 +382,9 @@ export default function StudentAccess() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge variant={quiz.isActive ? "default" : "secondary"}>
+                          <Badge
+                            variant={quiz.isActive ? "default" : "secondary"}
+                          >
                             {quiz.isActive ? "Active" : "Inactive"}
                           </Badge>
                           <Button variant="outline" size="sm">
@@ -357,9 +397,12 @@ export default function StudentAccess() {
                 ) : (
                   <div className="text-center py-8">
                     <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No Active Quizzes</h3>
+                    <h3 className="text-lg font-medium mb-2">
+                      No Active Quizzes
+                    </h3>
                     <p className="text-muted-foreground">
-                      There are no active quizzes at the moment. Please try again later or enter a room code above.
+                      There are no active quizzes at the moment. Please try
+                      again later or enter a room code above.
                     </p>
                   </div>
                 )}
@@ -376,7 +419,8 @@ export default function StudentAccess() {
                 </div>
                 <CardTitle>Quiz Found: "{selectedQuiz.title}"</CardTitle>
                 <CardDescription>
-                  This quiz is not currently active. Please wait for your instructor to start the quiz.
+                  This quiz is not currently active. Please wait for your
+                  instructor to start the quiz.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -395,13 +439,21 @@ export default function StudentAccess() {
 
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-4">
-                    The quiz will become available once your instructor activates it. You can refresh this page or try again later.
+                    The quiz will become available once your instructor
+                    activates it. You can refresh this page or try again later.
                   </p>
                   <div className="flex space-x-3">
-                    <Button variant="outline" onClick={resetForm} className="flex-1">
+                    <Button
+                      variant="outline"
+                      onClick={resetForm}
+                      className="flex-1"
+                    >
                       Try Different Code
                     </Button>
-                    <Button onClick={() => window.location.reload()} className="flex-1">
+                    <Button
+                      onClick={() => window.location.reload()}
+                      className="flex-1"
+                    >
                       Refresh Page
                     </Button>
                   </div>
@@ -445,7 +497,7 @@ export default function StudentAccess() {
                     onChange={(e) => setParticipantName(e.target.value)}
                     className="mt-1"
                     onKeyPress={(e) => {
-                      if (e.key === 'Enter' && participantName.trim()) {
+                      if (e.key === "Enter" && participantName.trim()) {
                         handleJoinQuiz();
                       }
                     }}
@@ -453,11 +505,15 @@ export default function StudentAccess() {
                 </div>
 
                 <div className="flex space-x-3">
-                  <Button variant="outline" onClick={resetForm} className="flex-1">
+                  <Button
+                    variant="outline"
+                    onClick={resetForm}
+                    className="flex-1"
+                  >
                     Back
                   </Button>
-                  <Button 
-                    onClick={handleJoinQuiz} 
+                  <Button
+                    onClick={handleJoinQuiz}
                     disabled={joining || !participantName.trim()}
                     className="flex-1"
                   >

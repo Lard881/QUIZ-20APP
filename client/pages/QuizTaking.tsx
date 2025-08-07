@@ -1,22 +1,39 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Quiz, QuizAnswer, SubmitAnswerRequest, StartQuizResponse } from "@shared/api";
+import {
+  Quiz,
+  QuizAnswer,
+  SubmitAnswerRequest,
+  StartQuizResponse,
+} from "@shared/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Clock, CheckCircle, AlertTriangle, BookOpen, Send } from "lucide-react";
+import {
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  BookOpen,
+  Send,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function QuizTaking() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
@@ -25,7 +42,7 @@ export default function QuizTaking() {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  
+
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const lastSaveRef = useRef<number>(Date.now());
 
@@ -58,27 +75,27 @@ export default function QuizTaking() {
           const answerData = {
             sessionId,
             questionId: currentQuestion.id,
-            answer: answers[currentQuestion.id]
+            answer: answers[currentQuestion.id],
           };
 
-          navigator.sendBeacon('/api/quiz/answer', JSON.stringify(answerData));
+          navigator.sendBeacon("/api/quiz/answer", JSON.stringify(answerData));
         }
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [quiz, currentQuestionIndex, answers, sessionId]);
 
   useEffect(() => {
     if (quizStarted && timeRemaining > 0 && !quizCompleted) {
       timerRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
+        setTimeRemaining((prev) => {
           const newTime = prev - 1;
 
           // Auto-submit when time runs out
@@ -129,7 +146,7 @@ export default function QuizTaking() {
 
         const quizWithRandomizedQuestions = {
           ...data.quiz,
-          questions: questionsToUse
+          questions: questionsToUse,
         };
 
         setQuiz(quizWithRandomizedQuestions);
@@ -139,8 +156,9 @@ export default function QuizTaking() {
         const errorData = await response.json();
         toast({
           title: "Cannot Start Quiz",
-          description: errorData.message || "Quiz session not found or has expired",
-          variant: "destructive"
+          description:
+            errorData.message || "Quiz session not found or has expired",
+          variant: "destructive",
         });
         navigate("/student");
       }
@@ -148,7 +166,7 @@ export default function QuizTaking() {
       toast({
         title: "Error",
         description: "Failed to connect to quiz. Please check your connection.",
-        variant: "destructive"
+        variant: "destructive",
       });
       navigate("/student");
     } finally {
@@ -157,9 +175,9 @@ export default function QuizTaking() {
   };
 
   const handleAnswerChange = (questionId: string, answer: string | number) => {
-    setAnswers(prev => ({
+    setAnswers((prev) => ({
       ...prev,
-      [questionId]: answer
+      [questionId]: answer,
     }));
 
     // Immediate save for manual changes (bypass debouncing)
@@ -185,13 +203,13 @@ export default function QuizTaking() {
       const answerData: SubmitAnswerRequest = {
         sessionId,
         questionId,
-        answer
+        answer,
       };
 
       await fetch("/api/quiz/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(answerData)
+        body: JSON.stringify(answerData),
       });
     } catch (error) {
       console.error("Failed to save answer:", error);
@@ -204,7 +222,7 @@ export default function QuizTaking() {
     toast({
       title: "Time's Up!",
       description: "Quiz has been automatically submitted",
-      variant: "destructive"
+      variant: "destructive",
     });
     submitQuiz();
   };
@@ -224,9 +242,9 @@ export default function QuizTaking() {
       setQuizCompleted(true);
       toast({
         title: "Quiz Submitted!",
-        description: "Your answers have been recorded successfully"
+        description: "Your answers have been recorded successfully",
       });
-      
+
       // Redirect after a delay
       setTimeout(() => {
         navigate("/student");
@@ -235,7 +253,7 @@ export default function QuizTaking() {
       toast({
         title: "Submission Error",
         description: "Failed to submit quiz. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setSubmitting(false);
@@ -245,7 +263,7 @@ export default function QuizTaking() {
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const getTimeProgress = (): number => {
@@ -255,24 +273,24 @@ export default function QuizTaking() {
   };
 
   const getTimerColor = (): string => {
-    if (timeRemaining <= 60) return 'text-destructive'; // Last minute - red
-    if (timeRemaining <= 300) return 'text-quiz-timer'; // Last 5 minutes - orange
-    return 'text-foreground'; // Normal - default color
+    if (timeRemaining <= 60) return "text-destructive"; // Last minute - red
+    if (timeRemaining <= 300) return "text-quiz-timer"; // Last 5 minutes - orange
+    return "text-foreground"; // Normal - default color
   };
 
   const getProgressColor = (): string => {
-    if (timeRemaining <= 60) return 'bg-destructive';
-    if (timeRemaining <= 300) return 'bg-quiz-timer';
-    return 'bg-primary';
+    if (timeRemaining <= 60) return "bg-destructive";
+    if (timeRemaining <= 300) return "bg-quiz-timer";
+    return "bg-primary";
   };
 
   const isAnswered = (questionId: string): boolean => {
-    return answers[questionId] !== undefined && answers[questionId] !== '';
+    return answers[questionId] !== undefined && answers[questionId] !== "";
   };
 
   const getAnsweredCount = (): number => {
     if (!quiz) return 0;
-    return quiz.questions.filter(q => isAnswered(q.id)).length;
+    return quiz.questions.filter((q) => isAnswered(q.id)).length;
   };
 
   if (loading) {
@@ -302,8 +320,13 @@ export default function QuizTaking() {
           <CardContent>
             <div className="space-y-4">
               <div className="bg-muted/30 rounded-lg p-4 text-sm">
-                <p><strong>Quiz:</strong> {quiz?.title}</p>
-                <p><strong>Questions Answered:</strong> {getAnsweredCount()} / {quiz?.questions.length}</p>
+                <p>
+                  <strong>Quiz:</strong> {quiz?.title}
+                </p>
+                <p>
+                  <strong>Questions Answered:</strong> {getAnsweredCount()} /{" "}
+                  {quiz?.questions.length}
+                </p>
               </div>
               <p className="text-muted-foreground">
                 Redirecting to student portal in a few seconds...
@@ -348,7 +371,9 @@ export default function QuizTaking() {
                 <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-sm md:text-lg font-semibold text-foreground truncate">{quiz.title}</h1>
+                <h1 className="text-sm md:text-lg font-semibold text-foreground truncate">
+                  {quiz.title}
+                </h1>
                 <p className="text-xs md:text-sm text-muted-foreground">
                   Question {currentQuestionIndex + 1} of {quiz.questions.length}
                 </p>
@@ -358,16 +383,17 @@ export default function QuizTaking() {
             <div className="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
               <div className="text-right">
                 <div className="flex items-center space-x-1 md:space-x-2">
-                  <Clock className={`w-3 h-3 md:w-4 md:h-4 ${getTimerColor()}`} />
-                  <span className={`text-sm md:text-base font-mono font-semibold ${getTimerColor()} ${timeRemaining <= 60 ? 'animate-pulse' : ''}`}>
+                  <Clock
+                    className={`w-3 h-3 md:w-4 md:h-4 ${getTimerColor()}`}
+                  />
+                  <span
+                    className={`text-sm md:text-base font-mono font-semibold ${getTimerColor()} ${timeRemaining <= 60 ? "animate-pulse" : ""}`}
+                  >
                     {formatTime(timeRemaining)}
                   </span>
                 </div>
                 <div className="w-16 md:w-24 mt-1">
-                  <Progress
-                    value={getTimeProgress()}
-                    className="h-1"
-                  />
+                  <Progress value={getTimeProgress()} className="h-1" />
                 </div>
                 {timeRemaining <= 60 && (
                   <p className="text-xs text-destructive mt-1 font-medium hidden md:block">
@@ -376,7 +402,10 @@ export default function QuizTaking() {
                 )}
               </div>
 
-              <Badge variant="outline" className="text-xs md:text-sm hidden sm:inline-flex">
+              <Badge
+                variant="outline"
+                className="text-xs md:text-sm hidden sm:inline-flex"
+              >
                 {getAnsweredCount()} / {quiz.questions.length}
               </Badge>
               <Badge variant="outline" className="text-xs sm:hidden">
@@ -402,43 +431,60 @@ export default function QuizTaking() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {currentQuestion.type === 'multiple-choice' && currentQuestion.options && (
-              <RadioGroup
-                value={answers[currentQuestion.id]?.toString() || ''}
-                onValueChange={(value) => handleAnswerChange(currentQuestion.id, parseInt(value))}
-              >
-                {currentQuestion.options.map((option, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                    <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                      {option}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            )}
+            {currentQuestion.type === "multiple-choice" &&
+              currentQuestion.options && (
+                <RadioGroup
+                  value={answers[currentQuestion.id]?.toString() || ""}
+                  onValueChange={(value) =>
+                    handleAnswerChange(currentQuestion.id, parseInt(value))
+                  }
+                >
+                  {currentQuestion.options.map((option, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value={index.toString()}
+                        id={`option-${index}`}
+                      />
+                      <Label
+                        htmlFor={`option-${index}`}
+                        className="flex-1 cursor-pointer"
+                      >
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              )}
 
-            {currentQuestion.type === 'true-false' && (
+            {currentQuestion.type === "true-false" && (
               <RadioGroup
-                value={answers[currentQuestion.id]?.toString() || ''}
-                onValueChange={(value) => handleAnswerChange(currentQuestion.id, parseInt(value))}
+                value={answers[currentQuestion.id]?.toString() || ""}
+                onValueChange={(value) =>
+                  handleAnswerChange(currentQuestion.id, parseInt(value))
+                }
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="0" id="true" />
-                  <Label htmlFor="true" className="cursor-pointer">True</Label>
+                  <Label htmlFor="true" className="cursor-pointer">
+                    True
+                  </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="1" id="false" />
-                  <Label htmlFor="false" className="cursor-pointer">False</Label>
+                  <Label htmlFor="false" className="cursor-pointer">
+                    False
+                  </Label>
                 </div>
               </RadioGroup>
             )}
 
-            {currentQuestion.type === 'short-answer' && (
+            {currentQuestion.type === "short-answer" && (
               <Textarea
                 placeholder="Type your answer here..."
-                value={answers[currentQuestion.id]?.toString() || ''}
-                onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                value={answers[currentQuestion.id]?.toString() || ""}
+                onChange={(e) =>
+                  handleAnswerChange(currentQuestion.id, e.target.value)
+                }
                 className="min-h-[100px]"
               />
             )}
@@ -455,10 +501,10 @@ export default function QuizTaking() {
                 onClick={() => setCurrentQuestionIndex(index)}
                 className={`w-6 h-6 md:w-8 md:h-8 rounded-full text-xs font-medium transition-all ${
                   index === currentQuestionIndex
-                    ? 'bg-primary text-primary-foreground'
+                    ? "bg-primary text-primary-foreground"
                     : isAnswered(quiz.questions[index].id)
-                    ? 'bg-quiz-success text-white'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      ? "bg-quiz-success text-white"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
                 {index + 1}
@@ -470,7 +516,9 @@ export default function QuizTaking() {
           <div className="flex items-center space-x-4 w-full md:w-auto order-1 md:order-1">
             <Button
               variant="outline"
-              onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+              onClick={() =>
+                setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))
+              }
               disabled={currentQuestionIndex === 0}
               className="flex-1 md:flex-none"
               size="sm"
@@ -492,7 +540,14 @@ export default function QuizTaking() {
               </Button>
             ) : (
               <Button
-                onClick={() => setCurrentQuestionIndex(Math.min(quiz.questions.length - 1, currentQuestionIndex + 1))}
+                onClick={() =>
+                  setCurrentQuestionIndex(
+                    Math.min(
+                      quiz.questions.length - 1,
+                      currentQuestionIndex + 1,
+                    ),
+                  )
+                }
                 className="flex-1 md:flex-none"
                 size="sm"
               >

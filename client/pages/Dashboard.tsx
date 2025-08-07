@@ -3,10 +3,33 @@ import { Link, useNavigate } from "react-router-dom";
 import { Quiz, GetQuizzesResponse } from "@shared/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Clock, Users, Play, QrCode, Settings, BookOpen, Trash2, MoreVertical, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Plus,
+  Clock,
+  Users,
+  Play,
+  QrCode,
+  Settings,
+  BookOpen,
+  Trash2,
+  MoreVertical,
+  LogOut,
+} from "lucide-react";
 
 export default function Dashboard() {
   const { instructor, logout } = useAuth();
@@ -25,17 +48,17 @@ export default function Dashboard() {
 
   const fetchQuizzes = async () => {
     try {
-      const token = localStorage.getItem('quiz_token');
+      const token = localStorage.getItem("quiz_token");
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       };
 
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch("/api/quizzes", {
-        headers
+        headers,
       });
 
       if (response.ok) {
@@ -44,7 +67,7 @@ export default function Dashboard() {
         setQuizzes(fetchedQuizzes);
 
         // Calculate total participants across all quizzes (non-blocking)
-        calculateTotalParticipants(fetchedQuizzes).catch(error => {
+        calculateTotalParticipants(fetchedQuizzes).catch((error) => {
           console.warn("Failed to calculate total participants:", error);
           setTotalParticipants(0);
         });
@@ -70,12 +93,12 @@ export default function Dashboard() {
       const participantRequests = quizList.map(async (quiz) => {
         try {
           const headers: Record<string, string> = {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           };
 
-          const token = localStorage.getItem('quiz_token');
+          const token = localStorage.getItem("quiz_token");
           if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+            headers["Authorization"] = `Bearer ${token}`;
           }
 
           // Create timeout controller for better browser compatibility
@@ -84,7 +107,7 @@ export default function Dashboard() {
 
           const response = await fetch(`/api/quiz/${quiz.id}/results`, {
             headers,
-            signal: controller.signal
+            signal: controller.signal,
           });
 
           clearTimeout(timeoutId);
@@ -93,11 +116,16 @@ export default function Dashboard() {
             const data = await response.json();
             return (data.participants || []).length;
           } else {
-            console.warn(`Failed to get participants for quiz ${quiz.id}: ${response.status} ${response.statusText}`);
+            console.warn(
+              `Failed to get participants for quiz ${quiz.id}: ${response.status} ${response.statusText}`,
+            );
             return 0;
           }
         } catch (error) {
-          console.warn(`Failed to get participants for quiz ${quiz.id}:`, error);
+          console.warn(
+            `Failed to get participants for quiz ${quiz.id}:`,
+            error,
+          );
           return 0;
         }
       });
@@ -105,7 +133,7 @@ export default function Dashboard() {
       const results = await Promise.allSettled(participantRequests);
 
       results.forEach((result) => {
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
           total += result.value;
         }
       });
@@ -117,33 +145,42 @@ export default function Dashboard() {
     }
   };
 
-  const handleToggleQuizStatus = async (quizId: string, currentStatus: boolean) => {
+  const handleToggleQuizStatus = async (
+    quizId: string,
+    currentStatus: boolean,
+  ) => {
     try {
-      const token = localStorage.getItem('quiz_token');
+      const token = localStorage.getItem("quiz_token");
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       };
 
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch(`/api/quiz/${quizId}/status`, {
-        method: 'PUT',
+        method: "PUT",
         headers,
-        body: JSON.stringify({ isActive: !currentStatus })
+        body: JSON.stringify({ isActive: !currentStatus }),
       });
 
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setQuizzes(quizzes.map(q =>
-            q.id === quizId ? { ...q, isActive: !currentStatus } : q
-          ));
+          setQuizzes(
+            quizzes.map((q) =>
+              q.id === quizId ? { ...q, isActive: !currentStatus } : q,
+            ),
+          );
         }
       } else {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
-        alert(`Failed to update quiz status: ${errorData.message || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
+        alert(
+          `Failed to update quiz status: ${errorData.message || response.statusText}`,
+        );
       }
     } catch (error) {
       console.error("Error updating quiz status:", error);
@@ -152,30 +189,38 @@ export default function Dashboard() {
   };
 
   const handleDeleteQuiz = async (quizId: string) => {
-    if (!confirm("Are you sure you want to delete this quiz? This action cannot be undone.")) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this quiz? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
     try {
-      const token = localStorage.getItem('quiz_token');
+      const token = localStorage.getItem("quiz_token");
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       };
 
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch(`/api/quiz/${quizId}`, {
-        method: 'DELETE',
-        headers
+        method: "DELETE",
+        headers,
       });
 
       if (response.ok) {
-        setQuizzes(quizzes.filter(q => q.id !== quizId));
+        setQuizzes(quizzes.filter((q) => q.id !== quizId));
       } else {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
-        alert(`Failed to delete quiz: ${errorData.message || response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
+        alert(
+          `Failed to delete quiz: ${errorData.message || response.statusText}`,
+        );
       }
     } catch (error) {
       console.error("Error deleting quiz:", error);
@@ -184,10 +229,10 @@ export default function Dashboard() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -219,14 +264,22 @@ export default function Dashboard() {
                 <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg md:text-2xl font-bold text-foreground truncate">QuizMaster</h1>
-                <p className="text-xs md:text-sm text-muted-foreground truncate">Welcome back, {instructor.name}</p>
+                <h1 className="text-lg md:text-2xl font-bold text-foreground truncate">
+                  QuizMaster
+                </h1>
+                <p className="text-xs md:text-sm text-muted-foreground truncate">
+                  Welcome back, {instructor.name}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="hidden sm:flex">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden sm:flex"
+                  >
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
                   </Button>
@@ -239,7 +292,10 @@ export default function Dashboard() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="text-destructive">
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="text-destructive"
+                  >
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
                   </DropdownMenuItem>
@@ -259,7 +315,10 @@ export default function Dashboard() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="text-destructive">
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="text-destructive"
+                  >
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
                   </DropdownMenuItem>
@@ -282,33 +341,39 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="quiz-card-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Quizzes</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Quizzes
+              </CardTitle>
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{quizzes.length}</div>
               <p className="text-xs text-muted-foreground">
-                {quizzes.filter(q => q.isActive).length} active
+                {quizzes.filter((q) => q.isActive).length} active
               </p>
             </CardContent>
           </Card>
-          
+
           <Card className="quiz-card-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Sessions</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Active Sessions
+              </CardTitle>
               <Play className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{quizzes.filter(q => q.isActive).length}</div>
-              <p className="text-xs text-muted-foreground">
-                Currently running
-              </p>
+              <div className="text-2xl font-bold">
+                {quizzes.filter((q) => q.isActive).length}
+              </div>
+              <p className="text-xs text-muted-foreground">Currently running</p>
             </CardContent>
           </Card>
-          
+
           <Card className="quiz-card-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Participants</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Participants
+              </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -367,9 +432,7 @@ export default function Dashboard() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <Link to={`/quiz/${quiz.id}/edit`}>
-                              Edit Quiz
-                            </Link>
+                            <Link to={`/quiz/${quiz.id}/edit`}>Edit Quiz</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <Link to={`/quiz/${quiz.id}/manage`}>
@@ -378,10 +441,14 @@ export default function Dashboard() {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() => handleToggleQuizStatus(quiz.id, quiz.isActive)}
+                            onClick={() =>
+                              handleToggleQuizStatus(quiz.id, quiz.isActive)
+                            }
                           >
                             <Play className="w-4 h-4 mr-2" />
-                            {quiz.isActive ? "Deactivate Quiz" : "Activate Quiz"}
+                            {quiz.isActive
+                              ? "Deactivate Quiz"
+                              : "Activate Quiz"}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -408,19 +475,22 @@ export default function Dashboard() {
                         {quiz.roomCode}
                       </div>
                     </div>
-                    
+
                     <div className="text-xs text-muted-foreground">
                       Created {formatDate(quiz.createdAt)}
                     </div>
 
                     <div className="flex space-x-2 pt-2">
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <Link to={`/quiz/${quiz.id}/edit`}>
-                          Edit
-                        </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        asChild
+                      >
+                        <Link to={`/quiz/${quiz.id}/edit`}>Edit</Link>
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="flex-1"
                         variant={quiz.isActive ? "secondary" : "default"}
                         asChild

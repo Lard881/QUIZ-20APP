@@ -2,12 +2,27 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, BookOpen, Save, LogOut, User, Mail, Lock, Shield } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  Save,
+  LogOut,
+  User,
+  Mail,
+  Lock,
+  Shield,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
@@ -74,13 +89,13 @@ export default function Settings() {
       }
 
       const success = await updateInstructor(updates);
-      
+
       if (success) {
         toast({
           title: "Profile Updated",
-          description: "Your profile has been updated successfully"
+          description: "Your profile has been updated successfully",
         });
-        
+
         // Clear password fields
         setCurrentPassword("");
         setNewPassword("");
@@ -100,7 +115,7 @@ export default function Settings() {
       logout();
       toast({
         title: "Logged Out",
-        description: "You have been logged out successfully"
+        description: "You have been logged out successfully",
       });
       navigate("/");
     }
@@ -108,12 +123,12 @@ export default function Settings() {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "Never";
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -133,7 +148,9 @@ export default function Settings() {
               <div className="w-8 h-8 quiz-gradient rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-semibold text-foreground">Account Settings</h1>
+              <h1 className="text-xl font-semibold text-foreground">
+                Account Settings
+              </h1>
             </div>
           </div>
         </div>
@@ -160,12 +177,18 @@ export default function Settings() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <Label className="text-muted-foreground">Account Created</Label>
-                  <p className="font-medium">{formatDate(instructor.createdAt)}</p>
+                  <Label className="text-muted-foreground">
+                    Account Created
+                  </Label>
+                  <p className="font-medium">
+                    {formatDate(instructor.createdAt)}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Last Login</Label>
-                  <p className="font-medium">{formatDate(instructor.lastLogin)}</p>
+                  <p className="font-medium">
+                    {formatDate(instructor.lastLogin)}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Account ID</Label>
@@ -173,7 +196,9 @@ export default function Settings() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Total Quizzes</Label>
-                  <p className="font-medium">{instructor.quizzes?.length || 0}</p>
+                  <p className="font-medium">
+                    {instructor.quizzes?.length || 0}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -226,9 +251,11 @@ export default function Settings() {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
                     <Lock className="w-4 h-4 text-muted-foreground" />
-                    <Label className="text-base font-medium">Change Password</Label>
+                    <Label className="text-base font-medium">
+                      Change Password
+                    </Label>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="currentPassword">Current Password</Label>
                     <Input
@@ -256,7 +283,9 @@ export default function Settings() {
                   </div>
 
                   <div>
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Label htmlFor="confirmPassword">
+                      Confirm New Password
+                    </Label>
                     <Input
                       id="confirmPassword"
                       type="password"
@@ -307,7 +336,8 @@ export default function Settings() {
                   <div>
                     <h4 className="font-medium">Active Session</h4>
                     <p className="text-sm text-muted-foreground">
-                      You are currently logged in. Click logout to end your session.
+                      You are currently logged in. Click logout to end your
+                      session.
                     </p>
                   </div>
                   <Button variant="destructive" onClick={handleLogout}>
@@ -319,7 +349,8 @@ export default function Settings() {
                 <Alert>
                   <Shield className="h-4 w-4" />
                   <AlertDescription>
-                    For your security, always logout when using shared or public computers.
+                    For your security, always logout when using shared or public
+                    computers.
                   </AlertDescription>
                 </Alert>
               </div>

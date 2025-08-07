@@ -1,8 +1,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Users, Timer, QrCode, CheckCircle, BarChart3 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  BookOpen,
+  Users,
+  Timer,
+  QrCode,
+  CheckCircle,
+  BarChart3,
+} from "lucide-react";
 
 export default function Home() {
   return (
@@ -16,16 +29,18 @@ export default function Home() {
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">QuizMaster</h1>
-                <p className="text-sm text-muted-foreground">Interactive Quiz Platform</p>
+                <h1 className="text-2xl font-bold text-foreground">
+                  QuizMaster
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Interactive Quiz Platform
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <Button variant="outline" asChild>
-                <Link to="/auth/login">
-                  Instructor Login
-                </Link>
+                <Link to="/auth/login">Instructor Login</Link>
               </Button>
               <Button asChild>
                 <Link to="/student">
@@ -48,10 +63,11 @@ export default function Home() {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            A powerful platform for educators to create engaging quizzes with real-time participation, 
-            automatic grading, and comprehensive analytics.
+            A powerful platform for educators to create engaging quizzes with
+            real-time participation, automatic grading, and comprehensive
+            analytics.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" asChild className="min-w-[200px]">
               <Link to="/auth/signup">
@@ -59,7 +75,12 @@ export default function Home() {
                 Get Started as Instructor
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="min-w-[200px]">
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="min-w-[200px]"
+            >
               <Link to="/student">
                 <Users className="w-5 h-5 mr-2" />
                 Join as Student
@@ -77,7 +98,8 @@ export default function Home() {
               </div>
               <CardTitle>Easy Quiz Creation</CardTitle>
               <CardDescription>
-                Create multiple choice, true/false, and short answer questions with our intuitive builder
+                Create multiple choice, true/false, and short answer questions
+                with our intuitive builder
               </CardDescription>
             </CardHeader>
           </Card>
@@ -89,7 +111,8 @@ export default function Home() {
               </div>
               <CardTitle>Real-time Participation</CardTitle>
               <CardDescription>
-                Students join instantly with QR codes or room codes, with live timer and auto-submission
+                Students join instantly with QR codes or room codes, with live
+                timer and auto-submission
               </CardDescription>
             </CardHeader>
           </Card>
@@ -101,7 +124,8 @@ export default function Home() {
               </div>
               <CardTitle>Automatic Grading</CardTitle>
               <CardDescription>
-                Instant results with detailed analytics and performance tracking for every participant
+                Instant results with detailed analytics and performance tracking
+                for every participant
               </CardDescription>
             </CardHeader>
           </Card>
@@ -113,7 +137,8 @@ export default function Home() {
               </div>
               <CardTitle>QR Code Access</CardTitle>
               <CardDescription>
-                Students can quickly join quizzes by scanning QR codes with their mobile devices
+                Students can quickly join quizzes by scanning QR codes with
+                their mobile devices
               </CardDescription>
             </CardHeader>
           </Card>
@@ -125,7 +150,8 @@ export default function Home() {
               </div>
               <CardTitle>Multiple Attempts</CardTitle>
               <CardDescription>
-                Configure retries and randomize question order for fair and flexible assessment
+                Configure retries and randomize question order for fair and
+                flexible assessment
               </CardDescription>
             </CardHeader>
           </Card>
@@ -137,7 +163,8 @@ export default function Home() {
               </div>
               <CardTitle>Analytics Dashboard</CardTitle>
               <CardDescription>
-                Comprehensive reports with student performance, question analytics, and insights
+                Comprehensive reports with student performance, question
+                analytics, and insights
               </CardDescription>
             </CardHeader>
           </Card>
@@ -149,20 +176,16 @@ export default function Home() {
             Ready to Transform Your Teaching?
           </h3>
           <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Join thousands of educators using QuizMaster to create engaging, 
+            Join thousands of educators using QuizMaster to create engaging,
             interactive learning experiences for their students.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
-              <Link to="/auth/signup">
-                Create Free Account
-              </Link>
+              <Link to="/auth/signup">Create Free Account</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link to="/auth/login">
-                Already have an account?
-              </Link>
+              <Link to="/auth/login">Already have an account?</Link>
             </Button>
           </div>
         </div>
@@ -176,14 +199,22 @@ export default function Home() {
               <div className="w-8 h-8 quiz-gradient rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg font-semibold text-foreground">QuizMaster</span>
+              <span className="text-lg font-semibold text-foreground">
+                QuizMaster
+              </span>
             </div>
-            
+
             <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-              <Link to="/student" className="hover:text-foreground transition-colors">
+              <Link
+                to="/student"
+                className="hover:text-foreground transition-colors"
+              >
                 Student Access
               </Link>
-              <Link to="/auth/login" className="hover:text-foreground transition-colors">
+              <Link
+                to="/auth/login"
+                className="hover:text-foreground transition-colors"
+              >
                 Instructor Login
               </Link>
               <span>© 2024 QuizMaster. All rights reserved.</span>

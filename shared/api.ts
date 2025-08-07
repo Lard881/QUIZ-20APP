@@ -20,14 +20,14 @@ export interface Quiz {
   randomizeQuestions: boolean;
   maxAttempts: number;
   durationValue: number;
-  durationUnit: 'minutes' | 'days';
+  durationUnit: "minutes" | "days";
   expiresAt?: string;
 }
 
 export interface QuizQuestion {
   id: string;
   question: string;
-  type: 'multiple-choice' | 'true-false' | 'short-answer';
+  type: "multiple-choice" | "true-false" | "short-answer";
   options?: string[]; // for multiple choice
   correctAnswer: string | number; // index for multiple choice, text for others
   points: number;
@@ -84,7 +84,7 @@ export interface SignupRequest {
 
 export interface AuthResponse {
   success: boolean;
-  instructor?: Omit<Instructor, 'password'>;
+  instructor?: Omit<Instructor, "password">;
   token?: string;
   message?: string;
 }
@@ -101,24 +101,24 @@ export interface CreateQuizRequest {
   title: string;
   description: string;
   timeLimit: number;
-  questions: Omit<QuizQuestion, 'id'>[];
+  questions: Omit<QuizQuestion, "id">[];
   allowRetries?: boolean;
   randomizeQuestions?: boolean;
   maxAttempts?: number;
   durationValue?: number;
-  durationUnit?: 'minutes' | 'days';
+  durationUnit?: "minutes" | "days";
 }
 
 export interface UpdateQuizRequest {
   title?: string;
   description?: string;
   timeLimit?: number;
-  questions?: Omit<QuizQuestion, 'id'>[];
+  questions?: Omit<QuizQuestion, "id">[];
   allowRetries?: boolean;
   randomizeQuestions?: boolean;
   maxAttempts?: number;
   durationValue?: number;
-  durationUnit?: 'minutes' | 'days';
+  durationUnit?: "minutes" | "days";
   isActive?: boolean;
 }
 
@@ -134,7 +134,7 @@ export interface JoinQuizRequest {
 
 export interface JoinQuizResponse {
   sessionId: string;
-  quiz: Omit<Quiz, 'questions'>;
+  quiz: Omit<Quiz, "questions">;
   success: boolean;
 }
 

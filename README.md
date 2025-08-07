@@ -7,6 +7,7 @@ A full-featured, real-time quiz management platform built with React, TypeScript
 ## 🚀 Features
 
 ### 🎓 **For Instructors**
+
 - **Complete Quiz Management**: Create, edit, delete, and organize quizzes
 - **Flexible Question Types**: Multiple choice, true/false, and short answer questions
 - **Advanced Settings**: Time limits, retry policies, question randomization
@@ -17,6 +18,7 @@ A full-featured, real-time quiz management platform built with React, TypeScript
 - **QR Code Generation**: Quick student access via QR codes
 
 ### 📱 **For Students**
+
 - **Easy Access**: Join via room codes or QR codes
 - **Mobile Responsive**: Works seamlessly on all devices
 - **Real-time Timer**: Auto-submission when time expires
@@ -25,6 +27,7 @@ A full-featured, real-time quiz management platform built with React, TypeScript
 - **Intuitive Interface**: Clean, distraction-free quiz taking experience
 
 ### 🔧 **Technical Features**
+
 - **Authentication System**: Secure instructor login/signup
 - **Session Management**: Persistent login with localStorage
 - **Error Handling**: Comprehensive error handling and user feedback
@@ -35,6 +38,7 @@ A full-featured, real-time quiz management platform built with React, TypeScript
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **React 18** with TypeScript
 - **Vite** for fast development and building
 - **React Router 6** for navigation
@@ -43,12 +47,14 @@ A full-featured, real-time quiz management platform built with React, TypeScript
 - **Lucide React** for icons
 
 ### Backend
+
 - **Express.js** with TypeScript
 - **RESTful API** design
 - **In-memory storage** (easily replaceable with database)
 - **CORS enabled** for cross-origin requests
 
 ### Development Tools
+
 - **TypeScript** for type safety
 - **ESLint** for code quality
 - **PostCSS** for CSS processing
@@ -63,22 +69,26 @@ A full-featured, real-time quiz management platform built with React, TypeScript
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
+
 ```bash
 git clone <repository-url>
 cd quiz-management-system
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Start Development Server
+
 ```bash
 npm run dev
 ```
 
 ### 4. Access the Application
+
 - **Main App**: Open `http://localhost:5173` in your browser
 - **API Server**: Runs automatically alongside the frontend
 
@@ -87,11 +97,13 @@ npm run dev
 ### Getting Started as an Instructor
 
 1. **Create Account**
+
    - Navigate to the home page
    - Click "Login/Sign Up"
    - Fill in your details to create an instructor account
 
 2. **Create Your First Quiz**
+
    - Click "Create Quiz" from the dashboard
    - Add quiz title, description, and time limit
    - Add questions with multiple choice, true/false, or short answer
@@ -108,6 +120,7 @@ npm run dev
 ### Getting Started as a Student
 
 1. **Join a Quiz**
+
    - Get the room code from your instructor
    - Visit the student access page
    - Enter the room code or scan QR code
@@ -121,6 +134,7 @@ npm run dev
 ## 🔧 Configuration
 
 ### Environment Variables
+
 Create a `.env` file in the root directory:
 
 ```env
@@ -136,10 +150,12 @@ PORT=3000
 ### API Endpoints
 
 #### Authentication
+
 - `POST /api/auth/login` - Instructor login
 - `POST /api/auth/signup` - Instructor registration
 
 #### Quiz Management
+
 - `GET /api/quizzes` - Get all quizzes for instructor
 - `POST /api/quiz` - Create new quiz
 - `GET /api/quiz/:id` - Get specific quiz details
@@ -148,6 +164,7 @@ PORT=3000
 - `PUT /api/quiz/:id/status` - Toggle quiz active status
 
 #### Student Access
+
 - `GET /api/quiz/check/:roomCode` - Check if quiz exists
 - `POST /api/quiz/join` - Join quiz with room code
 - `POST /api/quiz/:sessionId/start` - Start quiz session
@@ -157,6 +174,7 @@ PORT=3000
 ## 🎨 Customization
 
 ### Styling
+
 The app uses Tailwind CSS with custom design tokens:
 
 ```css
@@ -171,6 +189,7 @@ The app uses Tailwind CSS with custom design tokens:
 ```
 
 ### Theme Colors
+
 Modify colors in `tailwind.config.ts`:
 
 ```js
@@ -181,10 +200,10 @@ export default {
         primary: "hsl(210 40% 50%)",
         secondary: "hsl(210 40% 90%)",
         // Add your custom colors
-      }
-    }
-  }
-}
+      },
+    },
+  },
+};
 ```
 
 ## 🚀 Deployment
@@ -192,11 +211,13 @@ export default {
 ### Netlify (Recommended)
 
 1. **Prepare for Deployment**
+
    ```bash
    npm run build
    ```
 
 2. **Deploy to Netlify**
+
    - Connect your GitHub repository to Netlify
    - Set build command: `npm run build`
    - Set publish directory: `dist`
@@ -209,6 +230,7 @@ export default {
 ### Manual Deployment
 
 1. **Build the Project**
+
    ```bash
    npm run build
    ```
@@ -220,6 +242,7 @@ export default {
 ## 🔍 Development
 
 ### Project Structure
+
 ```
 quiz-management-system/
 ├── client/                 # React frontend
@@ -255,11 +278,13 @@ npm run lint         # Run ESLint
 ### Adding New Features
 
 1. **Frontend Components**
+
    - Add new pages in `client/pages/`
    - Create reusable components in `client/components/`
    - Update routing in `client/App.tsx`
 
 2. **Backend API**
+
    - Add new routes in `server/routes/`
    - Define types in `shared/api.ts`
    - Update API imports in components
@@ -293,6 +318,7 @@ npm run lint         # Run ESLint
 5. **Open Pull Request**
 
 ### Development Guidelines
+
 - Follow TypeScript best practices
 - Write descriptive commit messages
 - Add comments for complex logic
@@ -308,16 +334,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Common Issues
 
 **Students can't join quiz:**
+
 - Check if quiz is activated in dashboard
 - Verify room code is correct
 - Ensure quiz hasn't expired
 
 **Quiz not loading:**
+
 - Check browser console for errors
 - Verify API server is running
 - Clear browser cache and reload
 
 **Export not working:**
+
 - Ensure there are participant results
 - Check browser's download settings
 - Try refreshing the page
@@ -331,6 +360,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🎯 Roadmap
 
 ### Upcoming Features
+
 - [ ] **Database Integration** (PostgreSQL/MongoDB)
 - [ ] **Advanced Question Types** (Fill-in-the-blank, matching)
 - [ ] **Video/Image Support** in questions
@@ -343,6 +373,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] **Proctoring Features** (webcam monitoring)
 
 ### Performance Improvements
+
 - [ ] **Caching** for better performance
 - [ ] **Offline Mode** for quiz taking
 - [ ] **Progressive Web App** features

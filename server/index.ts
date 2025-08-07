@@ -14,7 +14,7 @@ import {
   updateQuiz,
   deleteQuiz,
   checkQuiz,
-  getActiveQuizzes
+  getActiveQuizzes,
 } from "./routes/quiz";
 import { login, signup, updateProfile, getProfile } from "./routes/auth";
 

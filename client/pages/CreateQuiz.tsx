@@ -2,26 +2,46 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { QuizQuestion, CreateQuizRequest } from "@shared/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Trash2, BookOpen, Clock, Save, Eye } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Trash2,
+  BookOpen,
+  Clock,
+  Save,
+  Eye,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-type QuestionType = 'multiple-choice' | 'true-false' | 'short-answer';
+type QuestionType = "multiple-choice" | "true-false" | "short-answer";
 
-interface QuestionForm extends Omit<QuizQuestion, 'id'> {
+interface QuestionForm extends Omit<QuizQuestion, "id"> {
   tempId: string;
 }
 
 export default function CreateQuiz() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [timeLimit, setTimeLimit] = useState(30);
@@ -30,7 +50,7 @@ export default function CreateQuiz() {
   const [randomizeQuestions, setRandomizeQuestions] = useState(false);
   const [maxAttempts, setMaxAttempts] = useState(1);
   const [durationValue, setDurationValue] = useState(30);
-  const [durationUnit, setDurationUnit] = useState<'minutes' | 'days'>('days');
+  const [durationUnit, setDurationUnit] = useState<"minutes" | "days">("days");
   const [saving, setSaving] = useState(false);
 
   const addQuestion = () => {
@@ -40,23 +60,27 @@ export default function CreateQuiz() {
       type: "multiple-choice",
       options: ["", "", "", ""],
       correctAnswer: 0,
-      points: 1
+      points: 1,
     };
     setQuestions([...questions, newQuestion]);
   };
 
   const updateQuestion = (tempId: string, updates: Partial<QuestionForm>) => {
-    setQuestions(questions.map(q => 
-      q.tempId === tempId ? { ...q, ...updates } : q
-    ));
+    setQuestions(
+      questions.map((q) => (q.tempId === tempId ? { ...q, ...updates } : q)),
+    );
   };
 
   const removeQuestion = (tempId: string) => {
-    setQuestions(questions.filter(q => q.tempId !== tempId));
+    setQuestions(questions.filter((q) => q.tempId !== tempId));
   };
 
-  const updateQuestionOption = (tempId: string, optionIndex: number, value: string) => {
-    const question = questions.find(q => q.tempId === tempId);
+  const updateQuestionOption = (
+    tempId: string,
+    optionIndex: number,
+    value: string,
+  ) => {
+    const question = questions.find((q) => q.tempId === tempId);
     if (question && question.options) {
       const newOptions = [...question.options];
       newOptions[optionIndex] = value;
@@ -69,16 +93,16 @@ export default function CreateQuiz() {
       toast({
         title: "Error",
         description: "Please enter a quiz title",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     if (questions.length === 0) {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Please add at least one question",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -89,18 +113,18 @@ export default function CreateQuiz() {
         toast({
           title: "Error",
           description: "All questions must have text",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
 
-      if (question.type === 'multiple-choice' && question.options) {
-        const filledOptions = question.options.filter(opt => opt.trim());
+      if (question.type === "multiple-choice" && question.options) {
+        const filledOptions = question.options.filter((opt) => opt.trim());
         if (filledOptions.length < 2) {
           toast({
             title: "Error",
             description: "Multiple choice questions need at least 2 options",
-            variant: "destructive"
+            variant: "destructive",
           });
           return;
         }
@@ -118,13 +142,13 @@ export default function CreateQuiz() {
         randomizeQuestions,
         maxAttempts,
         durationValue,
-        durationUnit
+        durationUnit,
       };
 
       const response = await fetch("/api/quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(quizData)
+        body: JSON.stringify(quizData),
       });
 
       if (!response.ok) {
@@ -133,7 +157,7 @@ export default function CreateQuiz() {
 
       toast({
         title: "Quiz Created!",
-        description: "Your quiz has been saved successfully"
+        description: "Your quiz has been saved successfully",
       });
 
       // Navigate back to dashboard
@@ -142,7 +166,7 @@ export default function CreateQuiz() {
       toast({
         title: "Error",
         description: "Failed to save quiz. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setSaving(false);
@@ -174,7 +198,9 @@ export default function CreateQuiz() {
             id={`question-${question.tempId}`}
             placeholder="Enter your question..."
             value={question.question}
-            onChange={(e) => updateQuestion(question.tempId, { question: e.target.value })}
+            onChange={(e) =>
+              updateQuestion(question.tempId, { question: e.target.value })
+            }
             className="mt-1"
           />
         </div>
@@ -186,14 +212,14 @@ export default function CreateQuiz() {
               value={question.type}
               onValueChange={(value: QuestionType) => {
                 const updates: Partial<QuestionForm> = { type: value };
-                if (value === 'true-false') {
-                  updates.options = ['True', 'False'];
+                if (value === "true-false") {
+                  updates.options = ["True", "False"];
                   updates.correctAnswer = 0;
-                } else if (value === 'short-answer') {
+                } else if (value === "short-answer") {
                   updates.options = undefined;
-                  updates.correctAnswer = '';
-                } else if (value === 'multiple-choice' && !question.options) {
-                  updates.options = ['', '', '', ''];
+                  updates.correctAnswer = "";
+                } else if (value === "multiple-choice" && !question.options) {
+                  updates.options = ["", "", "", ""];
                   updates.correctAnswer = 0;
                 }
                 updateQuestion(question.tempId, updates);
@@ -218,12 +244,16 @@ export default function CreateQuiz() {
               min="1"
               max="100"
               value={question.points}
-              onChange={(e) => updateQuestion(question.tempId, { points: parseInt(e.target.value) || 1 })}
+              onChange={(e) =>
+                updateQuestion(question.tempId, {
+                  points: parseInt(e.target.value) || 1,
+                })
+              }
             />
           </div>
         </div>
 
-        {question.type === 'multiple-choice' && question.options && (
+        {question.type === "multiple-choice" && question.options && (
           <div>
             <Label>Answer Options</Label>
             <div className="space-y-2 mt-2">
@@ -233,13 +263,23 @@ export default function CreateQuiz() {
                     type="radio"
                     name={`correct-${question.tempId}`}
                     checked={question.correctAnswer === optionIndex}
-                    onChange={() => updateQuestion(question.tempId, { correctAnswer: optionIndex })}
+                    onChange={() =>
+                      updateQuestion(question.tempId, {
+                        correctAnswer: optionIndex,
+                      })
+                    }
                     className="text-primary"
                   />
                   <Input
                     placeholder={`Option ${optionIndex + 1}`}
                     value={option}
-                    onChange={(e) => updateQuestionOption(question.tempId, optionIndex, e.target.value)}
+                    onChange={(e) =>
+                      updateQuestionOption(
+                        question.tempId,
+                        optionIndex,
+                        e.target.value,
+                      )
+                    }
                     className="flex-1"
                   />
                 </div>
@@ -251,7 +291,7 @@ export default function CreateQuiz() {
           </div>
         )}
 
-        {question.type === 'true-false' && (
+        {question.type === "true-false" && (
           <div>
             <Label>Correct Answer</Label>
             <div className="flex space-x-4 mt-2">
@@ -260,7 +300,9 @@ export default function CreateQuiz() {
                   type="radio"
                   name={`correct-${question.tempId}`}
                   checked={question.correctAnswer === 0}
-                  onChange={() => updateQuestion(question.tempId, { correctAnswer: 0 })}
+                  onChange={() =>
+                    updateQuestion(question.tempId, { correctAnswer: 0 })
+                  }
                   className="text-primary"
                 />
                 <span>True</span>
@@ -270,7 +312,9 @@ export default function CreateQuiz() {
                   type="radio"
                   name={`correct-${question.tempId}`}
                   checked={question.correctAnswer === 1}
-                  onChange={() => updateQuestion(question.tempId, { correctAnswer: 1 })}
+                  onChange={() =>
+                    updateQuestion(question.tempId, { correctAnswer: 1 })
+                  }
                   className="text-primary"
                 />
                 <span>False</span>
@@ -279,14 +323,20 @@ export default function CreateQuiz() {
           </div>
         )}
 
-        {question.type === 'short-answer' && (
+        {question.type === "short-answer" && (
           <div>
-            <Label htmlFor={`answer-${question.tempId}`}>Sample Correct Answer</Label>
+            <Label htmlFor={`answer-${question.tempId}`}>
+              Sample Correct Answer
+            </Label>
             <Input
               id={`answer-${question.tempId}`}
               placeholder="Enter a sample correct answer..."
               value={question.correctAnswer as string}
-              onChange={(e) => updateQuestion(question.tempId, { correctAnswer: e.target.value })}
+              onChange={(e) =>
+                updateQuestion(question.tempId, {
+                  correctAnswer: e.target.value,
+                })
+              }
               className="mt-1"
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -314,7 +364,9 @@ export default function CreateQuiz() {
               <div className="w-8 h-8 quiz-gradient rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-semibold text-foreground">Create New Quiz</h1>
+              <h1 className="text-xl font-semibold text-foreground">
+                Create New Quiz
+              </h1>
             </div>
             <div className="flex items-center space-x-3">
               <Button variant="outline" disabled>
@@ -374,7 +426,9 @@ export default function CreateQuiz() {
                     min="1"
                     max="180"
                     value={timeLimit}
-                    onChange={(e) => setTimeLimit(parseInt(e.target.value) || 30)}
+                    onChange={(e) =>
+                      setTimeLimit(parseInt(e.target.value) || 30)
+                    }
                     className="w-24"
                   />
                   <span className="text-sm text-muted-foreground">minutes</span>
@@ -394,7 +448,9 @@ export default function CreateQuiz() {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="allowRetries" className="text-base">Allow Retries</Label>
+                  <Label htmlFor="allowRetries" className="text-base">
+                    Allow Retries
+                  </Label>
                   <p className="text-sm text-muted-foreground">
                     Let students take the quiz multiple times
                   </p>
@@ -415,7 +471,9 @@ export default function CreateQuiz() {
                     min="1"
                     max="10"
                     value={maxAttempts}
-                    onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 1)}
+                    onChange={(e) =>
+                      setMaxAttempts(parseInt(e.target.value) || 1)
+                    }
                     className="w-24 mt-1"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
@@ -426,7 +484,9 @@ export default function CreateQuiz() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="randomizeQuestions" className="text-base">Randomize Questions</Label>
+                  <Label htmlFor="randomizeQuestions" className="text-base">
+                    Randomize Questions
+                  </Label>
                   <p className="text-sm text-muted-foreground">
                     Shuffle question order for each participant
                   </p>
@@ -445,12 +505,19 @@ export default function CreateQuiz() {
                     id="durationValue"
                     type="number"
                     min="1"
-                    max={durationUnit === 'days' ? "365" : "43200"}
+                    max={durationUnit === "days" ? "365" : "43200"}
                     value={durationValue}
-                    onChange={(e) => setDurationValue(parseInt(e.target.value) || 30)}
+                    onChange={(e) =>
+                      setDurationValue(parseInt(e.target.value) || 30)
+                    }
                     className="w-24"
                   />
-                  <Select value={durationUnit} onValueChange={(value: 'minutes' | 'days') => setDurationUnit(value)}>
+                  <Select
+                    value={durationUnit}
+                    onValueChange={(value: "minutes" | "days") =>
+                      setDurationUnit(value)
+                    }
+                  >
                     <SelectTrigger className="w-24">
                       <SelectValue />
                     </SelectTrigger>
@@ -470,7 +537,9 @@ export default function CreateQuiz() {
           {/* Questions Section */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Questions ({questions.length})</h2>
+              <h2 className="text-xl font-semibold">
+                Questions ({questions.length})
+              </h2>
               <Button onClick={addQuestion}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Question
@@ -495,7 +564,9 @@ export default function CreateQuiz() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {questions.map((question, index) => renderQuestionEditor(question, index))}
+                {questions.map((question, index) =>
+                  renderQuestionEditor(question, index),
+                )}
               </div>
             )}
           </div>

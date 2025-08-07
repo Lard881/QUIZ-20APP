@@ -1,20 +1,48 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { Quiz, QuizSession, QuizParticipant, UpdateQuizRequest } from "@shared/api";
+import {
+  Quiz,
+  QuizSession,
+  QuizParticipant,
+  UpdateQuizRequest,
+} from "@shared/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  ArrowLeft, BookOpen, Play, Square, Users, Clock, 
-  Settings, QrCode, BarChart3, RefreshCw, Shuffle,
-  AlertTriangle, CheckCircle, Copy
+import {
+  ArrowLeft,
+  BookOpen,
+  Play,
+  Square,
+  Users,
+  Clock,
+  Settings,
+  QrCode,
+  BarChart3,
+  RefreshCw,
+  Shuffle,
+  AlertTriangle,
+  CheckCircle,
+  Copy,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -35,7 +63,7 @@ export default function QuizManagement() {
   const [randomizeQuestions, setRandomizeQuestions] = useState(false);
   const [maxAttempts, setMaxAttempts] = useState(1);
   const [durationValue, setDurationValue] = useState(30);
-  const [durationUnit, setDurationUnit] = useState<'minutes' | 'days'>('days');
+  const [durationUnit, setDurationUnit] = useState<"minutes" | "days">("days");
 
   useEffect(() => {
     if (!instructor) {
@@ -46,7 +74,7 @@ export default function QuizManagement() {
       toast({
         title: "Error",
         description: "No quiz ID provided",
-        variant: "destructive"
+        variant: "destructive",
       });
       navigate("/dashboard");
       return;
@@ -67,13 +95,18 @@ export default function QuizManagement() {
           setRandomizeQuestions(quizData.quiz.randomizeQuestions || false);
           setMaxAttempts(quizData.quiz.maxAttempts || 1);
           setDurationValue(quizData.quiz.durationValue || 30);
-          setDurationUnit(quizData.quiz.durationUnit || 'days');
+          setDurationUnit(quizData.quiz.durationUnit || "days");
         } else {
           throw new Error("Invalid quiz data received");
         }
       } else {
-        const errorData = await quizResponse.json().catch(() => ({ message: "Unknown error" }));
-        throw new Error(errorData.message || `HTTP ${quizResponse.status}: ${quizResponse.statusText}`);
+        const errorData = await quizResponse
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
+        throw new Error(
+          errorData.message ||
+            `HTTP ${quizResponse.status}: ${quizResponse.statusText}`,
+        );
       }
 
       // Fetch quiz results/participants
@@ -85,7 +118,10 @@ export default function QuizManagement() {
           setParticipants(resultsData.participants || []);
         } else {
           // Results endpoint failure is not critical, just log it
-          console.warn("Could not fetch quiz results:", resultsResponse.statusText);
+          console.warn(
+            "Could not fetch quiz results:",
+            resultsResponse.statusText,
+          );
         }
       } catch (resultsError) {
         console.warn("Error fetching quiz results:", resultsError);
@@ -94,8 +130,9 @@ export default function QuizManagement() {
       console.error("Error fetching quiz data:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load quiz data",
-        variant: "destructive"
+        description:
+          error instanceof Error ? error.message : "Failed to load quiz data",
+        variant: "destructive",
       });
 
       // Navigate back to dashboard on critical errors
@@ -112,27 +149,27 @@ export default function QuizManagement() {
 
     setUpdating(true);
     try {
-      const token = localStorage.getItem('quiz_token');
+      const token = localStorage.getItem("quiz_token");
       const updateData: UpdateQuizRequest = {
         allowRetries,
         randomizeQuestions,
         maxAttempts,
         durationValue,
-        durationUnit
+        durationUnit,
       };
 
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       };
 
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch(`/api/quiz/${quiz.id}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers,
-        body: JSON.stringify(updateData)
+        body: JSON.stringify(updateData),
       });
 
       if (response.ok) {
@@ -141,21 +178,29 @@ export default function QuizManagement() {
           setQuiz(responseData.quiz);
           toast({
             title: "Settings Updated",
-            description: "Quiz settings have been saved successfully"
+            description: "Quiz settings have been saved successfully",
           });
         } else {
           throw new Error("Invalid response from server");
         }
       } else {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
+        throw new Error(
+          errorData.message ||
+            `HTTP ${response.status}: ${response.statusText}`,
+        );
       }
     } catch (error) {
       console.error("Error updating quiz settings:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update quiz settings",
-        variant: "destructive"
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update quiz settings",
+        variant: "destructive",
       });
     } finally {
       setUpdating(false);
@@ -166,19 +211,19 @@ export default function QuizManagement() {
     if (!quiz) return;
 
     try {
-      const token = localStorage.getItem('quiz_token');
+      const token = localStorage.getItem("quiz_token");
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       };
 
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch(`/api/quiz/${quiz.id}/status`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers,
-        body: JSON.stringify({ isActive: !quiz.isActive })
+        body: JSON.stringify({ isActive: !quiz.isActive }),
       });
 
       if (response.ok) {
@@ -193,18 +238,23 @@ export default function QuizManagement() {
           title: quiz.isActive ? "Quiz Stopped" : "Quiz Started",
           description: quiz.isActive
             ? "The quiz has been deactivated"
-            : "The quiz is now live and accepting participants"
+            : "The quiz is now live and accepting participants",
         });
       } else {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Unknown error" }));
         throw new Error(errorData.message || `Failed to update quiz status`);
       }
     } catch (error) {
       console.error("Error updating quiz status:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update quiz status",
-        variant: "destructive"
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update quiz status",
+        variant: "destructive",
       });
     }
   };
@@ -214,7 +264,7 @@ export default function QuizManagement() {
       navigator.clipboard.writeText(quiz.roomCode);
       toast({
         title: "Copied!",
-        description: "Room code copied to clipboard"
+        description: "Room code copied to clipboard",
       });
     }
   };
@@ -226,25 +276,34 @@ export default function QuizManagement() {
   };
 
   // Analytics helper functions
-  const calculateStudentScore = (participant: QuizParticipant): { score: number; details: any[] } => {
+  const calculateStudentScore = (
+    participant: QuizParticipant,
+  ): { score: number; details: any[] } => {
     if (!quiz) return { score: 0, details: [] };
 
     let totalScore = 0;
     const details: any[] = [];
 
-    quiz.questions.forEach(question => {
-      const studentAnswer = participant.answers.find(a => a.questionId === question.id);
+    quiz.questions.forEach((question) => {
+      const studentAnswer = participant.answers.find(
+        (a) => a.questionId === question.id,
+      );
       let isCorrect = false;
       let pointsEarned = 0;
 
       if (studentAnswer) {
-        if (question.type === 'multiple-choice' || question.type === 'true-false') {
+        if (
+          question.type === "multiple-choice" ||
+          question.type === "true-false"
+        ) {
           isCorrect = studentAnswer.answer === question.correctAnswer;
           pointsEarned = isCorrect ? question.points : 0;
-        } else if (question.type === 'short-answer') {
+        } else if (question.type === "short-answer") {
           // For short answer, we'll assume it's correct if there's an answer
           // In a real system, this would need manual grading
-          isCorrect = studentAnswer.answer && studentAnswer.answer.toString().trim() !== '';
+          isCorrect =
+            studentAnswer.answer &&
+            studentAnswer.answer.toString().trim() !== "";
           pointsEarned = isCorrect ? question.points : 0;
         }
       }
@@ -259,7 +318,7 @@ export default function QuizManagement() {
         type: question.type,
         isCorrect,
         pointsEarned,
-        maxPoints: question.points
+        maxPoints: question.points,
       });
     });
 
@@ -272,7 +331,10 @@ export default function QuizManagement() {
 
   const getTotalPossiblePoints = (): number => {
     if (!quiz) return 0;
-    return quiz.questions.reduce((total, question) => total + question.points, 0);
+    return quiz.questions.reduce(
+      (total, question) => total + question.points,
+      0,
+    );
   };
 
   const calculateAverageScore = (): number => {
@@ -280,38 +342,45 @@ export default function QuizManagement() {
     const totalPossible = getTotalPossiblePoints();
     if (totalPossible === 0) return 0;
 
-    const averagePoints = participants.reduce((sum, participant) => {
-      return sum + getStudentScoreOnly(participant);
-    }, 0) / participants.length;
+    const averagePoints =
+      participants.reduce((sum, participant) => {
+        return sum + getStudentScoreOnly(participant);
+      }, 0) / participants.length;
 
     return (averagePoints / totalPossible) * 100;
   };
 
   const getGrade = (percentage: number): string => {
-    if (percentage >= 90) return 'A';
-    if (percentage >= 80) return 'B';
-    if (percentage >= 70) return 'C';
-    if (percentage >= 60) return 'D';
-    return 'F';
+    if (percentage >= 90) return "A";
+    if (percentage >= 80) return "B";
+    if (percentage >= 70) return "C";
+    if (percentage >= 60) return "D";
+    return "F";
   };
 
   const getGradeVariant = (grade: string) => {
     switch (grade) {
-      case 'A': return 'default';
-      case 'B': return 'secondary';
-      case 'C': return 'outline';
-      case 'D': return 'destructive';
-      case 'F': return 'destructive';
-      default: return 'outline';
+      case "A":
+        return "default";
+      case "B":
+        return "secondary";
+      case "C":
+        return "outline";
+      case "D":
+        return "destructive";
+      case "F":
+        return "destructive";
+      default:
+        return "outline";
     }
   };
 
   const getScoreColor = (percentage: number): string => {
-    if (percentage >= 90) return 'text-quiz-success';
-    if (percentage >= 80) return 'text-primary';
-    if (percentage >= 70) return 'text-quiz-warning';
-    if (percentage >= 60) return 'text-quiz-timer';
-    return 'text-destructive';
+    if (percentage >= 90) return "text-quiz-success";
+    if (percentage >= 80) return "text-primary";
+    if (percentage >= 70) return "text-quiz-warning";
+    if (percentage >= 60) return "text-quiz-timer";
+    return "text-destructive";
   };
 
   const downloadExcel = () => {
@@ -319,16 +388,24 @@ export default function QuizManagement() {
       toast({
         title: "No Data",
         description: "No student data available to download",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     // Create CSV content (which can be opened in Excel)
-    const headers = ['Student Name', 'Score', 'Total Points', 'Percentage', 'Grade', 'Questions Answered', 'Submission Time'];
+    const headers = [
+      "Student Name",
+      "Score",
+      "Total Points",
+      "Percentage",
+      "Grade",
+      "Questions Answered",
+      "Submission Time",
+    ];
     const csvContent = [
-      headers.join(','),
-      ...participants.map(participant => {
+      headers.join(","),
+      ...participants.map((participant) => {
         const scoreData = calculateStudentScore(participant);
         const score = scoreData.score;
         const totalPoints = getTotalPossiblePoints();
@@ -337,7 +414,7 @@ export default function QuizManagement() {
         const questionsAnswered = participant.answers.length;
         const submissionTime = participant.submittedAt
           ? new Date(participant.submittedAt).toLocaleString()
-          : 'In Progress';
+          : "In Progress";
 
         return [
           `"${participant.name}"`,
@@ -346,25 +423,25 @@ export default function QuizManagement() {
           `${percentage}%`,
           grade,
           `${questionsAnswered}/${quiz.questions.length}`,
-          `"${submissionTime}"`
-        ].join(',');
-      })
-    ].join('\n');
+          `"${submissionTime}"`,
+        ].join(",");
+      }),
+    ].join("\n");
 
     // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${quiz.title}_results.csv`);
-    link.style.visibility = 'hidden';
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${quiz.title}_results.csv`);
+    link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     toast({
       title: "Download Started",
-      description: "Quiz results have been downloaded as CSV file"
+      description: "Quiz results have been downloaded as CSV file",
     });
   };
 
@@ -389,7 +466,8 @@ export default function QuizManagement() {
             <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
             <h2 className="text-lg font-semibold mb-2">Quiz Not Found</h2>
             <p className="text-muted-foreground mb-4">
-              The quiz you're looking for doesn't exist or you don't have permission to access it.
+              The quiz you're looking for doesn't exist or you don't have
+              permission to access it.
             </p>
             <Button asChild>
               <Link to="/dashboard">
@@ -410,7 +488,12 @@ export default function QuizManagement() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
-              <Button variant="ghost" size="sm" asChild className="flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="flex-shrink-0"
+              >
                 <Link to="/dashboard">
                   <ArrowLeft className="w-4 h-4 md:mr-2" />
                   <span className="hidden md:inline">Back to Dashboard</span>
@@ -420,13 +503,20 @@ export default function QuizManagement() {
                 <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-sm md:text-xl font-semibold text-foreground truncate">{quiz.title}</h1>
-                <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">Quiz Management</p>
+                <h1 className="text-sm md:text-xl font-semibold text-foreground truncate">
+                  {quiz.title}
+                </h1>
+                <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
+                  Quiz Management
+                </p>
               </div>
             </div>
 
             <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
-              <Badge variant={quiz.isActive ? "default" : "secondary"} className="hidden sm:inline-flex">
+              <Badge
+                variant={quiz.isActive ? "default" : "secondary"}
+                className="hidden sm:inline-flex"
+              >
                 {quiz.isActive ? "Active" : "Inactive"}
               </Badge>
               <Button
@@ -479,31 +569,39 @@ export default function QuizManagement() {
                     {quiz.isActive ? "Live" : "Stopped"}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {quiz.isActive ? "Accepting participants" : "Not accepting participants"}
+                    {quiz.isActive
+                      ? "Accepting participants"
+                      : "Not accepting participants"}
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Participants</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Participants
+                  </CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{participants.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Total joined
-                  </p>
+                  <div className="text-2xl font-bold">
+                    {participants.length}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Total joined</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Questions</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Questions
+                  </CardTitle>
                   <BookOpen className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{quiz.questions.length}</div>
+                  <div className="text-2xl font-bold">
+                    {quiz.questions.length}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     Total questions
                   </p>
@@ -512,14 +610,14 @@ export default function QuizManagement() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Time Limit</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Time Limit
+                  </CardTitle>
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{quiz.timeLimit}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Minutes
-                  </p>
+                  <p className="text-xs text-muted-foreground">Minutes</p>
                 </CardContent>
               </Card>
             </div>
@@ -577,7 +675,9 @@ export default function QuizManagement() {
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="allowRetries" className="text-base">Allow Retries</Label>
+                    <Label htmlFor="allowRetries" className="text-base">
+                      Allow Retries
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Let students take the quiz multiple times
                     </p>
@@ -598,7 +698,9 @@ export default function QuizManagement() {
                       min="1"
                       max="10"
                       value={maxAttempts}
-                      onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 1)}
+                      onChange={(e) =>
+                        setMaxAttempts(parseInt(e.target.value) || 1)
+                      }
                       className="w-24 mt-1"
                     />
                     <p className="text-sm text-muted-foreground mt-1">
@@ -608,52 +710,63 @@ export default function QuizManagement() {
                 )}
 
                 <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="randomizeQuestions" className="text-base">
+                      Randomize Questions
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Shuffle question order for each participant
+                    </p>
+                  </div>
+                  <Switch
+                    id="randomizeQuestions"
+                    checked={randomizeQuestions}
+                    onCheckedChange={setRandomizeQuestions}
+                  />
+                </div>
+
                 <div>
-                  <Label htmlFor="randomizeQuestions" className="text-base">Randomize Questions</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Shuffle question order for each participant
+                  <Label htmlFor="durationValue">Quiz Duration</Label>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <Input
+                      id="durationValue"
+                      type="number"
+                      min="1"
+                      max={durationUnit === "days" ? "365" : "43200"}
+                      value={durationValue}
+                      onChange={(e) =>
+                        setDurationValue(parseInt(e.target.value) || 30)
+                      }
+                      className="w-24"
+                    />
+                    <Select
+                      value={durationUnit}
+                      onValueChange={(value: "minutes" | "days") =>
+                        setDurationUnit(value)
+                      }
+                    >
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="minutes">Minutes</SelectItem>
+                        <SelectItem value="days">Days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Quiz will automatically deactivate after this duration
+                    {quiz?.expiresAt && (
+                      <span className="block mt-1">
+                        Expires on:{" "}
+                        {new Date(quiz.expiresAt).toLocaleDateString()} at{" "}
+                        {new Date(quiz.expiresAt).toLocaleTimeString()}
+                      </span>
+                    )}
                   </p>
                 </div>
-                <Switch
-                  id="randomizeQuestions"
-                  checked={randomizeQuestions}
-                  onCheckedChange={setRandomizeQuestions}
-                />
-              </div>
 
-              <div>
-                <Label htmlFor="durationValue">Quiz Duration</Label>
-                <div className="flex items-center space-x-2 mt-1">
-                  <Input
-                    id="durationValue"
-                    type="number"
-                    min="1"
-                    max={durationUnit === 'days' ? "365" : "43200"}
-                    value={durationValue}
-                    onChange={(e) => setDurationValue(parseInt(e.target.value) || 30)}
-                    className="w-24"
-                  />
-                  <Select value={durationUnit} onValueChange={(value: 'minutes' | 'days') => setDurationUnit(value)}>
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="minutes">Minutes</SelectItem>
-                      <SelectItem value="days">Days</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Quiz will automatically deactivate after this duration
-                  {quiz?.expiresAt && (
-                    <span className="block mt-1">
-                      Expires on: {new Date(quiz.expiresAt).toLocaleDateString()} at {new Date(quiz.expiresAt).toLocaleTimeString()}
-                    </span>
-                  )}
-                </p>
-              </div>
-
-              <Button onClick={updateQuizSettings} disabled={updating}>
+                <Button onClick={updateQuizSettings} disabled={updating}>
                   {updating ? (
                     <>
                       <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -683,7 +796,9 @@ export default function QuizManagement() {
                 {participants.length === 0 ? (
                   <div className="text-center py-8">
                     <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No participants yet</h3>
+                    <h3 className="text-lg font-medium mb-2">
+                      No participants yet
+                    </h3>
                     <p className="text-muted-foreground">
                       Participants will appear here once they join the quiz
                     </p>
@@ -698,10 +813,14 @@ export default function QuizManagement() {
                         <div>
                           <h4 className="font-medium">{participant.name}</h4>
                           <p className="text-sm text-muted-foreground">
-                            {participant.answers.length} / {quiz.questions.length} answered
+                            {participant.answers.length} /{" "}
+                            {quiz.questions.length} answered
                             {participant.submittedAt && (
                               <span className="ml-2">
-                                • Submitted {new Date(participant.submittedAt).toLocaleTimeString()}
+                                • Submitted{" "}
+                                {new Date(
+                                  participant.submittedAt,
+                                ).toLocaleTimeString()}
                               </span>
                             )}
                           </p>
@@ -712,8 +831,14 @@ export default function QuizManagement() {
                               Score: {participant.score}
                             </Badge>
                           )}
-                          <Badge variant={participant.submittedAt ? "default" : "secondary"}>
-                            {participant.submittedAt ? "Completed" : "In Progress"}
+                          <Badge
+                            variant={
+                              participant.submittedAt ? "default" : "secondary"
+                            }
+                          >
+                            {participant.submittedAt
+                              ? "Completed"
+                              : "In Progress"}
                           </Badge>
                         </div>
                       </div>
@@ -745,7 +870,9 @@ export default function QuizManagement() {
                 {participants.length === 0 ? (
                   <div className="text-center py-8">
                     <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No Data Available</h3>
+                    <h3 className="text-lg font-medium mb-2">
+                      No Data Available
+                    </h3>
                     <p className="text-muted-foreground">
                       No students have completed this quiz yet
                     </p>
@@ -755,32 +882,52 @@ export default function QuizManagement() {
                     {/* Summary Statistics */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
-                        <div className="text-2xl font-bold text-quiz-success">{participants.length}</div>
-                        <div className="text-sm text-muted-foreground">Total Students</div>
+                        <div className="text-2xl font-bold text-quiz-success">
+                          {participants.length}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Total Students
+                        </div>
                       </div>
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-primary">
                           {calculateAverageScore().toFixed(1)}%
                         </div>
-                        <div className="text-sm text-muted-foreground">Average Score</div>
+                        <div className="text-sm text-muted-foreground">
+                          Average Score
+                        </div>
                       </div>
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-quiz-success">
-                          {participants.filter(p => {
-                            const percentage = (getStudentScoreOnly(p) / getTotalPossiblePoints()) * 100;
-                            return getGrade(percentage) !== 'F';
-                          }).length}
+                          {
+                            participants.filter((p) => {
+                              const percentage =
+                                (getStudentScoreOnly(p) /
+                                  getTotalPossiblePoints()) *
+                                100;
+                              return getGrade(percentage) !== "F";
+                            }).length
+                          }
                         </div>
-                        <div className="text-sm text-muted-foreground">Passed</div>
+                        <div className="text-sm text-muted-foreground">
+                          Passed
+                        </div>
                       </div>
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-destructive">
-                          {participants.filter(p => {
-                            const percentage = (getStudentScoreOnly(p) / getTotalPossiblePoints()) * 100;
-                            return getGrade(percentage) === 'F';
-                          }).length}
+                          {
+                            participants.filter((p) => {
+                              const percentage =
+                                (getStudentScoreOnly(p) /
+                                  getTotalPossiblePoints()) *
+                                100;
+                              return getGrade(percentage) === "F";
+                            }).length
+                          }
                         </div>
-                        <div className="text-sm text-muted-foreground">Failed</div>
+                        <div className="text-sm text-muted-foreground">
+                          Failed
+                        </div>
                       </div>
                     </div>
 
@@ -793,43 +940,71 @@ export default function QuizManagement() {
                         <table className="w-full">
                           <thead className="bg-muted/30">
                             <tr>
-                              <th className="text-left p-3 font-medium">Student Name</th>
-                              <th className="text-left p-3 font-medium">Score</th>
-                              <th className="text-left p-3 font-medium">Percentage</th>
-                              <th className="text-left p-3 font-medium">Grade</th>
-                              <th className="text-left p-3 font-medium">Questions Answered</th>
-                              <th className="text-left p-3 font-medium">Submission Time</th>
+                              <th className="text-left p-3 font-medium">
+                                Student Name
+                              </th>
+                              <th className="text-left p-3 font-medium">
+                                Score
+                              </th>
+                              <th className="text-left p-3 font-medium">
+                                Percentage
+                              </th>
+                              <th className="text-left p-3 font-medium">
+                                Grade
+                              </th>
+                              <th className="text-left p-3 font-medium">
+                                Questions Answered
+                              </th>
+                              <th className="text-left p-3 font-medium">
+                                Submission Time
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
                             {participants.map((participant) => {
-                              const scoreData = calculateStudentScore(participant);
+                              const scoreData =
+                                calculateStudentScore(participant);
                               const score = scoreData.score;
-                              const percentage = ((score / getTotalPossiblePoints()) * 100);
+                              const percentage =
+                                (score / getTotalPossiblePoints()) * 100;
                               const grade = getGrade(percentage);
 
                               return (
-                                <tr key={participant.id} className="border-b hover:bg-muted/20">
-                                  <td className="p-3 font-medium">{participant.name}</td>
-                                  <td className="p-3">{score} / {getTotalPossiblePoints()}</td>
+                                <tr
+                                  key={participant.id}
+                                  className="border-b hover:bg-muted/20"
+                                >
+                                  <td className="p-3 font-medium">
+                                    {participant.name}
+                                  </td>
                                   <td className="p-3">
-                                    <span className={`font-medium ${getScoreColor(percentage)}`}>
+                                    {score} / {getTotalPossiblePoints()}
+                                  </td>
+                                  <td className="p-3">
+                                    <span
+                                      className={`font-medium ${getScoreColor(percentage)}`}
+                                    >
                                       {percentage.toFixed(1)}%
                                     </span>
                                   </td>
                                   <td className="p-3">
-                                    <Badge variant={getGradeVariant(grade)} className="font-bold">
+                                    <Badge
+                                      variant={getGradeVariant(grade)}
+                                      className="font-bold"
+                                    >
                                       {grade}
                                     </Badge>
                                   </td>
                                   <td className="p-3">
-                                    {participant.answers.length} / {quiz?.questions.length || 0}
+                                    {participant.answers.length} /{" "}
+                                    {quiz?.questions.length || 0}
                                   </td>
                                   <td className="p-3 text-sm text-muted-foreground">
                                     {participant.submittedAt
-                                      ? new Date(participant.submittedAt).toLocaleString()
-                                      : 'In Progress'
-                                    }
+                                      ? new Date(
+                                          participant.submittedAt,
+                                        ).toLocaleString()
+                                      : "In Progress"}
                                   </td>
                                 </tr>
                               );

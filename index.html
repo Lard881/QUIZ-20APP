@@ -6,51 +6,61 @@
     <title>Hello world project</title>
     <script>
       // Comprehensive ResizeObserver error suppression
-      (function() {
+      (function () {
         // Store original console methods
         const originalConsoleError = console.error;
         const originalConsoleWarn = console.warn;
 
         // Override console.error
-        console.error = function(...args) {
+        console.error = function (...args) {
           const message = args[0];
-          if (typeof message === 'string' && (
-            message.includes('ResizeObserver loop completed with undelivered notifications') ||
-            message.includes('ResizeObserver loop limit exceeded')
-          )) {
+          if (
+            typeof message === "string" &&
+            (message.includes(
+              "ResizeObserver loop completed with undelivered notifications",
+            ) ||
+              message.includes("ResizeObserver loop limit exceeded"))
+          ) {
             return; // Suppress ResizeObserver errors
           }
           originalConsoleError.apply(console, args);
         };
 
         // Override console.warn for ResizeObserver warnings
-        console.warn = function(...args) {
+        console.warn = function (...args) {
           const message = args[0];
-          if (typeof message === 'string' && message.includes('ResizeObserver')) {
+          if (
+            typeof message === "string" &&
+            message.includes("ResizeObserver")
+          ) {
             return; // Suppress ResizeObserver warnings
           }
           originalConsoleWarn.apply(console, args);
         };
 
         // Handle unhandled promise rejections
-        window.addEventListener('unhandledrejection', function(event) {
+        window.addEventListener("unhandledrejection", function (event) {
           const reason = event.reason;
-          if (reason && typeof reason === 'object' && reason.message &&
-              reason.message.includes('ResizeObserver')) {
+          if (
+            reason &&
+            typeof reason === "object" &&
+            reason.message &&
+            reason.message.includes("ResizeObserver")
+          ) {
             event.preventDefault();
           }
         });
 
         // Handle general window errors
-        window.addEventListener('error', function(event) {
-          if (event.message && event.message.includes('ResizeObserver')) {
+        window.addEventListener("error", function (event) {
+          if (event.message && event.message.includes("ResizeObserver")) {
             event.preventDefault();
             return false;
           }
         });
 
         // Add a global error handler for ResizeObserver specifically
-        if (typeof ResizeObserver !== 'undefined') {
+        if (typeof ResizeObserver !== "undefined") {
           const OriginalResizeObserver = ResizeObserver;
           window.ResizeObserver = class extends OriginalResizeObserver {
             constructor(callback) {
@@ -59,7 +69,7 @@
                   callback(entries, observer);
                 } catch (error) {
                   // Silently handle ResizeObserver errors
-                  if (!error.message?.includes('ResizeObserver')) {
+                  if (!error.message?.includes("ResizeObserver")) {
                     throw error;
                   }
                 }

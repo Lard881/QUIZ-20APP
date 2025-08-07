@@ -1,9 +1,9 @@
 import { RequestHandler } from "express";
-import { 
-  Quiz, 
-  QuizSession, 
+import {
+  Quiz,
+  QuizSession,
   QuizParticipant,
-  CreateQuizRequest, 
+  CreateQuizRequest,
   CreateQuizResponse,
   JoinQuizRequest,
   JoinQuizResponse,
@@ -11,7 +11,7 @@ import {
   SubmitAnswerRequest,
   GetQuizzesResponse,
   QuizResultsResponse,
-  ErrorResponse 
+  ErrorResponse,
 } from "@shared/api";
 
 // In-memory storage (replace with database in production)
@@ -19,26 +19,33 @@ let quizzes: Quiz[] = [
   {
     id: "1",
     title: "JavaScript Fundamentals",
-    description: "Test your knowledge of basic JavaScript concepts including variables, functions, and control structures.",
+    description:
+      "Test your knowledge of basic JavaScript concepts including variables, functions, and control structures.",
     instructorId: "instructor1",
     timeLimit: 30,
     questions: [
       {
         id: "q1",
-        question: "What is the correct way to declare a variable in JavaScript?",
+        question:
+          "What is the correct way to declare a variable in JavaScript?",
         type: "multiple-choice",
-        options: ["var x = 5;", "variable x = 5;", "v x = 5;", "declare x = 5;"],
+        options: [
+          "var x = 5;",
+          "variable x = 5;",
+          "v x = 5;",
+          "declare x = 5;",
+        ],
         correctAnswer: 0,
-        points: 1
+        points: 1,
       },
       {
-        id: "q2", 
+        id: "q2",
         question: "JavaScript is a compiled language.",
         type: "true-false",
         options: ["True", "False"],
         correctAnswer: 1,
-        points: 1
-      }
+        points: 1,
+      },
     ],
     roomCode: "JS2024",
     isActive: false,
@@ -46,26 +53,27 @@ let quizzes: Quiz[] = [
     randomizeQuestions: false,
     maxAttempts: 1,
     durationValue: 30,
-    durationUnit: 'days',
+    durationUnit: "days",
     expiresAt: "2024-02-15T10:00:00Z",
     createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-15T10:00:00Z"
+    updatedAt: "2024-01-15T10:00:00Z",
   },
   {
     id: "2",
-    title: "React Components Quiz", 
-    description: "Advanced quiz covering React hooks, state management, and component lifecycle.",
+    title: "React Components Quiz",
+    description:
+      "Advanced quiz covering React hooks, state management, and component lifecycle.",
     instructorId: "instructor1",
     timeLimit: 45,
     questions: [
       {
         id: "q3",
         question: "Which hook is used for side effects in React?",
-        type: "multiple-choice", 
+        type: "multiple-choice",
         options: ["useState", "useEffect", "useContext", "useReducer"],
         correctAnswer: 1,
-        points: 2
-      }
+        points: 2,
+      },
     ],
     roomCode: "REACT45",
     isActive: true,
@@ -73,11 +81,11 @@ let quizzes: Quiz[] = [
     randomizeQuestions: true,
     maxAttempts: 3,
     durationValue: 180,
-    durationUnit: 'minutes',
+    durationUnit: "minutes",
     expiresAt: "2024-01-16T17:30:00Z",
     createdAt: "2024-01-16T14:30:00Z",
-    updatedAt: "2024-01-16T14:30:00Z"
-  }
+    updatedAt: "2024-01-16T14:30:00Z",
+  },
 ];
 
 let quizSessions: QuizSession[] = [];
@@ -85,8 +93,8 @@ let participants: QuizParticipant[] = [];
 
 // Helper function to generate room code
 const generateRoomCode = (): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
   for (let i = 0; i < 6; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -97,13 +105,13 @@ const generateRoomCode = (): string => {
 export const getQuizzes: RequestHandler = (req, res) => {
   try {
     const response: GetQuizzesResponse = {
-      quizzes: quizzes
+      quizzes: quizzes,
     };
     res.json(response);
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "FETCH_FAILED",
-      message: "Failed to fetch quizzes"
+      message: "Failed to fetch quizzes",
     };
     res.status(500).json(errorResponse);
   }
@@ -113,23 +121,27 @@ export const getQuizzes: RequestHandler = (req, res) => {
 export const createQuiz: RequestHandler = (req, res) => {
   try {
     const quizData = req.body as CreateQuizRequest;
-    
+
     // Validate required fields
-    if (!quizData.title || !quizData.questions || quizData.questions.length === 0) {
+    if (
+      !quizData.title ||
+      !quizData.questions ||
+      quizData.questions.length === 0
+    ) {
       const errorResponse: ErrorResponse = {
         error: "VALIDATION_ERROR",
-        message: "Title and at least one question are required"
+        message: "Title and at least one question are required",
       };
       return res.status(400).json(errorResponse);
     }
 
     const now = new Date();
     const durationValue = quizData.durationValue || 30;
-    const durationUnit = quizData.durationUnit || 'days';
+    const durationUnit = quizData.durationUnit || "days";
 
     // Calculate expiration time based on unit
     let expirationMilliseconds: number;
-    if (durationUnit === 'minutes') {
+    if (durationUnit === "minutes") {
       expirationMilliseconds = durationValue * 60 * 1000; // minutes to milliseconds
     } else {
       expirationMilliseconds = durationValue * 24 * 60 * 60 * 1000; // days to milliseconds
@@ -145,7 +157,7 @@ export const createQuiz: RequestHandler = (req, res) => {
       timeLimit: quizData.timeLimit,
       questions: quizData.questions.map((q, index) => ({
         ...q,
-        id: `q${Date.now()}_${index}`
+        id: `q${Date.now()}_${index}`,
       })),
       roomCode: generateRoomCode(),
       isActive: true, // Start as active by default
@@ -156,21 +168,21 @@ export const createQuiz: RequestHandler = (req, res) => {
       durationUnit,
       expiresAt: expiresAt.toISOString(),
       createdAt: now.toISOString(),
-      updatedAt: now.toISOString()
+      updatedAt: now.toISOString(),
     };
 
     quizzes.push(newQuiz);
 
     const response: CreateQuizResponse = {
       quiz: newQuiz,
-      success: true
+      success: true,
     };
 
     res.status(201).json(response);
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "CREATE_FAILED",
-      message: "Failed to create quiz"
+      message: "Failed to create quiz",
     };
     res.status(500).json(errorResponse);
   }
@@ -184,11 +196,13 @@ const isQuizExpired = (quiz: Quiz): boolean => {
 
 // Helper function to get client IP address
 const getClientIP = (req: any): string => {
-  return req.headers['x-forwarded-for'] ||
-         req.connection.remoteAddress ||
-         req.socket.remoteAddress ||
-         (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
-         '127.0.0.1';
+  return (
+    req.headers["x-forwarded-for"] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+    "127.0.0.1"
+  );
 };
 
 // Join quiz with room code
@@ -200,16 +214,16 @@ export const joinQuiz: RequestHandler = (req, res) => {
     if (!roomCode || !participantName) {
       const errorResponse: ErrorResponse = {
         error: "VALIDATION_ERROR",
-        message: "Room code and participant name are required"
+        message: "Room code and participant name are required",
       };
       return res.status(400).json(errorResponse);
     }
 
-    const quiz = quizzes.find(q => q.roomCode === roomCode);
+    const quiz = quizzes.find((q) => q.roomCode === roomCode);
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
-        message: "Quiz not found"
+        message: "Quiz not found",
       };
       return res.status(404).json(errorResponse);
     }
@@ -220,7 +234,7 @@ export const joinQuiz: RequestHandler = (req, res) => {
       quiz.isActive = false;
       const errorResponse: ErrorResponse = {
         error: "QUIZ_EXPIRED",
-        message: "This quiz has expired and is no longer available"
+        message: "This quiz has expired and is no longer available",
       };
       return res.status(410).json(errorResponse);
     }
@@ -232,32 +246,34 @@ export const joinQuiz: RequestHandler = (req, res) => {
     }
 
     // Check attempts by name and IP
-    const existingParticipants = participants.filter(p =>
-      p.name.toLowerCase() === participantName.toLowerCase() || p.ipAddress === clientIP
+    const existingParticipants = participants.filter(
+      (p) =>
+        p.name.toLowerCase() === participantName.toLowerCase() ||
+        p.ipAddress === clientIP,
     );
 
-    const participantAttempts = existingParticipants.filter(p => {
-      const session = quizSessions.find(s => s.id === p.sessionId);
+    const participantAttempts = existingParticipants.filter((p) => {
+      const session = quizSessions.find((s) => s.id === p.sessionId);
       return session && session.quizId === quiz.id;
     });
 
     if (participantAttempts.length >= quiz.maxAttempts) {
       const errorResponse: ErrorResponse = {
         error: "MAX_ATTEMPTS_REACHED",
-        message: `You have reached the maximum number of attempts (${quiz.maxAttempts}) for this quiz`
+        message: `You have reached the maximum number of attempts (${quiz.maxAttempts}) for this quiz`,
       };
       return res.status(429).json(errorResponse);
     }
 
     // Find or create session for this quiz
-    let session = quizSessions.find(s => s.quizId === quiz.id && s.isActive);
+    let session = quizSessions.find((s) => s.quizId === quiz.id && s.isActive);
     if (!session) {
       session = {
         id: `session_${Date.now()}`,
         quizId: quiz.id,
         participants: [],
         startTime: new Date().toISOString(),
-        isActive: true
+        isActive: true,
       };
       quizSessions.push(session);
     }
@@ -270,7 +286,7 @@ export const joinQuiz: RequestHandler = (req, res) => {
       answers: [],
       ipAddress: clientIP,
       attemptNumber: participantAttempts.length + 1,
-      deviceFingerprint: req.headers['user-agent'] || 'unknown'
+      deviceFingerprint: req.headers["user-agent"] || "unknown",
     };
 
     participants.push(participant);
@@ -288,16 +304,16 @@ export const joinQuiz: RequestHandler = (req, res) => {
         isActive: quiz.isActive,
         createdAt: quiz.createdAt,
         updatedAt: quiz.updatedAt,
-        questions: [] // Don't send questions until quiz starts
+        questions: [], // Don't send questions until quiz starts
       },
-      success: true
+      success: true,
     };
 
     res.json(response);
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "JOIN_FAILED",
-      message: "Failed to join quiz"
+      message: "Failed to join quiz",
     };
     res.status(500).json(errorResponse);
   }
@@ -308,20 +324,20 @@ export const startQuiz: RequestHandler = (req, res) => {
   try {
     const { sessionId } = req.params;
 
-    const session = quizSessions.find(s => s.id === sessionId);
+    const session = quizSessions.find((s) => s.id === sessionId);
     if (!session) {
       const errorResponse: ErrorResponse = {
         error: "SESSION_NOT_FOUND",
-        message: "Quiz session not found"
+        message: "Quiz session not found",
       };
       return res.status(404).json(errorResponse);
     }
 
-    const quiz = quizzes.find(q => q.id === session.quizId);
+    const quiz = quizzes.find((q) => q.id === session.quizId);
     if (!quiz) {
       const errorResponse: ErrorResponse = {
-        error: "QUIZ_NOT_FOUND", 
-        message: "Quiz not found"
+        error: "QUIZ_NOT_FOUND",
+        message: "Quiz not found",
       };
       return res.status(404).json(errorResponse);
     }
@@ -332,14 +348,14 @@ export const startQuiz: RequestHandler = (req, res) => {
     const response: StartQuizResponse = {
       quiz: quiz,
       sessionId: session.id,
-      timeRemaining: quiz.timeLimit * 60 // Convert to seconds
+      timeRemaining: quiz.timeLimit * 60, // Convert to seconds
     };
 
     res.json(response);
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "START_FAILED",
-      message: "Failed to start quiz"
+      message: "Failed to start quiz",
     };
     res.status(500).json(errorResponse);
   }
@@ -350,21 +366,23 @@ export const submitAnswer: RequestHandler = (req, res) => {
   try {
     const { sessionId, questionId, answer } = req.body as SubmitAnswerRequest;
 
-    const participant = participants.find(p => p.sessionId === sessionId);
+    const participant = participants.find((p) => p.sessionId === sessionId);
     if (!participant) {
       const errorResponse: ErrorResponse = {
         error: "PARTICIPANT_NOT_FOUND",
-        message: "Participant not found"
+        message: "Participant not found",
       };
       return res.status(404).json(errorResponse);
     }
 
     // Update or add answer
-    const existingAnswerIndex = participant.answers.findIndex(a => a.questionId === questionId);
+    const existingAnswerIndex = participant.answers.findIndex(
+      (a) => a.questionId === questionId,
+    );
     const answerData = {
       questionId,
       answer,
-      timeStamp: new Date().toISOString()
+      timeStamp: new Date().toISOString(),
     };
 
     if (existingAnswerIndex >= 0) {
@@ -377,7 +395,7 @@ export const submitAnswer: RequestHandler = (req, res) => {
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "SUBMIT_FAILED",
-      message: "Failed to submit answer"
+      message: "Failed to submit answer",
     };
     res.status(500).json(errorResponse);
   }
@@ -388,41 +406,43 @@ export const getQuizResults: RequestHandler = (req, res) => {
   try {
     const { quizId } = req.params;
 
-    const quiz = quizzes.find(q => q.id === quizId);
+    const quiz = quizzes.find((q) => q.id === quizId);
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
-        message: "Quiz not found"
+        message: "Quiz not found",
       };
       return res.status(404).json(errorResponse);
     }
 
-    const sessions = quizSessions.filter(s => s.quizId === quizId);
-    const allParticipants = participants.filter(p => 
-      sessions.some(s => s.id === p.sessionId)
+    const sessions = quizSessions.filter((s) => s.quizId === quizId);
+    const allParticipants = participants.filter((p) =>
+      sessions.some((s) => s.id === p.sessionId),
     );
 
     // Calculate scores (simplified)
-    const participantsWithScores = allParticipants.map(p => ({
+    const participantsWithScores = allParticipants.map((p) => ({
       ...p,
-      score: p.answers.length // Simplified scoring
+      score: p.answers.length, // Simplified scoring
     }));
 
-    const averageScore = participantsWithScores.length > 0
-      ? participantsWithScores.reduce((sum, p) => sum + (p.score || 0), 0) / participantsWithScores.length
-      : 0;
+    const averageScore =
+      participantsWithScores.length > 0
+        ? participantsWithScores.reduce((sum, p) => sum + (p.score || 0), 0) /
+          participantsWithScores.length
+        : 0;
 
     const response: QuizResultsResponse = {
       participants: participantsWithScores,
       quiz: quiz,
-      averageScore
+      averageScore,
     };
 
     res.json(response);
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "RESULTS_FAILED",
-      message: "Failed to get quiz results"
+      message: "Failed to get quiz results",
     };
     res.status(500).json(errorResponse);
   }
@@ -434,11 +454,11 @@ export const updateQuizStatus: RequestHandler = (req, res) => {
     const { quizId } = req.params;
     const { isActive } = req.body;
 
-    const quiz = quizzes.find(q => q.id === quizId);
+    const quiz = quizzes.find((q) => q.id === quizId);
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
-        message: "Quiz not found"
+        message: "Quiz not found",
       };
       return res.status(404).json(errorResponse);
     }
@@ -450,7 +470,7 @@ export const updateQuizStatus: RequestHandler = (req, res) => {
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "UPDATE_FAILED",
-      message: "Failed to update quiz status"
+      message: "Failed to update quiz status",
     };
     res.status(500).json(errorResponse);
   }
@@ -461,11 +481,11 @@ export const getQuiz: RequestHandler = (req, res) => {
   try {
     const { quizId } = req.params;
 
-    const quiz = quizzes.find(q => q.id === quizId);
+    const quiz = quizzes.find((q) => q.id === quizId);
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
-        message: "Quiz not found"
+        message: "Quiz not found",
       };
       return res.status(404).json(errorResponse);
     }
@@ -474,7 +494,7 @@ export const getQuiz: RequestHandler = (req, res) => {
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "FETCH_FAILED",
-      message: "Failed to fetch quiz"
+      message: "Failed to fetch quiz",
     };
     res.status(500).json(errorResponse);
   }
@@ -486,37 +506,48 @@ export const updateQuiz: RequestHandler = (req, res) => {
     const { quizId } = req.params;
     const updateData = req.body;
 
-    const quiz = quizzes.find(q => q.id === quizId);
+    const quiz = quizzes.find((q) => q.id === quizId);
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
-        message: "Quiz not found"
+        message: "Quiz not found",
       };
       return res.status(404).json(errorResponse);
     }
 
     // Update quiz properties
     if (updateData.title !== undefined) quiz.title = updateData.title;
-    if (updateData.description !== undefined) quiz.description = updateData.description;
-    if (updateData.timeLimit !== undefined) quiz.timeLimit = updateData.timeLimit;
-    if (updateData.allowRetries !== undefined) quiz.allowRetries = updateData.allowRetries;
-    if (updateData.randomizeQuestions !== undefined) quiz.randomizeQuestions = updateData.randomizeQuestions;
-    if (updateData.maxAttempts !== undefined) quiz.maxAttempts = updateData.maxAttempts;
+    if (updateData.description !== undefined)
+      quiz.description = updateData.description;
+    if (updateData.timeLimit !== undefined)
+      quiz.timeLimit = updateData.timeLimit;
+    if (updateData.allowRetries !== undefined)
+      quiz.allowRetries = updateData.allowRetries;
+    if (updateData.randomizeQuestions !== undefined)
+      quiz.randomizeQuestions = updateData.randomizeQuestions;
+    if (updateData.maxAttempts !== undefined)
+      quiz.maxAttempts = updateData.maxAttempts;
     if (updateData.isActive !== undefined) quiz.isActive = updateData.isActive;
     if (updateData.questions !== undefined) {
       quiz.questions = updateData.questions.map((q: any, index: number) => ({
         ...q,
-        id: q.id || `q${Date.now()}_${index}`
+        id: q.id || `q${Date.now()}_${index}`,
       }));
     }
 
     // Update duration and recalculate expiration if duration changed
     let shouldRecalculateExpiration = false;
-    if (updateData.durationValue !== undefined && updateData.durationValue !== quiz.durationValue) {
+    if (
+      updateData.durationValue !== undefined &&
+      updateData.durationValue !== quiz.durationValue
+    ) {
       quiz.durationValue = updateData.durationValue;
       shouldRecalculateExpiration = true;
     }
-    if (updateData.durationUnit !== undefined && updateData.durationUnit !== quiz.durationUnit) {
+    if (
+      updateData.durationUnit !== undefined &&
+      updateData.durationUnit !== quiz.durationUnit
+    ) {
       quiz.durationUnit = updateData.durationUnit;
       shouldRecalculateExpiration = true;
     }
@@ -524,12 +555,14 @@ export const updateQuiz: RequestHandler = (req, res) => {
     if (shouldRecalculateExpiration) {
       const now = new Date();
       let expirationMilliseconds: number;
-      if (quiz.durationUnit === 'minutes') {
+      if (quiz.durationUnit === "minutes") {
         expirationMilliseconds = quiz.durationValue * 60 * 1000;
       } else {
         expirationMilliseconds = quiz.durationValue * 24 * 60 * 60 * 1000;
       }
-      quiz.expiresAt = new Date(now.getTime() + expirationMilliseconds).toISOString();
+      quiz.expiresAt = new Date(
+        now.getTime() + expirationMilliseconds,
+      ).toISOString();
     }
 
     quiz.updatedAt = new Date().toISOString();
@@ -538,7 +571,7 @@ export const updateQuiz: RequestHandler = (req, res) => {
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "UPDATE_FAILED",
-      message: "Failed to update quiz"
+      message: "Failed to update quiz",
     };
     res.status(500).json(errorResponse);
   }
@@ -549,11 +582,11 @@ export const checkQuiz: RequestHandler = (req, res) => {
   try {
     const { roomCode } = req.params;
 
-    const quiz = quizzes.find(q => q.roomCode === roomCode);
+    const quiz = quizzes.find((q) => q.roomCode === roomCode);
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
-        message: "Quiz not found"
+        message: "Quiz not found",
       };
       return res.status(404).json(errorResponse);
     }
@@ -564,7 +597,7 @@ export const checkQuiz: RequestHandler = (req, res) => {
       quiz.isActive = false;
       const errorResponse: ErrorResponse = {
         error: "QUIZ_EXPIRED",
-        message: "This quiz has expired"
+        message: "This quiz has expired",
       };
       return res.status(410).json(errorResponse);
     }
@@ -575,7 +608,7 @@ export const checkQuiz: RequestHandler = (req, res) => {
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "CHECK_FAILED",
-      message: "Failed to check quiz"
+      message: "Failed to check quiz",
     };
     res.status(500).json(errorResponse);
   }
@@ -585,17 +618,17 @@ export const checkQuiz: RequestHandler = (req, res) => {
 export const getActiveQuizzes: RequestHandler = (req, res) => {
   try {
     const activeQuizzes = quizzes
-      .filter(q => q.isActive)
+      .filter((q) => q.isActive)
       .map(({ questions, ...quiz }) => ({
         ...quiz,
-        participantCount: Math.floor(Math.random() * 20) // Mock participant count
+        participantCount: Math.floor(Math.random() * 20), // Mock participant count
       }));
 
     res.json({ quizzes: activeQuizzes });
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "FETCH_FAILED",
-      message: "Failed to fetch active quizzes"
+      message: "Failed to fetch active quizzes",
     };
     res.status(500).json(errorResponse);
   }
@@ -606,11 +639,11 @@ export const deleteQuiz: RequestHandler = (req, res) => {
   try {
     const { quizId } = req.params;
 
-    const quizIndex = quizzes.findIndex(q => q.id === quizId);
+    const quizIndex = quizzes.findIndex((q) => q.id === quizId);
     if (quizIndex === -1) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
-        message: "Quiz not found"
+        message: "Quiz not found",
       };
       return res.status(404).json(errorResponse);
     }
@@ -619,20 +652,20 @@ export const deleteQuiz: RequestHandler = (req, res) => {
     quizzes.splice(quizIndex, 1);
 
     // Clean up related sessions and participants
-    const relatedSessions = quizSessions.filter(s => s.quizId === quizId);
-    relatedSessions.forEach(session => {
+    const relatedSessions = quizSessions.filter((s) => s.quizId === quizId);
+    relatedSessions.forEach((session) => {
       // Remove participants from this session
-      participants = participants.filter(p => p.sessionId !== session.id);
+      participants = participants.filter((p) => p.sessionId !== session.id);
     });
 
     // Remove sessions
-    quizSessions = quizSessions.filter(s => s.quizId !== quizId);
+    quizSessions = quizSessions.filter((s) => s.quizId !== quizId);
 
     res.json({ success: true, message: "Quiz deleted successfully" });
   } catch (error) {
     const errorResponse: ErrorResponse = {
       error: "DELETE_FAILED",
-      message: "Failed to delete quiz"
+      message: "Failed to delete quiz",
     };
     res.status(500).json(errorResponse);
   }
