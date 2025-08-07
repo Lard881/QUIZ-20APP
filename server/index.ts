@@ -29,6 +29,12 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // Authentication API Routes
+  app.post("/api/auth/login", login);
+  app.post("/api/auth/signup", signup);
+  app.patch("/api/auth/update", updateProfile);
+  app.get("/api/auth/profile", getProfile);
+
   // Quiz Management API Routes
   app.get("/api/quizzes", getQuizzes);
   app.post("/api/quiz", createQuiz);
