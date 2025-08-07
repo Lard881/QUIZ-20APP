@@ -277,7 +277,7 @@ export default function QuizManagement() {
     if (totalPossible === 0) return 0;
 
     const averagePoints = participants.reduce((sum, participant) => {
-      return sum + calculateStudentScore(participant);
+      return sum + getStudentScoreOnly(participant);
     }, 0) / participants.length;
 
     return (averagePoints / totalPossible) * 100;
@@ -683,7 +683,7 @@ export default function QuizManagement() {
                             {participant.answers.length} / {quiz.questions.length} answered
                             {participant.submittedAt && (
                               <span className="ml-2">
-                                �� Submitted {new Date(participant.submittedAt).toLocaleTimeString()}
+                                • Submitted {new Date(participant.submittedAt).toLocaleTimeString()}
                               </span>
                             )}
                           </p>
