@@ -143,19 +143,19 @@ export default function Dashboard() {
       <header className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 quiz-gradient rounded-xl flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
+              <div className="w-8 h-8 md:w-10 md:h-10 quiz-gradient rounded-xl flex items-center justify-center flex-shrink-0">
+                <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">QuizMaster</h1>
-                <p className="text-sm text-muted-foreground">Welcome back, {instructor.name}</p>
+              <div className="min-w-0">
+                <h1 className="text-lg md:text-2xl font-bold text-foreground truncate">QuizMaster</h1>
+                <p className="text-xs md:text-sm text-muted-foreground truncate">Welcome back, {instructor.name}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="hidden sm:flex">
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
                   </Button>
@@ -174,10 +174,30 @@ export default function Dashboard() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button asChild>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="sm:hidden">
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="text-destructive">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button asChild size="sm" className="flex-shrink-0">
                 <Link to="/quiz/create">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Quiz
+                  <Plus className="w-4 h-4 md:mr-2" />
+                  <span className="hidden md:inline">Create Quiz</span>
                 </Link>
               </Button>
             </div>
