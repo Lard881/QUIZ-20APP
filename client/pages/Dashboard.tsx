@@ -25,15 +25,28 @@ export default function Dashboard() {
   const fetchQuizzes = async () => {
     try {
       const token = localStorage.getItem('quiz_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch("/api/quizzes", {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers
       });
-      const data = (await response.json()) as GetQuizzesResponse;
-      setQuizzes(data.quizzes || []);
+
+      if (response.ok) {
+        const data = (await response.json()) as GetQuizzesResponse;
+        setQuizzes(data.quizzes || []);
+      } else {
+        console.error("Failed to fetch quizzes:", response.statusText);
+        setQuizzes([]);
+      }
     } catch (error) {
       console.error("Error fetching quizzes:", error);
+      setQuizzes([]);
     } finally {
       setLoading(false);
     }
