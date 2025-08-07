@@ -70,6 +70,8 @@ export default function QuizEdit() {
         setAllowRetries(fetchedQuiz.allowRetries || false);
         setRandomizeQuestions(fetchedQuiz.randomizeQuestions || false);
         setMaxAttempts(fetchedQuiz.maxAttempts || 1);
+        setDurationValue(fetchedQuiz.durationValue || 30);
+        setDurationUnit(fetchedQuiz.durationUnit || 'days');
         
         // Convert questions to form format
         const formQuestions: QuestionForm[] = fetchedQuiz.questions.map((q: QuizQuestion) => ({
