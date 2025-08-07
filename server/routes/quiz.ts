@@ -122,8 +122,18 @@ export const createQuiz: RequestHandler = (req, res) => {
     }
 
     const now = new Date();
-    const expirationDays = quizData.expirationDays || 30;
-    const expiresAt = new Date(now.getTime() + (expirationDays * 24 * 60 * 60 * 1000));
+    const durationValue = quizData.durationValue || 30;
+    const durationUnit = quizData.durationUnit || 'days';
+
+    // Calculate expiration time based on unit
+    let expirationMilliseconds: number;
+    if (durationUnit === 'minutes') {
+      expirationMilliseconds = durationValue * 60 * 1000; // minutes to milliseconds
+    } else {
+      expirationMilliseconds = durationValue * 24 * 60 * 60 * 1000; // days to milliseconds
+    }
+
+    const expiresAt = new Date(now.getTime() + expirationMilliseconds);
 
     const newQuiz: Quiz = {
       id: Date.now().toString(),
@@ -140,7 +150,8 @@ export const createQuiz: RequestHandler = (req, res) => {
       allowRetries: quizData.allowRetries || false,
       randomizeQuestions: quizData.randomizeQuestions || false,
       maxAttempts: quizData.maxAttempts || 1,
-      expirationDays,
+      durationValue,
+      durationUnit,
       expiresAt: expiresAt.toISOString(),
       createdAt: now.toISOString(),
       updatedAt: now.toISOString()
