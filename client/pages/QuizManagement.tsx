@@ -65,7 +65,8 @@ export default function QuizManagement() {
           setAllowRetries(quizData.quiz.allowRetries || false);
           setRandomizeQuestions(quizData.quiz.randomizeQuestions || false);
           setMaxAttempts(quizData.quiz.maxAttempts || 1);
-          setExpirationDays(quizData.quiz.expirationDays || 30);
+          setDurationValue(quizData.quiz.durationValue || 30);
+          setDurationUnit(quizData.quiz.durationUnit || 'days');
         } else {
           throw new Error("Invalid quiz data received");
         }
