@@ -27,7 +27,7 @@ const App = () => (
           <Route path="/quiz/:id/edit" element={<PlaceholderPage pageName="Quiz Edit" />} />
           <Route path="/quiz/:id/manage" element={<PlaceholderPage pageName="Quiz Management" />} />
           <Route path="/student" element={<StudentAccess />} />
-          <Route path="/quiz/:sessionId/take" element={<PlaceholderPage pageName="Quiz Taking" />} />
+          <Route path="/quiz/:sessionId/take" element={<QuizTaking />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
