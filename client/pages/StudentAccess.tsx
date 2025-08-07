@@ -156,10 +156,25 @@ export default function StudentAccess() {
           });
         }
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+
+        let title = "Error";
+        let description = errorData.message || "Failed to join quiz";
+
+        if (response.status === 429) {
+          title = "Maximum Attempts Reached";
+          description = errorData.message || "You have reached the maximum number of attempts for this quiz";
+        } else if (response.status === 410) {
+          title = "Quiz Expired";
+          description = errorData.message || "This quiz has expired";
+        } else if (response.status === 400) {
+          title = "Quiz Not Available";
+          description = errorData.message || "This quiz is not currently accepting participants";
+        }
+
         toast({
-          title: "Error",
-          description: errorData.message || "Failed to join quiz",
+          title,
+          description,
           variant: "destructive"
         });
       }
