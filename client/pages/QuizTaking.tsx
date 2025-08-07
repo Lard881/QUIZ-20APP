@@ -446,21 +446,14 @@ export default function QuizTaking() {
         </Card>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-            disabled={currentQuestionIndex === 0}
-          >
-            Previous
-          </Button>
-
-          <div className="flex space-x-2">
+        <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+          {/* Question indicators */}
+          <div className="flex flex-wrap justify-center space-x-1 md:space-x-2 order-2 md:order-2">
             {quiz.questions.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentQuestionIndex(index)}
-                className={`w-8 h-8 rounded-full text-xs font-medium transition-all ${
+                className={`w-6 h-6 md:w-8 md:h-8 rounded-full text-xs font-medium transition-all ${
                   index === currentQuestionIndex
                     ? 'bg-primary text-primary-foreground'
                     : isAnswered(quiz.questions[index].id)
@@ -473,22 +466,40 @@ export default function QuizTaking() {
             ))}
           </div>
 
-          {isLastQuestion ? (
-            <Button 
-              onClick={submitQuiz} 
-              disabled={submitting}
-              className="bg-quiz-success hover:bg-quiz-success/90"
-            >
-              <Send className="w-4 h-4 mr-2" />
-              {submitting ? "Submitting..." : "Submit Quiz"}
-            </Button>
-          ) : (
+          {/* Navigation buttons */}
+          <div className="flex items-center space-x-4 w-full md:w-auto order-1 md:order-1">
             <Button
-              onClick={() => setCurrentQuestionIndex(Math.min(quiz.questions.length - 1, currentQuestionIndex + 1))}
+              variant="outline"
+              onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+              disabled={currentQuestionIndex === 0}
+              className="flex-1 md:flex-none"
+              size="sm"
             >
-              Next
+              Previous
             </Button>
-          )}
+          </div>
+
+          <div className="flex items-center space-x-4 w-full md:w-auto order-3 md:order-3">
+            {isLastQuestion ? (
+              <Button
+                onClick={submitQuiz}
+                disabled={submitting}
+                className="bg-quiz-success hover:bg-quiz-success/90 flex-1 md:flex-none"
+                size="sm"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {submitting ? "Submitting..." : "Submit Quiz"}
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setCurrentQuestionIndex(Math.min(quiz.questions.length - 1, currentQuestionIndex + 1))}
+                className="flex-1 md:flex-none"
+                size="sm"
+              >
+                Next
+              </Button>
+            )}
+          </div>
         </div>
       </main>
     </div>
