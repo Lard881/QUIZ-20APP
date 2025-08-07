@@ -405,39 +405,41 @@ export default function QuizManagement() {
       <header className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" asChild>
+            <div className="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
+              <Button variant="ghost" size="sm" asChild className="flex-shrink-0">
                 <Link to="/dashboard">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
+                  <ArrowLeft className="w-4 h-4 md:mr-2" />
+                  <span className="hidden md:inline">Back to Dashboard</span>
                 </Link>
               </Button>
-              <div className="w-8 h-8 quiz-gradient rounded-lg flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-white" />
+              <div className="w-6 h-6 md:w-8 md:h-8 quiz-gradient rounded-lg flex items-center justify-center flex-shrink-0">
+                <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-xl font-semibold text-foreground">{quiz.title}</h1>
-                <p className="text-sm text-muted-foreground">Quiz Management</p>
+              <div className="min-w-0">
+                <h1 className="text-sm md:text-xl font-semibold text-foreground truncate">{quiz.title}</h1>
+                <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">Quiz Management</p>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-3">
-              <Badge variant={quiz.isActive ? "default" : "secondary"}>
+
+            <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
+              <Badge variant={quiz.isActive ? "default" : "secondary"} className="hidden sm:inline-flex">
                 {quiz.isActive ? "Active" : "Inactive"}
               </Badge>
               <Button
                 onClick={toggleQuizStatus}
                 variant={quiz.isActive ? "destructive" : "default"}
+                size="sm"
+                className="flex-shrink-0"
               >
                 {quiz.isActive ? (
                   <>
-                    <Square className="w-4 h-4 mr-2" />
-                    Stop Quiz
+                    <Square className="w-4 h-4 md:mr-2" />
+                    <span className="hidden md:inline">Stop Quiz</span>
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Quiz
+                    <Play className="w-4 h-4 md:mr-2" />
+                    <span className="hidden md:inline">Start Quiz</span>
                   </>
                 )}
               </Button>
