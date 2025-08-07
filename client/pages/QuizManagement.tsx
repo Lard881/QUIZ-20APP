@@ -748,13 +748,19 @@ export default function QuizManagement() {
                       </div>
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-quiz-success">
-                          {participants.filter(p => getGrade(calculateStudentScore(p)) !== 'F').length}
+                          {participants.filter(p => {
+                            const percentage = (getStudentScoreOnly(p) / getTotalPossiblePoints()) * 100;
+                            return getGrade(percentage) !== 'F';
+                          }).length}
                         </div>
                         <div className="text-sm text-muted-foreground">Passed</div>
                       </div>
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-destructive">
-                          {participants.filter(p => getGrade(calculateStudentScore(p)) === 'F').length}
+                          {participants.filter(p => {
+                            const percentage = (getStudentScoreOnly(p) / getTotalPossiblePoints()) * 100;
+                            return getGrade(percentage) === 'F';
+                          }).length}
                         </div>
                         <div className="text-sm text-muted-foreground">Failed</div>
                       </div>
