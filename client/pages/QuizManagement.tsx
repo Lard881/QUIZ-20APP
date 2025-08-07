@@ -47,36 +47,62 @@ export default function QuizManagement() {
   const fetchQuizData = async () => {
     try {
       const token = localStorage.getItem('quiz_token');
-      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       // Fetch quiz details
       const quizResponse = await fetch(`/api/quiz/${quizId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers
       });
-      
+
       if (quizResponse.ok) {
         const quizData = await quizResponse.json();
-        setQuiz(quizData.quiz);
-        setAllowRetries(quizData.quiz.allowRetries || false);
-        setRandomizeQuestions(quizData.quiz.randomizeQuestions || false);
-        setMaxAttempts(quizData.quiz.maxAttempts || 1);
+        if (quizData.quiz) {
+          setQuiz(quizData.quiz);
+          setAllowRetries(quizData.quiz.allowRetries || false);
+          setRandomizeQuestions(quizData.quiz.randomizeQuestions || false);
+          setMaxAttempts(quizData.quiz.maxAttempts || 1);
+        } else {
+          throw new Error("Invalid quiz data received");
+        }
+      } else {
+        const errorData = await quizResponse.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errorData.message || `HTTP ${quizResponse.status}: ${quizResponse.statusText}`);
       }
 
       // Fetch quiz results/participants
-      const resultsResponse = await fetch(`/api/quiz/${quizId}/results`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (resultsResponse.ok) {
-        const resultsData = await resultsResponse.json();
-        setParticipants(resultsData.participants || []);
+      try {
+        const resultsResponse = await fetch(`/api/quiz/${quizId}/results`, {
+          headers
+        });
+
+        if (resultsResponse.ok) {
+          const resultsData = await resultsResponse.json();
+          setParticipants(resultsData.participants || []);
+        } else {
+          // Results endpoint failure is not critical, just log it
+          console.warn("Could not fetch quiz results:", resultsResponse.statusText);
+        }
+      } catch (resultsError) {
+        console.warn("Error fetching quiz results:", resultsError);
       }
     } catch (error) {
       console.error("Error fetching quiz data:", error);
       toast({
         title: "Error",
-        description: "Failed to load quiz data",
+        description: error instanceof Error ? error.message : "Failed to load quiz data",
         variant: "destructive"
       });
+
+      // Navigate back to dashboard on critical errors
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     } finally {
       setLoading(false);
     }
