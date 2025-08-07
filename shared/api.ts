@@ -93,6 +93,20 @@ export interface CreateQuizRequest {
   description: string;
   timeLimit: number;
   questions: Omit<QuizQuestion, 'id'>[];
+  allowRetries?: boolean;
+  randomizeQuestions?: boolean;
+  maxAttempts?: number;
+}
+
+export interface UpdateQuizRequest {
+  title?: string;
+  description?: string;
+  timeLimit?: number;
+  questions?: Omit<QuizQuestion, 'id'>[];
+  allowRetries?: boolean;
+  randomizeQuestions?: boolean;
+  maxAttempts?: number;
+  isActive?: boolean;
 }
 
 export interface CreateQuizResponse {
