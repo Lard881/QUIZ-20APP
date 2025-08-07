@@ -8,6 +8,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import CreateQuiz from "./pages/CreateQuiz";
+import StudentAccess from "./pages/StudentAccess";
+import QuizTaking from "./pages/QuizTaking";
+import QuizManagement from "./pages/QuizManagement";
+import PlaceholderPage from "./pages/PlaceholderPage";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +24,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/quiz/create" element={<CreateQuiz />} />
+          <Route path="/quiz/:id/edit" element={<PlaceholderPage pageName="Quiz Edit" />} />
+          <Route path="/quiz/:id/manage" element={<PlaceholderPage pageName="Quiz Management" />} />
+          <Route path="/student" element={<StudentAccess />} />
+          <Route path="/quiz/:sessionId/take" element={<PlaceholderPage pageName="Quiz Taking" />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
