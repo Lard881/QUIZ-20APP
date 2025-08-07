@@ -13,6 +13,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalParticipants, setTotalParticipants] = useState(0);
 
   useEffect(() => {
     if (!instructor) {
