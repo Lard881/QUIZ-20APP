@@ -19,6 +19,8 @@ export interface Quiz {
   allowRetries: boolean;
   randomizeQuestions: boolean;
   maxAttempts: number;
+  expirationDays: number;
+  expiresAt?: string;
 }
 
 export interface QuizQuestion {
