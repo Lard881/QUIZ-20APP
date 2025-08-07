@@ -42,8 +42,10 @@ export function createServer() {
 
   // Quiz Management API Routes
   app.get("/api/quizzes", getQuizzes);
+  app.get("/api/quizzes/active", getActiveQuizzes);
   app.post("/api/quiz", createQuiz);
   app.get("/api/quiz/:quizId", getQuiz);
+  app.get("/api/quiz/check/:roomCode", checkQuiz);
   app.patch("/api/quiz/:quizId", updateQuiz);
   app.delete("/api/quiz/:quizId", deleteQuiz);
   app.post("/api/quiz/join", joinQuiz);
