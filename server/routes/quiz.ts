@@ -420,11 +420,38 @@ export const getQuizResults: RequestHandler = (req, res) => {
       sessions.some((s) => s.id === p.sessionId),
     );
 
-    // Calculate scores (simplified)
-    const participantsWithScores = allParticipants.map((p) => ({
-      ...p,
-      score: p.answers.length, // Simplified scoring
-    }));
+    // Calculate scores properly
+    const participantsWithScores = allParticipants.map((p) => {
+      let totalScore = 0;
+
+      // Calculate actual score based on correct answers
+      quiz.questions.forEach((question) => {
+        const studentAnswer = p.answers.find((a) => a.questionId === question.id);
+
+        if (studentAnswer) {
+          let isCorrect = false;
+
+          if (question.type === "multiple-choice" || question.type === "true-false") {
+            // For multiple choice and true/false, compare exact answer
+            isCorrect = studentAnswer.answer === question.correctAnswer;
+          } else if (question.type === "short-answer") {
+            // For short answer, check if there's a non-empty answer
+            // In a real system, this would need manual grading
+            isCorrect = studentAnswer.answer &&
+                       studentAnswer.answer.toString().trim() !== "";
+          }
+
+          if (isCorrect) {
+            totalScore += question.points;
+          }
+        }
+      });
+
+      return {
+        ...p,
+        score: totalScore,
+      };
+    });
 
     const averageScore =
       participantsWithScores.length > 0
