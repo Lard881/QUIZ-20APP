@@ -148,7 +148,7 @@ export const createQuiz: RequestHandler = (req, res) => {
         id: `q${Date.now()}_${index}`
       })),
       roomCode: generateRoomCode(),
-      isActive: false,
+      isActive: true, // Start as active by default
       allowRetries: quizData.allowRetries || false,
       randomizeQuestions: quizData.randomizeQuestions || false,
       maxAttempts: quizData.maxAttempts || 1,
@@ -225,12 +225,10 @@ export const joinQuiz: RequestHandler = (req, res) => {
       return res.status(410).json(errorResponse);
     }
 
+    // Allow joining inactive quizzes but show appropriate message
     if (!quiz.isActive) {
-      const errorResponse: ErrorResponse = {
-        error: "QUIZ_NOT_ACTIVE",
-        message: "Quiz is not currently active"
-      };
-      return res.status(400).json(errorResponse);
+      // Still allow joining, but participant will wait for quiz to be activated
+      console.log(`Student attempting to join inactive quiz: ${quiz.title}`);
     }
 
     // Check attempts by name and IP
