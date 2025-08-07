@@ -117,15 +117,37 @@ export default function QuizTaking() {
   const startQuiz = async () => {
     try {
       const response = await fetch(`/api/quiz/session/${sessionId}/start`);
-      const data = (await response.json()) as StartQuizResponse;
-      
-      setQuiz(data.quiz);
-      setTimeRemaining(data.timeRemaining);
-      setQuizStarted(true);
+
+      if (response.ok) {
+        const data = (await response.json()) as StartQuizResponse;
+
+        // Randomize questions if enabled
+        let questionsToUse = [...data.quiz.questions];
+        if (data.quiz.randomizeQuestions) {
+          questionsToUse = questionsToUse.sort(() => Math.random() - 0.5);
+        }
+
+        const quizWithRandomizedQuestions = {
+          ...data.quiz,
+          questions: questionsToUse
+        };
+
+        setQuiz(quizWithRandomizedQuestions);
+        setTimeRemaining(data.timeRemaining);
+        setQuizStarted(true);
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Cannot Start Quiz",
+          description: errorData.message || "Quiz session not found or has expired",
+          variant: "destructive"
+        });
+        navigate("/student");
+      }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to start quiz",
+        description: "Failed to connect to quiz. Please check your connection.",
         variant: "destructive"
       });
       navigate("/student");
