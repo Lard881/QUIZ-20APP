@@ -8,25 +8,6 @@
 
   <body>
     <div id="root"></div>
-
-    <script>
-      // Suppress ResizeObserver loop warning (common with Radix UI components)
-      window.addEventListener('error', function(e) {
-        if (e.message && e.message.includes('ResizeObserver loop completed with undelivered notifications')) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      });
-
-      const originalConsoleError = console.error;
-      console.error = function(...args) {
-        if (args[0] && typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) {
-          return;
-        }
-        originalConsoleError.apply(console, args);
-      };
-    </script>
     <script type="module" src="/client/App.tsx"></script>
   </body>
 </html>
