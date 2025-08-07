@@ -35,6 +35,46 @@ export default function QuizTaking() {
     }
   }, [sessionId]);
 
+  // Handle page visibility changes to pause/resume timer efficiently
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Page is hidden, save current progress
+        if (quiz && currentQuestionIndex >= 0) {
+          const currentQuestion = quiz.questions[currentQuestionIndex];
+          if (currentQuestion && answers[currentQuestion.id] !== undefined) {
+            saveAnswer(currentQuestion.id, answers[currentQuestion.id]);
+          }
+        }
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      // Save progress before page unload
+      if (quiz && currentQuestionIndex >= 0) {
+        const currentQuestion = quiz.questions[currentQuestionIndex];
+        if (currentQuestion && answers[currentQuestion.id] !== undefined) {
+          // Use sendBeacon for reliable background requests
+          const answerData = {
+            sessionId,
+            questionId: currentQuestion.id,
+            answer: answers[currentQuestion.id]
+          };
+
+          navigator.sendBeacon('/api/quiz/answer', JSON.stringify(answerData));
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [quiz, currentQuestionIndex, answers, sessionId]);
+
   useEffect(() => {
     if (quizStarted && timeRemaining > 0 && !quizCompleted) {
       timerRef.current = setInterval(() => {
