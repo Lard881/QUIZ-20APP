@@ -40,7 +40,11 @@ export default function Dashboard() {
 
       if (response.ok) {
         const data = (await response.json()) as GetQuizzesResponse;
-        setQuizzes(data.quizzes || []);
+        const fetchedQuizzes = data.quizzes || [];
+        setQuizzes(fetchedQuizzes);
+
+        // Calculate total participants across all quizzes
+        await calculateTotalParticipants(fetchedQuizzes);
       } else {
         console.error("Failed to fetch quizzes:", response.statusText);
         setQuizzes([]);
@@ -50,6 +54,29 @@ export default function Dashboard() {
       setQuizzes([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const calculateTotalParticipants = async (quizList: Quiz[]) => {
+    try {
+      let total = 0;
+
+      for (const quiz of quizList) {
+        try {
+          const response = await fetch(`/api/quiz/${quiz.id}/results`);
+          if (response.ok) {
+            const data = await response.json();
+            total += (data.participants || []).length;
+          }
+        } catch (error) {
+          console.warn(`Failed to get participants for quiz ${quiz.id}:`, error);
+        }
+      }
+
+      setTotalParticipants(total);
+    } catch (error) {
+      console.error("Error calculating total participants:", error);
+      setTotalParticipants(0);
     }
   };
 
