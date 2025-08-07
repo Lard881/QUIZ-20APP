@@ -73,9 +73,7 @@ export default function QuizManagement() {
 
       // Fetch quiz results/participants
       try {
-        const resultsResponse = await fetch(`/api/quiz/${quizId}/results`, {
-          headers
-        });
+        const resultsResponse = await fetch(`/api/quiz/${quizId}/results`);
 
         if (resultsResponse.ok) {
           const resultsData = await resultsResponse.json();
