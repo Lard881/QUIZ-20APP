@@ -251,12 +251,15 @@ export const joinQuiz: RequestHandler = (req, res) => {
       quizSessions.push(session);
     }
 
-    // Add participant
+    // Add participant with IP and attempt tracking
     const participant: QuizParticipant = {
       id: `participant_${Date.now()}`,
       name: participantName,
       sessionId: session.id,
-      answers: []
+      answers: [],
+      ipAddress: clientIP,
+      attemptNumber: participantAttempts.length + 1,
+      deviceFingerprint: req.headers['user-agent'] || 'unknown'
     };
 
     participants.push(participant);
