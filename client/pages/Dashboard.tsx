@@ -204,12 +204,6 @@ export default function Dashboard() {
         {/* Quiz List */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Your Quizzes</h2>
-          <Button variant="outline" asChild>
-            <Link to="/student">
-              <QrCode className="w-4 h-4 mr-2" />
-              Student Access
-            </Link>
-          </Button>
         </div>
 
         {quizzes.length === 0 ? (
