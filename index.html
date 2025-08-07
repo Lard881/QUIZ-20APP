@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hello world project</title>
+    <script>
+      // Suppress common ResizeObserver warning
+      window.addEventListener('unhandledrejection', function(e) {
+        if (e.reason && e.reason.message && e.reason.message.includes('ResizeObserver')) {
+          e.preventDefault();
+        }
+      });
+    </script>
   </head>
 
   <body>
