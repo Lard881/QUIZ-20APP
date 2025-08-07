@@ -48,8 +48,10 @@ export default function StudentAccess() {
     }
   };
 
-  const handleRoomCodeSubmit = async () => {
-    if (!roomCode.trim()) {
+  const handleRoomCodeSubmit = async (codeToSubmit?: string) => {
+    const code = codeToSubmit || roomCode;
+
+    if (!code.trim()) {
       toast({
         title: "Error",
         description: "Please enter a room code",
@@ -58,22 +60,39 @@ export default function StudentAccess() {
       return;
     }
 
-    // Find quiz by room code
-    const quiz = availableQuizzes.find(q => 
-      q.roomCode.toLowerCase() === roomCode.toLowerCase() && q.isActive
-    );
+    try {
+      // Check if quiz exists and is active
+      const response = await fetch(`/api/quiz/check/${code.toUpperCase()}`);
 
-    if (!quiz) {
+      if (response.ok) {
+        const data = await response.json();
+        if (data.quiz && data.quiz.isActive) {
+          setSelectedQuiz(data.quiz);
+          setShowNameInput(true);
+          if (!codeToSubmit) {
+            setRoomCode(code.toUpperCase());
+          }
+        } else {
+          toast({
+            title: "Quiz Not Available",
+            description: "This quiz is not currently active",
+            variant: "destructive"
+          });
+        }
+      } else {
+        toast({
+          title: "Quiz Not Found",
+          description: "Invalid room code or quiz does not exist",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Quiz Not Found",
-        description: "Invalid room code or quiz is not active",
+        title: "Error",
+        description: "Failed to check quiz. Please try again.",
         variant: "destructive"
       });
-      return;
     }
-
-    setSelectedQuiz(quiz);
-    setShowNameInput(true);
   };
 
   const handleJoinQuiz = async () => {
