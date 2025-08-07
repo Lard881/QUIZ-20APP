@@ -71,6 +71,8 @@ let quizzes: Quiz[] = [
     allowRetries: true,
     randomizeQuestions: true,
     maxAttempts: 3,
+    expirationDays: 7,
+    expiresAt: "2024-01-23T14:30:00Z",
     createdAt: "2024-01-16T14:30:00Z",
     updatedAt: "2024-01-16T14:30:00Z"
   }
