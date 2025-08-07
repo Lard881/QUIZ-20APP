@@ -61,17 +61,44 @@ export default function Dashboard() {
     try {
       let total = 0;
 
-      for (const quiz of quizList) {
+      // Use Promise.allSettled to handle multiple requests gracefully
+      const participantRequests = quizList.map(async (quiz) => {
         try {
-          const response = await fetch(`/api/quiz/${quiz.id}/results`);
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json'
+          };
+
+          const token = localStorage.getItem('quiz_token');
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+
+          const response = await fetch(`/api/quiz/${quiz.id}/results`, {
+            headers,
+            // Add timeout to prevent hanging requests
+            signal: AbortSignal.timeout(5000)
+          });
+
           if (response.ok) {
             const data = await response.json();
-            total += (data.participants || []).length;
+            return (data.participants || []).length;
+          } else {
+            console.warn(`Failed to get participants for quiz ${quiz.id}: ${response.status} ${response.statusText}`);
+            return 0;
           }
         } catch (error) {
           console.warn(`Failed to get participants for quiz ${quiz.id}:`, error);
+          return 0;
         }
-      }
+      });
+
+      const results = await Promise.allSettled(participantRequests);
+
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          total += result.value;
+        }
+      });
 
       setTotalParticipants(total);
     } catch (error) {
