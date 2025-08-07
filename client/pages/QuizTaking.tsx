@@ -35,25 +35,43 @@ export default function QuizTaking() {
   }, [sessionId]);
 
   useEffect(() => {
-    if (quizStarted && timeRemaining > 0) {
+    if (quizStarted && timeRemaining > 0 && !quizCompleted) {
       timerRef.current = setInterval(() => {
         setTimeRemaining(prev => {
-          if (prev <= 1) {
-            // Auto-submit when time runs out
+          const newTime = prev - 1;
+
+          // Auto-submit when time runs out
+          if (newTime <= 0) {
             handleAutoSubmit();
             return 0;
           }
-          return prev - 1;
+
+          // Auto-save current answer every 10 seconds if there's an active answer
+          if (newTime % 10 === 0 && quiz) {
+            const currentQuestion = quiz.questions[currentQuestionIndex];
+            if (currentQuestion && answers[currentQuestion.id] !== undefined) {
+              saveAnswer(currentQuestion.id, answers[currentQuestion.id]);
+            }
+          }
+
+          return newTime;
         });
       }, 1000);
+    } else {
+      // Clear timer when quiz is not active
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     }
 
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
+        timerRef.current = null;
       }
     };
-  }, [quizStarted, timeRemaining]);
+  }, [quizStarted, quizCompleted]);
 
   const startQuiz = async () => {
     try {
