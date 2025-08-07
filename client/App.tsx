@@ -47,7 +47,7 @@ const App = () => (
             <Route path="/auth/signup" element={<Signup />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/quiz/create" element={<CreateQuiz />} />
-            <Route path="/quiz/:id/edit" element={<PlaceholderPage pageName="Quiz Edit" />} />
+            <Route path="/quiz/:id/edit" element={<QuizEdit />} />
             <Route path="/quiz/:id/manage" element={<QuizManagement />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/student" element={<StudentAccess />} />
