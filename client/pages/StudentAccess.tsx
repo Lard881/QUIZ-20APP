@@ -13,32 +13,40 @@ import { useToast } from "@/hooks/use-toast";
 export default function StudentAccess() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+  const [searchParams] = useSearchParams();
+
   const [roomCode, setRoomCode] = useState("");
   const [participantName, setParticipantName] = useState("");
   const [joining, setJoining] = useState(false);
   const [showNameInput, setShowNameInput] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<any>(null);
+  const [availableQuizzes, setAvailableQuizzes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock available quizzes for demo
-  const availableQuizzes = [
-    {
-      id: "1",
-      title: "JavaScript Fundamentals",
-      roomCode: "JS2024",
-      timeLimit: 30,
-      isActive: true,
-      participantCount: 12
-    },
-    {
-      id: "2",
-      title: "React Components Quiz",
-      roomCode: "REACT45",
-      timeLimit: 45,
-      isActive: true,
-      participantCount: 8
+  useEffect(() => {
+    // Check for room code in URL parameters
+    const codeFromUrl = searchParams.get('code');
+    if (codeFromUrl) {
+      setRoomCode(codeFromUrl.toUpperCase());
+      handleRoomCodeSubmit(codeFromUrl.toUpperCase());
     }
-  ];
+
+    fetchAvailableQuizzes();
+  }, [searchParams]);
+
+  const fetchAvailableQuizzes = async () => {
+    try {
+      const response = await fetch("/api/quizzes/active");
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableQuizzes(data.quizzes || []);
+      }
+    } catch (error) {
+      console.error("Error fetching available quizzes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRoomCodeSubmit = async () => {
     if (!roomCode.trim()) {
