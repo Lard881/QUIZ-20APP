@@ -53,23 +53,8 @@ export default function QuizManagement() {
 
   const fetchQuizData = async () => {
     try {
-      console.log('Fetching quiz data for ID:', quizId);
-      const token = localStorage.getItem('quiz_token');
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      console.log('Making request to:', `/api/quiz/${quizId}`);
-      console.log('With headers:', headers);
-
-      // Fetch quiz details
-      const quizResponse = await fetch(`/api/quiz/${quizId}`, {
-        headers
-      });
+      // Fetch quiz details with minimal headers first
+      const quizResponse = await fetch(`/api/quiz/${quizId}`);
 
       if (quizResponse.ok) {
         const quizData = await quizResponse.json();
