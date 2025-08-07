@@ -538,6 +538,33 @@ export default function QuizEdit() {
                   onCheckedChange={setRandomizeQuestions}
                 />
               </div>
+
+              <div>
+                <Label htmlFor="durationValue">Quiz Duration</Label>
+                <div className="flex items-center space-x-2 mt-1">
+                  <Input
+                    id="durationValue"
+                    type="number"
+                    min="1"
+                    max={durationUnit === 'days' ? "365" : "43200"}
+                    value={durationValue}
+                    onChange={(e) => setDurationValue(parseInt(e.target.value) || 30)}
+                    className="w-24"
+                  />
+                  <Select value={durationUnit} onValueChange={(value: 'minutes' | 'days') => setDurationUnit(value)}>
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="minutes">Minutes</SelectItem>
+                      <SelectItem value="days">Days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Quiz will automatically deactivate after this duration
+                </p>
+              </div>
             </CardContent>
           </Card>
 
