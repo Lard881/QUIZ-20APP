@@ -271,15 +271,20 @@ export default function StudentAccess() {
             </Card>
 
             {/* Available Quizzes */}
-            {availableQuizzes.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Active Quizzes</CardTitle>
-                  <CardDescription>
-                    Click on any quiz below to join directly
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Quizzes</CardTitle>
+                <CardDescription>
+                  {loading ? "Loading available quizzes..." : "Click on any quiz below to join directly"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading quizzes...</p>
+                  </div>
+                ) : availableQuizzes.length > 0 ? (
                   <div className="space-y-3">
                     {availableQuizzes.map((quiz) => (
                       <div
@@ -315,9 +320,17 @@ export default function StudentAccess() {
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No Active Quizzes</h3>
+                    <p className="text-muted-foreground">
+                      There are no active quizzes at the moment. Please try again later or enter a room code above.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         ) : (
           /* Name Input Section */
