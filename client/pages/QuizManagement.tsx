@@ -33,7 +33,8 @@ export default function QuizManagement() {
   const [allowRetries, setAllowRetries] = useState(false);
   const [randomizeQuestions, setRandomizeQuestions] = useState(false);
   const [maxAttempts, setMaxAttempts] = useState(1);
-  const [expirationDays, setExpirationDays] = useState(30);
+  const [durationValue, setDurationValue] = useState(30);
+  const [durationUnit, setDurationUnit] = useState<'minutes' | 'days'>('days');
 
   useEffect(() => {
     if (!instructor) {
