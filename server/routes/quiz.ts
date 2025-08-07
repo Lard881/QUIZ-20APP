@@ -163,10 +163,26 @@ export const createQuiz: RequestHandler = (req, res) => {
   }
 };
 
+// Helper function to check if quiz is expired
+const isQuizExpired = (quiz: Quiz): boolean => {
+  if (!quiz.expiresAt) return false;
+  return new Date() > new Date(quiz.expiresAt);
+};
+
+// Helper function to get client IP address
+const getClientIP = (req: any): string => {
+  return req.headers['x-forwarded-for'] ||
+         req.connection.remoteAddress ||
+         req.socket.remoteAddress ||
+         (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+         '127.0.0.1';
+};
+
 // Join quiz with room code
 export const joinQuiz: RequestHandler = (req, res) => {
   try {
     const { roomCode, participantName } = req.body as JoinQuizRequest;
+    const clientIP = getClientIP(req);
 
     if (!roomCode || !participantName) {
       const errorResponse: ErrorResponse = {
@@ -176,13 +192,50 @@ export const joinQuiz: RequestHandler = (req, res) => {
       return res.status(400).json(errorResponse);
     }
 
-    const quiz = quizzes.find(q => q.roomCode === roomCode && q.isActive);
+    const quiz = quizzes.find(q => q.roomCode === roomCode);
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
-        message: "Quiz not found or not active"
+        message: "Quiz not found"
       };
       return res.status(404).json(errorResponse);
+    }
+
+    // Check if quiz is expired
+    if (isQuizExpired(quiz)) {
+      // Auto-deactivate expired quiz
+      quiz.isActive = false;
+      const errorResponse: ErrorResponse = {
+        error: "QUIZ_EXPIRED",
+        message: "This quiz has expired and is no longer available"
+      };
+      return res.status(410).json(errorResponse);
+    }
+
+    if (!quiz.isActive) {
+      const errorResponse: ErrorResponse = {
+        error: "QUIZ_NOT_ACTIVE",
+        message: "Quiz is not currently active"
+      };
+      return res.status(400).json(errorResponse);
+    }
+
+    // Check attempts by name and IP
+    const existingParticipants = participants.filter(p =>
+      p.name.toLowerCase() === participantName.toLowerCase() || p.ipAddress === clientIP
+    );
+
+    const participantAttempts = existingParticipants.filter(p => {
+      const session = quizSessions.find(s => s.id === p.sessionId);
+      return session && session.quizId === quiz.id;
+    });
+
+    if (participantAttempts.length >= quiz.maxAttempts) {
+      const errorResponse: ErrorResponse = {
+        error: "MAX_ATTEMPTS_REACHED",
+        message: `You have reached the maximum number of attempts (${quiz.maxAttempts}) for this quiz`
+      };
+      return res.status(429).json(errorResponse);
     }
 
     // Find or create session for this quiz
