@@ -55,7 +55,36 @@ export interface Instructor {
   id: string;
   name: string;
   email: string;
+  password?: string; // Only for server-side, never sent to client
   quizzes: string[]; // quiz IDs
+  createdAt: string;
+  lastLogin?: string;
+}
+
+// Authentication Types
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface SignupRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  instructor?: Omit<Instructor, 'password'>;
+  token?: string;
+  message?: string;
+}
+
+export interface UpdateInstructorRequest {
+  name?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
 }
 
 // API Response Types
