@@ -27,6 +27,7 @@ export default function QuizTaking() {
   const [submitting, setSubmitting] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSaveRef = useRef<number>(Date.now());
 
   useEffect(() => {
     if (sessionId) {
