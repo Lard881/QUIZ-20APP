@@ -140,7 +140,8 @@ export default function QuizTaking() {
       [questionId]: answer
     }));
 
-    // Auto-save answer
+    // Immediate save for manual changes (bypass debouncing)
+    lastSaveRef.current = 0; // Reset to allow immediate save
     saveAnswer(questionId, answer);
   };
 
