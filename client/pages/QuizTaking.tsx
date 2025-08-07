@@ -232,6 +232,18 @@ export default function QuizTaking() {
     return ((totalSeconds - timeRemaining) / totalSeconds) * 100;
   };
 
+  const getTimerColor = (): string => {
+    if (timeRemaining <= 60) return 'text-destructive'; // Last minute - red
+    if (timeRemaining <= 300) return 'text-quiz-timer'; // Last 5 minutes - orange
+    return 'text-foreground'; // Normal - default color
+  };
+
+  const getProgressColor = (): string => {
+    if (timeRemaining <= 60) return 'bg-destructive';
+    if (timeRemaining <= 300) return 'bg-quiz-timer';
+    return 'bg-primary';
+  };
+
   const isAnswered = (questionId: string): boolean => {
     return answers[questionId] !== undefined && answers[questionId] !== '';
   };
