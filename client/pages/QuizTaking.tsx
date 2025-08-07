@@ -147,7 +147,18 @@ export default function QuizTaking() {
   const saveAnswer = async (questionId: string, answer: string | number) => {
     if (!sessionId) return;
 
+    // Debouncing: only save if enough time has passed since last save
+    const now = Date.now();
+    const timeSinceLastSave = now - lastSaveRef.current;
+
+    // Minimum 2 seconds between auto-saves, immediate for manual saves
+    if (timeSinceLastSave < 2000) {
+      return;
+    }
+
     try {
+      lastSaveRef.current = now;
+
       const answerData: SubmitAnswerRequest = {
         sessionId,
         questionId,
@@ -161,6 +172,8 @@ export default function QuizTaking() {
       });
     } catch (error) {
       console.error("Failed to save answer:", error);
+      // Reset the save timer on error to allow retry
+      lastSaveRef.current = now - 3000;
     }
   };
 
