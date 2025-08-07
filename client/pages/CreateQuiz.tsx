@@ -117,7 +117,8 @@ export default function CreateQuiz() {
         allowRetries,
         randomizeQuestions,
         maxAttempts,
-        expirationDays
+        durationValue,
+        durationUnit
       };
 
       const response = await fetch("/api/quiz", {
