@@ -1,6 +1,17 @@
 import "./global.css";
 import React from "react";
 
+// Suppress ResizeObserver warnings in console
+if (typeof window !== 'undefined') {
+  const originalError = window.console.error;
+  window.console.error = (...args) => {
+    if (args[0]?.includes?.('ResizeObserver loop completed')) {
+      return;
+    }
+    originalError(...args);
+  };
+}
+
 import { Toaster } from "@/components/ui/toaster";
 import { createRoot } from "react-dom/client";
 import { Toaster as Sonner } from "@/components/ui/sonner";
