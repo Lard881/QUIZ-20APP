@@ -336,17 +336,22 @@ export default function QuizTaking() {
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <div className="flex items-center space-x-2">
-                  <Clock className={`w-4 h-4 ${timeRemaining < 300 ? 'text-quiz-timer' : 'text-muted-foreground'}`} />
-                  <span className={`font-mono font-semibold ${timeRemaining < 300 ? 'text-quiz-timer' : 'text-foreground'}`}>
+                  <Clock className={`w-4 h-4 ${getTimerColor()}`} />
+                  <span className={`font-mono font-semibold ${getTimerColor()} ${timeRemaining <= 60 ? 'animate-pulse' : ''}`}>
                     {formatTime(timeRemaining)}
                   </span>
                 </div>
                 <div className="w-24 mt-1">
-                  <Progress 
-                    value={getTimeProgress()} 
-                    className={`h-1 ${timeRemaining < 300 ? 'text-quiz-timer' : ''}`}
+                  <Progress
+                    value={getTimeProgress()}
+                    className="h-1"
                   />
                 </div>
+                {timeRemaining <= 60 && (
+                  <p className="text-xs text-destructive mt-1 font-medium">
+                    Time running out!
+                  </p>
+                )}
               </div>
               
               <Badge variant="outline">
