@@ -11,6 +11,7 @@ import {
   getQuizResults,
   updateQuizStatus
 } from "./routes/quiz";
+import { login, signup, updateProfile, getProfile } from "./routes/auth";
 
 export function createServer() {
   const app = express();
