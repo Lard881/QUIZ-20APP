@@ -369,3 +369,106 @@ export const updateQuizStatus: RequestHandler = (req, res) => {
     res.status(500).json(errorResponse);
   }
 };
+
+// Get single quiz details
+export const getQuiz: RequestHandler = (req, res) => {
+  try {
+    const { quizId } = req.params;
+
+    const quiz = quizzes.find(q => q.id === quizId);
+    if (!quiz) {
+      const errorResponse: ErrorResponse = {
+        error: "QUIZ_NOT_FOUND",
+        message: "Quiz not found"
+      };
+      return res.status(404).json(errorResponse);
+    }
+
+    res.json({ quiz, success: true });
+  } catch (error) {
+    const errorResponse: ErrorResponse = {
+      error: "FETCH_FAILED",
+      message: "Failed to fetch quiz"
+    };
+    res.status(500).json(errorResponse);
+  }
+};
+
+// Update quiz details and settings
+export const updateQuiz: RequestHandler = (req, res) => {
+  try {
+    const { quizId } = req.params;
+    const updateData = req.body;
+
+    const quiz = quizzes.find(q => q.id === quizId);
+    if (!quiz) {
+      const errorResponse: ErrorResponse = {
+        error: "QUIZ_NOT_FOUND",
+        message: "Quiz not found"
+      };
+      return res.status(404).json(errorResponse);
+    }
+
+    // Update quiz properties
+    if (updateData.title !== undefined) quiz.title = updateData.title;
+    if (updateData.description !== undefined) quiz.description = updateData.description;
+    if (updateData.timeLimit !== undefined) quiz.timeLimit = updateData.timeLimit;
+    if (updateData.allowRetries !== undefined) quiz.allowRetries = updateData.allowRetries;
+    if (updateData.randomizeQuestions !== undefined) quiz.randomizeQuestions = updateData.randomizeQuestions;
+    if (updateData.maxAttempts !== undefined) quiz.maxAttempts = updateData.maxAttempts;
+    if (updateData.isActive !== undefined) quiz.isActive = updateData.isActive;
+    if (updateData.questions !== undefined) {
+      quiz.questions = updateData.questions.map((q: any, index: number) => ({
+        ...q,
+        id: q.id || `q${Date.now()}_${index}`
+      }));
+    }
+
+    quiz.updatedAt = new Date().toISOString();
+
+    res.json({ quiz, success: true });
+  } catch (error) {
+    const errorResponse: ErrorResponse = {
+      error: "UPDATE_FAILED",
+      message: "Failed to update quiz"
+    };
+    res.status(500).json(errorResponse);
+  }
+};
+
+// Delete quiz
+export const deleteQuiz: RequestHandler = (req, res) => {
+  try {
+    const { quizId } = req.params;
+
+    const quizIndex = quizzes.findIndex(q => q.id === quizId);
+    if (quizIndex === -1) {
+      const errorResponse: ErrorResponse = {
+        error: "QUIZ_NOT_FOUND",
+        message: "Quiz not found"
+      };
+      return res.status(404).json(errorResponse);
+    }
+
+    // Remove quiz
+    quizzes.splice(quizIndex, 1);
+
+    // Clean up related sessions and participants
+    const relatedSessions = quizSessions.filter(s => s.quizId === quizId);
+    relatedSessions.forEach(session => {
+      // Remove participants from this session
+      participants = participants.filter(p => p.sessionId !== session.id);
+    });
+
+    // Remove sessions
+    quizSessions = quizSessions.filter(s => s.quizId !== quizId);
+
+    res.json({ success: true, message: "Quiz deleted successfully" });
+  } catch (error) {
+    const errorResponse: ErrorResponse = {
+      error: "DELETE_FAILED",
+      message: "Failed to delete quiz"
+    };
+    res.status(500).json(errorResponse);
+  }
+};
