@@ -166,28 +166,43 @@ export default function QuizManagement() {
 
     try {
       const token = localStorage.getItem('quiz_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/quiz/${quiz.id}/status`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify({ isActive: !quiz.isActive })
       });
 
       if (response.ok) {
-        setQuiz({ ...quiz, isActive: !quiz.isActive });
+        const responseData = await response.json();
+        if (responseData.quiz) {
+          setQuiz(responseData.quiz);
+        } else {
+          setQuiz({ ...quiz, isActive: !quiz.isActive });
+        }
+
         toast({
           title: quiz.isActive ? "Quiz Stopped" : "Quiz Started",
-          description: quiz.isActive 
-            ? "The quiz has been deactivated" 
+          description: quiz.isActive
+            ? "The quiz has been deactivated"
             : "The quiz is now live and accepting participants"
         });
+      } else {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errorData.message || `Failed to update quiz status`);
       }
     } catch (error) {
+      console.error("Error updating quiz status:", error);
       toast({
         title: "Error",
-        description: "Failed to update quiz status",
+        description: error instanceof Error ? error.message : "Failed to update quiz status",
         variant: "destructive"
       });
     }
