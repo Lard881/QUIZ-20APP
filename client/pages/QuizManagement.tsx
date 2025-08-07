@@ -120,29 +120,40 @@ export default function QuizManagement() {
         maxAttempts
       };
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/quiz/${quiz.id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify(updateData)
       });
 
       if (response.ok) {
-        const updatedQuiz = { ...quiz, allowRetries, randomizeQuestions, maxAttempts };
-        setQuiz(updatedQuiz);
-        toast({
-          title: "Settings Updated",
-          description: "Quiz settings have been saved successfully"
-        });
+        const responseData = await response.json();
+        if (responseData.quiz) {
+          setQuiz(responseData.quiz);
+          toast({
+            title: "Settings Updated",
+            description: "Quiz settings have been saved successfully"
+          });
+        } else {
+          throw new Error("Invalid response from server");
+        }
       } else {
-        throw new Error("Failed to update settings");
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
+      console.error("Error updating quiz settings:", error);
       toast({
         title: "Error",
-        description: "Failed to update quiz settings",
+        description: error instanceof Error ? error.message : "Failed to update quiz settings",
         variant: "destructive"
       });
     } finally {
