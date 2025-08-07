@@ -16,39 +16,9 @@ export default function Index() {
 
   const fetchQuizzes = async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await fetch("/api/quizzes");
-      // const data = (await response.json()) as GetQuizzesResponse;
-      // setQuizzes(data.quizzes);
-      
-      // Mock data for now
-      const mockQuizzes: Quiz[] = [
-        {
-          id: "1",
-          title: "JavaScript Fundamentals",
-          description: "Test your knowledge of basic JavaScript concepts including variables, functions, and control structures.",
-          instructorId: "instructor1",
-          timeLimit: 30,
-          questions: [],
-          roomCode: "JS2024",
-          isActive: false,
-          createdAt: "2024-01-15T10:00:00Z",
-          updatedAt: "2024-01-15T10:00:00Z"
-        },
-        {
-          id: "2",
-          title: "React Components Quiz",
-          description: "Advanced quiz covering React hooks, state management, and component lifecycle.",
-          instructorId: "instructor1",
-          timeLimit: 45,
-          questions: [],
-          roomCode: "REACT45",
-          isActive: true,
-          createdAt: "2024-01-16T14:30:00Z",
-          updatedAt: "2024-01-16T14:30:00Z"
-        }
-      ];
-      setQuizzes(mockQuizzes);
+      const response = await fetch("/api/quizzes");
+      const data = (await response.json()) as GetQuizzesResponse;
+      setQuizzes(data.quizzes);
     } catch (error) {
       console.error("Error fetching quizzes:", error);
     } finally {
