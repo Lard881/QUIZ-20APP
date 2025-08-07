@@ -16,6 +16,9 @@ export interface Quiz {
   updatedAt: string;
   startedAt?: string;
   endedAt?: string;
+  allowRetries: boolean;
+  randomizeQuestions: boolean;
+  maxAttempts: number;
 }
 
 export interface QuizQuestion {
