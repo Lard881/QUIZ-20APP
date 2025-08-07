@@ -117,6 +117,40 @@ export default function Dashboard() {
     }
   };
 
+  const handleToggleQuizStatus = async (quizId: string, currentStatus: boolean) => {
+    try {
+      const token = localStorage.getItem('quiz_token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`/api/quiz/${quizId}/status`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ isActive: !currentStatus })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setQuizzes(quizzes.map(q =>
+            q.id === quizId ? { ...q, isActive: !currentStatus } : q
+          ));
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        alert(`Failed to update quiz status: ${errorData.message || response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error updating quiz status:", error);
+      alert("Failed to update quiz status. Please check your connection.");
+    }
+  };
+
   const handleDeleteQuiz = async (quizId: string) => {
     if (!confirm("Are you sure you want to delete this quiz? This action cannot be undone.")) {
       return;
