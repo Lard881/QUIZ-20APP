@@ -179,6 +179,8 @@ export default function QuizEdit() {
         allowRetries,
         randomizeQuestions,
         maxAttempts,
+        durationValue,
+        durationUnit,
         questions: questions.map(({ tempId, id, ...q }) => q)
       };
 
