@@ -28,6 +28,7 @@ import CreateQuiz from "./pages/CreateQuiz";
 import StudentAccess from "./pages/StudentAccess";
 import QuizTaking from "./pages/QuizTaking";
 import QuizManagement from "./pages/QuizManagement";
+import Settings from "./pages/Settings";
 import PlaceholderPage from "./pages/PlaceholderPage";
 
 const queryClient = new QueryClient();
