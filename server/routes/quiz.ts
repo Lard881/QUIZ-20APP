@@ -123,6 +123,9 @@ export const createQuiz: RequestHandler = (req, res) => {
       })),
       roomCode: generateRoomCode(),
       isActive: false,
+      allowRetries: quizData.allowRetries || false,
+      randomizeQuestions: quizData.randomizeQuestions || false,
+      maxAttempts: quizData.maxAttempts || 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
