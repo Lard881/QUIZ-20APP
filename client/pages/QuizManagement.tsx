@@ -581,20 +581,41 @@ export default function QuizManagement() {
                 )}
 
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="randomizeQuestions" className="text-base">Randomize Questions</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Shuffle question order for each participant
-                    </p>
-                  </div>
-                  <Switch
-                    id="randomizeQuestions"
-                    checked={randomizeQuestions}
-                    onCheckedChange={setRandomizeQuestions}
-                  />
+                <div>
+                  <Label htmlFor="randomizeQuestions" className="text-base">Randomize Questions</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Shuffle question order for each participant
+                  </p>
                 </div>
+                <Switch
+                  id="randomizeQuestions"
+                  checked={randomizeQuestions}
+                  onCheckedChange={setRandomizeQuestions}
+                />
+              </div>
 
-                <Button onClick={updateQuizSettings} disabled={updating}>
+              <div>
+                <Label htmlFor="expirationDays">Quiz Duration (Days)</Label>
+                <Input
+                  id="expirationDays"
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={expirationDays}
+                  onChange={(e) => setExpirationDays(parseInt(e.target.value) || 30)}
+                  className="w-24 mt-1"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Quiz will automatically deactivate after this many days
+                  {quiz?.expiresAt && (
+                    <span className="block mt-1">
+                      Expires on: {new Date(quiz.expiresAt).toLocaleDateString()}
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              <Button onClick={updateQuizSettings} disabled={updating}>
                   {updating ? (
                     <>
                       <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
