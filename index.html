@@ -5,12 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hello world project</title>
     <script>
-      // Suppress common ResizeObserver warning
-      window.addEventListener('unhandledrejection', function(e) {
-        if (e.reason && e.reason.message && e.reason.message.includes('ResizeObserver')) {
-          e.preventDefault();
-        }
-      });
+      // Suppress ResizeObserver warnings
+      (function() {
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+          // Suppress ResizeObserver loop notifications
+          if (args[0] && typeof args[0] === 'string' &&
+              args[0].includes('ResizeObserver loop completed with undelivered notifications')) {
+            return;
+          }
+          originalConsoleError.apply(console, args);
+        };
+
+        // Also handle unhandled rejections
+        window.addEventListener('unhandledrejection', function(e) {
+          if (e.reason && e.reason.message && e.reason.message.includes('ResizeObserver')) {
+            e.preventDefault();
+          }
+        });
+
+        // Handle window errors
+        window.addEventListener('error', function(e) {
+          if (e.message && e.message.includes('ResizeObserver loop completed with undelivered notifications')) {
+            e.preventDefault();
+            return false;
+          }
+        });
+      })();
     </script>
   </head>
 
