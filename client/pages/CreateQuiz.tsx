@@ -435,6 +435,22 @@ export default function CreateQuiz() {
                   onCheckedChange={setRandomizeQuestions}
                 />
               </div>
+
+              <div>
+                <Label htmlFor="expirationDays">Quiz Duration (Days)</Label>
+                <Input
+                  id="expirationDays"
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={expirationDays}
+                  onChange={(e) => setExpirationDays(parseInt(e.target.value) || 30)}
+                  className="w-24 mt-1"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Quiz will automatically deactivate after this many days
+                </p>
+              </div>
             </CardContent>
           </Card>
 
