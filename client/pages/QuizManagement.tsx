@@ -622,21 +622,32 @@ export default function QuizManagement() {
               </div>
 
               <div>
-                <Label htmlFor="expirationDays">Quiz Duration (Days)</Label>
-                <Input
-                  id="expirationDays"
-                  type="number"
-                  min="1"
-                  max="365"
-                  value={expirationDays}
-                  onChange={(e) => setExpirationDays(parseInt(e.target.value) || 30)}
-                  className="w-24 mt-1"
-                />
+                <Label htmlFor="durationValue">Quiz Duration</Label>
+                <div className="flex items-center space-x-2 mt-1">
+                  <Input
+                    id="durationValue"
+                    type="number"
+                    min="1"
+                    max={durationUnit === 'days' ? "365" : "43200"}
+                    value={durationValue}
+                    onChange={(e) => setDurationValue(parseInt(e.target.value) || 30)}
+                    className="w-24"
+                  />
+                  <Select value={durationUnit} onValueChange={(value: 'minutes' | 'days') => setDurationUnit(value)}>
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="minutes">Minutes</SelectItem>
+                      <SelectItem value="days">Days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Quiz will automatically deactivate after this many days
+                  Quiz will automatically deactivate after this duration
                   {quiz?.expiresAt && (
                     <span className="block mt-1">
-                      Expires on: {new Date(quiz.expiresAt).toLocaleDateString()}
+                      Expires on: {new Date(quiz.expiresAt).toLocaleDateString()} at {new Date(quiz.expiresAt).toLocaleTimeString()}
                     </span>
                   )}
                 </p>
