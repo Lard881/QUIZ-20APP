@@ -48,6 +48,9 @@ export interface QuizParticipant {
   answers: QuizAnswer[];
   score?: number;
   submittedAt?: string;
+  ipAddress: string;
+  attemptNumber: number;
+  deviceFingerprint?: string;
 }
 
 export interface QuizAnswer {
