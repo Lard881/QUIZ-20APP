@@ -325,7 +325,8 @@ export default function QuizManagement() {
     const csvContent = [
       headers.join(','),
       ...participants.map(participant => {
-        const score = calculateStudentScore(participant);
+        const scoreData = calculateStudentScore(participant);
+        const score = scoreData.score;
         const totalPoints = getTotalPossiblePoints();
         const percentage = ((score / totalPoints) * 100).toFixed(1);
         const grade = getGrade(parseFloat(percentage));
