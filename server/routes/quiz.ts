@@ -512,6 +512,28 @@ export const updateQuiz: RequestHandler = (req, res) => {
       }));
     }
 
+    // Update duration and recalculate expiration if duration changed
+    let shouldRecalculateExpiration = false;
+    if (updateData.durationValue !== undefined && updateData.durationValue !== quiz.durationValue) {
+      quiz.durationValue = updateData.durationValue;
+      shouldRecalculateExpiration = true;
+    }
+    if (updateData.durationUnit !== undefined && updateData.durationUnit !== quiz.durationUnit) {
+      quiz.durationUnit = updateData.durationUnit;
+      shouldRecalculateExpiration = true;
+    }
+
+    if (shouldRecalculateExpiration) {
+      const now = new Date();
+      let expirationMilliseconds: number;
+      if (quiz.durationUnit === 'minutes') {
+        expirationMilliseconds = quiz.durationValue * 60 * 1000;
+      } else {
+        expirationMilliseconds = quiz.durationValue * 24 * 60 * 60 * 1000;
+      }
+      quiz.expiresAt = new Date(now.getTime() + expirationMilliseconds).toISOString();
+    }
+
     quiz.updatedAt = new Date().toISOString();
 
     res.json({ quiz, success: true });
