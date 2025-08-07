@@ -111,7 +111,10 @@ export default function CreateQuiz() {
         title: title.trim(),
         description: description.trim(),
         timeLimit,
-        questions: questions.map(({ tempId, ...q }) => q)
+        questions: questions.map(({ tempId, ...q }) => q),
+        allowRetries,
+        randomizeQuestions,
+        maxAttempts
       };
 
       const response = await fetch("/api/quiz", {
