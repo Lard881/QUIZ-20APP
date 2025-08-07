@@ -445,6 +445,52 @@ export const updateQuiz: RequestHandler = (req, res) => {
   }
 };
 
+// Check if quiz exists and is active by room code
+export const checkQuiz: RequestHandler = (req, res) => {
+  try {
+    const { roomCode } = req.params;
+
+    const quiz = quizzes.find(q => q.roomCode === roomCode && q.isActive);
+    if (!quiz) {
+      const errorResponse: ErrorResponse = {
+        error: "QUIZ_NOT_FOUND",
+        message: "Quiz not found or not active"
+      };
+      return res.status(404).json(errorResponse);
+    }
+
+    // Return quiz without questions for security
+    const { questions, ...quizWithoutQuestions } = quiz;
+    res.json({ quiz: quizWithoutQuestions, success: true });
+  } catch (error) {
+    const errorResponse: ErrorResponse = {
+      error: "CHECK_FAILED",
+      message: "Failed to check quiz"
+    };
+    res.status(500).json(errorResponse);
+  }
+};
+
+// Get active quizzes (for student access page)
+export const getActiveQuizzes: RequestHandler = (req, res) => {
+  try {
+    const activeQuizzes = quizzes
+      .filter(q => q.isActive)
+      .map(({ questions, ...quiz }) => ({
+        ...quiz,
+        participantCount: Math.floor(Math.random() * 20) // Mock participant count
+      }));
+
+    res.json({ quizzes: activeQuizzes });
+  } catch (error) {
+    const errorResponse: ErrorResponse = {
+      error: "FETCH_FAILED",
+      message: "Failed to fetch active quizzes"
+    };
+    res.status(500).json(errorResponse);
+  }
+};
+
 // Delete quiz
 export const deleteQuiz: RequestHandler = (req, res) => {
   try {
