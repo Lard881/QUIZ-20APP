@@ -19,7 +19,8 @@ export interface Quiz {
   allowRetries: boolean;
   randomizeQuestions: boolean;
   maxAttempts: number;
-  expirationDays: number;
+  durationValue: number;
+  durationUnit: 'minutes' | 'days';
   expiresAt?: string;
 }
 
