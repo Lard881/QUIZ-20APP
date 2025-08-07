@@ -28,6 +28,7 @@ import CreateQuiz from "./pages/CreateQuiz";
 import StudentAccess from "./pages/StudentAccess";
 import QuizTaking from "./pages/QuizTaking";
 import QuizManagement from "./pages/QuizManagement";
+import QuizEdit from "./pages/QuizEdit";
 import Settings from "./pages/Settings";
 import PlaceholderPage from "./pages/PlaceholderPage";
 
