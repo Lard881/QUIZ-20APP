@@ -56,6 +56,7 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Error fetching quizzes:", error);
       setQuizzes([]);
+      setTotalParticipants(0);
     } finally {
       setLoading(false);
     }
