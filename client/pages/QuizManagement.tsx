@@ -218,6 +218,128 @@ export default function QuizManagement() {
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${baseUrl}/student?code=${quiz.roomCode}`)}`;
   };
 
+  // Analytics helper functions
+  const calculateStudentScore = (participant: QuizParticipant): number => {
+    if (!quiz) return 0;
+
+    let totalScore = 0;
+    participant.answers.forEach(answer => {
+      const question = quiz.questions.find(q => q.id === answer.questionId);
+      if (question) {
+        if (question.type === 'multiple-choice' || question.type === 'true-false') {
+          if (answer.answer === question.correctAnswer) {
+            totalScore += question.points;
+          }
+        } else if (question.type === 'short-answer') {
+          // For short answer, we'll assume it's correct if there's an answer
+          // In a real system, this would need manual grading
+          if (answer.answer && answer.answer.toString().trim()) {
+            totalScore += question.points;
+          }
+        }
+      }
+    });
+
+    return totalScore;
+  };
+
+  const getTotalPossiblePoints = (): number => {
+    if (!quiz) return 0;
+    return quiz.questions.reduce((total, question) => total + question.points, 0);
+  };
+
+  const calculateAverageScore = (): number => {
+    if (participants.length === 0) return 0;
+    const totalPossible = getTotalPossiblePoints();
+    if (totalPossible === 0) return 0;
+
+    const averagePoints = participants.reduce((sum, participant) => {
+      return sum + calculateStudentScore(participant);
+    }, 0) / participants.length;
+
+    return (averagePoints / totalPossible) * 100;
+  };
+
+  const getGrade = (percentage: number): string => {
+    if (percentage >= 90) return 'A';
+    if (percentage >= 80) return 'B';
+    if (percentage >= 70) return 'C';
+    if (percentage >= 60) return 'D';
+    return 'F';
+  };
+
+  const getGradeVariant = (grade: string) => {
+    switch (grade) {
+      case 'A': return 'default';
+      case 'B': return 'secondary';
+      case 'C': return 'outline';
+      case 'D': return 'destructive';
+      case 'F': return 'destructive';
+      default: return 'outline';
+    }
+  };
+
+  const getScoreColor = (percentage: number): string => {
+    if (percentage >= 90) return 'text-quiz-success';
+    if (percentage >= 80) return 'text-primary';
+    if (percentage >= 70) return 'text-quiz-warning';
+    if (percentage >= 60) return 'text-quiz-timer';
+    return 'text-destructive';
+  };
+
+  const downloadExcel = () => {
+    if (!quiz || participants.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No student data available to download",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create CSV content (which can be opened in Excel)
+    const headers = ['Student Name', 'Score', 'Total Points', 'Percentage', 'Grade', 'Questions Answered', 'Submission Time'];
+    const csvContent = [
+      headers.join(','),
+      ...participants.map(participant => {
+        const score = calculateStudentScore(participant);
+        const totalPoints = getTotalPossiblePoints();
+        const percentage = ((score / totalPoints) * 100).toFixed(1);
+        const grade = getGrade(parseFloat(percentage));
+        const questionsAnswered = participant.answers.length;
+        const submissionTime = participant.submittedAt
+          ? new Date(participant.submittedAt).toLocaleString()
+          : 'In Progress';
+
+        return [
+          `"${participant.name}"`,
+          score,
+          totalPoints,
+          `${percentage}%`,
+          grade,
+          `${questionsAnswered}/${quiz.questions.length}`,
+          `"${submissionTime}"`
+        ].join(',');
+      })
+    ].join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${quiz.title}_results.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Download Started",
+      description: "Quiz results have been downloaded as CSV file"
+    });
+  };
+
   if (!instructor) return null;
 
   if (loading) {
