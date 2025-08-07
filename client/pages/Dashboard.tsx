@@ -377,7 +377,14 @@ export default function Dashboard() {
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
+                            onClick={() => handleToggleQuizStatus(quiz.id, quiz.isActive)}
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            {quiz.isActive ? "Deactivate Quiz" : "Activate Quiz"}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
                             onClick={() => handleDeleteQuiz(quiz.id)}
                             className="text-destructive"
                           >
