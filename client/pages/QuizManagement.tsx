@@ -821,11 +821,11 @@ export default function QuizManagement() {
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {participant.score !== undefined && (
+                          {participant.submittedAt ? (
                             <Badge variant="outline">
-                              Score: {participant.score}
+                              Score: {getStudentScoreOnly(participant)}/{getTotalPossiblePoints()}
                             </Badge>
-                          )}
+                          ) : null}
                           <Badge
                             variant={
                               participant.submittedAt ? "default" : "secondary"
