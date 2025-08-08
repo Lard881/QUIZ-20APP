@@ -295,12 +295,23 @@ export default function QuizManagement() {
       let pointsEarned = 0;
 
       if (studentAnswer) {
+        console.log(`  Question ${question.id}: Student answered ${studentAnswer.answer}, correct is ${question.correctAnswer}`);
+
         if (
           question.type === "multiple-choice" ||
           question.type === "true-false"
         ) {
-          isCorrect = studentAnswer.answer === question.correctAnswer;
+          // Handle both string and number answers
+          const studentAns = typeof studentAnswer.answer === 'string'
+            ? parseInt(studentAnswer.answer)
+            : studentAnswer.answer;
+          const correctAns = typeof question.correctAnswer === 'string'
+            ? parseInt(question.correctAnswer.toString())
+            : question.correctAnswer;
+
+          isCorrect = studentAns === correctAns;
           pointsEarned = isCorrect ? question.points : 0;
+          console.log(`    Comparison: ${studentAns} === ${correctAns} = ${isCorrect} (${pointsEarned} points)`);
         } else if (question.type === "short-answer") {
           // For short answer, we'll assume it's correct if there's an answer
           // In a real system, this would need manual grading
@@ -308,7 +319,10 @@ export default function QuizManagement() {
             studentAnswer.answer &&
             studentAnswer.answer.toString().trim() !== "";
           pointsEarned = isCorrect ? question.points : 0;
+          console.log(`    Short answer: ${isCorrect} (${pointsEarned} points)`);
         }
+      } else {
+        console.log(`  Question ${question.id}: No answer provided`);
       }
 
       totalScore += pointsEarned;
