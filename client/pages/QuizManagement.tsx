@@ -360,10 +360,12 @@ export default function QuizManagement() {
   // Analytics helper functions
   const calculateStudentScore = (
     participant: QuizParticipant,
-  ): { score: number; details: any[] } => {
-    if (!quiz) return { score: 0, details: [] };
+  ): { score: number; details: any[]; questionsAnswered: number; questionsCorrect: number } => {
+    if (!quiz) return { score: 0, details: [], questionsAnswered: 0, questionsCorrect: 0 };
 
     let totalScore = 0;
+    let questionsAnswered = 0;
+    let questionsCorrect = 0;
     const details: any[] = [];
 
     quiz.questions.forEach((question) => {
@@ -373,28 +375,36 @@ export default function QuizManagement() {
       let isCorrect = false;
       let pointsEarned = 0;
 
-      if (studentAnswer) {
+      if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
+        questionsAnswered++;
+
         if (
           question.type === "multiple-choice" ||
           question.type === "true-false"
         ) {
-          // Handle both string and number answers
-          const studentAns = typeof studentAnswer.answer === 'string'
-            ? parseInt(studentAnswer.answer)
-            : studentAnswer.answer;
-          const correctAns = typeof question.correctAnswer === 'string'
-            ? parseInt(question.correctAnswer.toString())
-            : question.correctAnswer;
+          // Handle both string and number answers properly
+          let studentAns = studentAnswer.answer;
+          let correctAns = question.correctAnswer;
+
+          // Convert to numbers if possible for accurate comparison
+          if (typeof studentAns === 'string' && !isNaN(Number(studentAns))) {
+            studentAns = Number(studentAns);
+          }
+          if (typeof correctAns === 'string' && !isNaN(Number(correctAns))) {
+            correctAns = Number(correctAns);
+          }
 
           isCorrect = studentAns === correctAns;
           pointsEarned = isCorrect ? question.points : 0;
         } else if (question.type === "short-answer") {
-          // For short answer, we'll assume it's correct if there's an answer
-          // In a real system, this would need manual grading
-          isCorrect =
-            studentAnswer.answer &&
-            studentAnswer.answer.toString().trim() !== "";
+          // For short answer, check if there's a meaningful answer
+          const answerText = studentAnswer.answer.toString().trim();
+          isCorrect = answerText.length > 0;
           pointsEarned = isCorrect ? question.points : 0;
+        }
+
+        if (isCorrect) {
+          questionsCorrect++;
         }
       }
 
@@ -409,10 +419,11 @@ export default function QuizManagement() {
         isCorrect,
         pointsEarned,
         maxPoints: question.points,
+        answered: studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null,
       });
     });
 
-    return { score: totalScore, details };
+    return { score: totalScore, details, questionsAnswered, questionsCorrect };
   };
 
   const getStudentScoreOnly = (participant: QuizParticipant): number => {
