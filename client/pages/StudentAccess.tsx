@@ -75,18 +75,27 @@ export default function StudentAccess() {
     }
 
     try {
+      const upperCaseCode = code.toUpperCase().trim();
+      console.log("Checking room code:", upperCaseCode); // Debug log
+
       // Check if quiz exists and is active
-      const response = await fetch(`/api/quiz/check/${code.toUpperCase()}`);
+      const response = await fetch(`/api/quiz/check/${upperCaseCode}`);
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Quiz check response:", data); // Debug log
+
         if (data.quiz) {
           if (data.quiz.isActive) {
             setSelectedQuiz(data.quiz);
             setShowNameInput(true);
             if (!codeToSubmit) {
-              setRoomCode(code.toUpperCase());
+              setRoomCode(upperCaseCode);
             }
+            toast({
+              title: "Quiz Found!",
+              description: `Ready to join "${data.quiz.title}"`,
+            });
           } else {
             // Show the quiz info but indicate it's not active
             setSelectedQuiz(data.quiz);
@@ -107,6 +116,8 @@ export default function StudentAccess() {
         const errorData = await response
           .json()
           .catch(() => ({ message: "Unknown error" }));
+        console.error("Quiz check failed:", response.status, errorData); // Debug log
+
         if (response.status === 410) {
           toast({
             title: "Quiz Expired",
@@ -118,16 +129,16 @@ export default function StudentAccess() {
         } else {
           toast({
             title: "Quiz Not Found",
-            description:
-              errorData.message || "Invalid room code or quiz does not exist",
+            description: `Room code "${upperCaseCode}" not found. Please check the code and try again.`,
             variant: "destructive",
           });
         }
       }
     } catch (error) {
+      console.error("Error checking quiz:", error); // Debug log
       toast({
-        title: "Error",
-        description: "Failed to check quiz. Please try again.",
+        title: "Connection Error",
+        description: "Failed to connect to quiz server. Please check your internet connection and try again.",
         variant: "destructive",
       });
     }
