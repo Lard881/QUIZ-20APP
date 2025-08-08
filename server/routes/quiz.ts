@@ -494,10 +494,18 @@ export const getQuizResults: RequestHandler = (req, res) => {
     // Calculate scores properly
     const participantsWithScores = allParticipants.map((p) => {
       let totalScore = 0;
+      console.log(`\n=== Processing participant: ${p.name} ===`);
+      console.log(`Participant ID: ${p.id}`);
+      console.log(`Participant answers count: ${p.answers.length}`);
+      console.log(`Participant answers:`, p.answers);
 
       // Calculate actual score based on correct answers
-      quiz.questions.forEach((question) => {
+      quiz.questions.forEach((question, qIndex) => {
         const studentAnswer = p.answers.find((a) => a.questionId === question.id);
+        console.log(`\nQuestion ${qIndex + 1} (ID: ${question.id}):`);
+        console.log(`  Question: ${question.question}`);
+        console.log(`  Correct answer: ${question.correctAnswer}`);
+        console.log(`  Student answer: ${studentAnswer?.answer || 'No answer'}`);
 
         if (studentAnswer) {
           let isCorrect = false;
@@ -505,18 +513,27 @@ export const getQuizResults: RequestHandler = (req, res) => {
           if (question.type === "multiple-choice" || question.type === "true-false") {
             // For multiple choice and true/false, compare exact answer
             isCorrect = studentAnswer.answer === question.correctAnswer;
+            console.log(`  Answer comparison: ${studentAnswer.answer} === ${question.correctAnswer} = ${isCorrect}`);
           } else if (question.type === "short-answer") {
             // For short answer, check if there's a non-empty answer
             // In a real system, this would need manual grading
             isCorrect = studentAnswer.answer &&
                        studentAnswer.answer.toString().trim() !== "";
+            console.log(`  Short answer check: ${isCorrect}`);
           }
 
           if (isCorrect) {
             totalScore += question.points;
+            console.log(`  ✓ Correct! Added ${question.points} points. Total: ${totalScore}`);
+          } else {
+            console.log(`  ✗ Incorrect. Total remains: ${totalScore}`);
           }
+        } else {
+          console.log(`  No answer provided`);
         }
       });
+
+      console.log(`Final score for ${p.name}: ${totalScore}`);
 
       return {
         ...p,
