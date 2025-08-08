@@ -498,6 +498,14 @@ export const getQuizResults: RequestHandler = (req, res) => {
       console.log(`Participant ID: ${p.id}`);
       console.log(`Participant answers count: ${p.answers.length}`);
       console.log(`Participant answers:`, p.answers);
+      console.log(`Participant submittedAt: ${p.submittedAt}`);
+      console.log(`Participant existing score: ${p.score}`);
+
+      // If participant already has a calculated score and submittedAt, use it
+      // but recalculate to ensure accuracy
+      if (p.score !== undefined && p.submittedAt) {
+        console.log(`Participant ${p.name} has existing score: ${p.score}, but recalculating...`);
+      }
 
       // Calculate actual score based on correct answers
       quiz.questions.forEach((question, qIndex) => {
@@ -511,9 +519,16 @@ export const getQuizResults: RequestHandler = (req, res) => {
           let isCorrect = false;
 
           if (question.type === "multiple-choice" || question.type === "true-false") {
-            // For multiple choice and true/false, compare exact answer
-            isCorrect = studentAnswer.answer === question.correctAnswer;
-            console.log(`  Answer comparison: ${studentAnswer.answer} === ${question.correctAnswer} = ${isCorrect}`);
+            // Handle both string and number answers for compatibility
+            const studentAns = typeof studentAnswer.answer === 'string'
+              ? (isNaN(Number(studentAnswer.answer)) ? studentAnswer.answer : Number(studentAnswer.answer))
+              : studentAnswer.answer;
+            const correctAns = typeof question.correctAnswer === 'string'
+              ? (isNaN(Number(question.correctAnswer)) ? question.correctAnswer : Number(question.correctAnswer))
+              : question.correctAnswer;
+
+            isCorrect = studentAns === correctAns;
+            console.log(`  Answer comparison: ${studentAns} === ${correctAns} = ${isCorrect}`);
           } else if (question.type === "short-answer") {
             // For short answer, check if there's a non-empty answer
             // In a real system, this would need manual grading
@@ -533,8 +548,9 @@ export const getQuizResults: RequestHandler = (req, res) => {
         }
       });
 
-      console.log(`Final score for ${p.name}: ${totalScore}`);
+      console.log(`Final calculated score for ${p.name}: ${totalScore}`);
 
+      // Update the participant score regardless of previous value
       return {
         ...p,
         score: totalScore,
