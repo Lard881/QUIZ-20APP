@@ -163,19 +163,24 @@ export default function StudentAccess() {
         participantName: participantName.trim(),
       };
 
+      console.log("Attempting to join quiz with data:", joinData); // Debug log
+
       const response = await fetch("/api/quiz/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(joinData),
       });
 
+      console.log("Join response status:", response.status); // Debug log
+
       if (response.ok) {
         const data = await response.json();
+        console.log("Join response data:", data); // Debug log
 
         if (data.success) {
           toast({
             title: "Joined Successfully!",
-            description: `Welcome to ${selectedQuiz.title}`,
+            description: `Welcome to ${selectedQuiz.title}. Loading quiz...`,
           });
 
           // Navigate to quiz taking page with session ID
