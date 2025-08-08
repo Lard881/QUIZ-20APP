@@ -408,7 +408,6 @@ export default function QuizManagement() {
         const totalPoints = getTotalPossiblePoints();
         const percentage = ((score / totalPoints) * 100).toFixed(1);
         const grade = getGrade(parseFloat(percentage));
-        const questionsAnswered = participant.answers.length;
         const submissionTime = participant.submittedAt
           ? new Date(participant.submittedAt).toLocaleString()
           : "In Progress";
@@ -419,7 +418,6 @@ export default function QuizManagement() {
           totalPoints,
           `${percentage}%`,
           grade,
-          `${questionsAnswered}/${quiz.questions.length}`,
           `"${submissionTime}"`,
         ].join(",");
       }),
