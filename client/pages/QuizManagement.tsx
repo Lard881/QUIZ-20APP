@@ -126,6 +126,7 @@ export default function QuizManagement() {
     }
 
     try {
+      console.log("Fetching quiz data for ID:", quizId);
       // Fetch quiz details with minimal headers first
       const quizResponse = await fetch(`/api/quiz/${quizId}`, {
         cache: "no-cache", // Force fresh data
