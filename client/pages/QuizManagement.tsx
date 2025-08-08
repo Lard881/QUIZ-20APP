@@ -402,6 +402,7 @@ export default function QuizManagement() {
 
     // Create CSV content (which can be opened in Excel)
     const headers = [
+      "Rank",
       "Student Name",
       "Score",
       "Total Points",
