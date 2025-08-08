@@ -8,6 +8,7 @@ import {
   joinQuiz,
   startQuiz,
   submitAnswer,
+  submitQuiz,
   getQuizResults,
   updateQuizStatus,
   getQuiz,
