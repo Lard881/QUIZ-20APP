@@ -976,6 +976,15 @@ export default function QuizManagement() {
                       <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                       {refreshing ? "Refreshing..." : "Refresh Data"}
                     </Button>
+                    <Button
+                      onClick={forceRecalculateScores}
+                      variant="outline"
+                      size="sm"
+                      disabled={refreshing}
+                    >
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Recalculate All Scores
+                    </Button>
                     <Button onClick={downloadExcel} variant="outline">
                       <BarChart3 className="w-4 h-4 mr-2" />
                       Download Excel Report
