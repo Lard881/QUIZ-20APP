@@ -872,10 +872,16 @@ export default function QuizManagement() {
                       Detailed scores and grades for all quiz participants
                     </CardDescription>
                   </div>
-                  <Button onClick={downloadExcel} variant="outline">
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Download Excel Report
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button onClick={fetchQuizData} variant="outline" size="sm">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Refresh Data
+                    </Button>
+                    <Button onClick={downloadExcel} variant="outline">
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Download Excel Report
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
