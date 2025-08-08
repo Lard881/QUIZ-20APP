@@ -965,13 +965,32 @@ export default function QuizManagement() {
                             </tr>
                           </thead>
                           <tbody>
-                            {participants.map((participant) => {
-                              // Always recalculate score for each participant
-                              const scoreData = calculateStudentScore(participant);
-                              const score = scoreData.score;
-                              const totalPossible = getTotalPossiblePoints();
-                              const percentage = totalPossible > 0 ? (score / totalPossible) * 100 : 0;
-                              const grade = getGrade(percentage);
+                            {participants
+                              .map((participant) => {
+                                // Always recalculate score for each participant
+                                const scoreData = calculateStudentScore(participant);
+                                const score = scoreData.score;
+                                const totalPossible = getTotalPossiblePoints();
+                                const percentage = totalPossible > 0 ? (score / totalPossible) * 100 : 0;
+                                const grade = getGrade(percentage);
+
+                                return { participant, scoreData, score, totalPossible, percentage, grade };
+                              })
+                              .sort((a, b) => {
+                                // Sort by percentage (highest first), then by submission time
+                                if (b.percentage !== a.percentage) {
+                                  return b.percentage - a.percentage;
+                                }
+                                // If same percentage, prioritize submitted over in-progress
+                                if (a.participant.submittedAt && !b.participant.submittedAt) return -1;
+                                if (!a.participant.submittedAt && b.participant.submittedAt) return 1;
+                                // If both submitted or both in-progress, sort by submission time
+                                if (a.participant.submittedAt && b.participant.submittedAt) {
+                                  return new Date(a.participant.submittedAt).getTime() - new Date(b.participant.submittedAt).getTime();
+                                }
+                                return 0;
+                              })
+                              .map(({ participant, scoreData, score, totalPossible, percentage, grade }, index) => {
 
                               return (
                                 <tr
