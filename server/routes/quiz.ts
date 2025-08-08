@@ -511,44 +511,54 @@ export const getQuizResults: RequestHandler = (req, res) => {
       sessions.some((s) => s.id === p.sessionId),
     );
 
-    // Calculate scores properly
+    // Calculate scores properly for all participants
     const participantsWithScores = allParticipants.map((p) => {
       let totalScore = 0;
+      let questionsAnswered = 0;
+      let questionsCorrect = 0;
 
-      // Calculate actual score based on correct answers
+      // Calculate actual score based on correct answers for each participant
       quiz.questions.forEach((question) => {
         const studentAnswer = p.answers.find((a) => a.questionId === question.id);
 
-        if (studentAnswer) {
+        if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
+          questionsAnswered++;
           let isCorrect = false;
 
           if (question.type === "multiple-choice" || question.type === "true-false") {
             // Handle both string and number answers for compatibility
-            const studentAns = typeof studentAnswer.answer === 'string'
-              ? (isNaN(Number(studentAnswer.answer)) ? studentAnswer.answer : Number(studentAnswer.answer))
-              : studentAnswer.answer;
-            const correctAns = typeof question.correctAnswer === 'string'
-              ? (isNaN(Number(question.correctAnswer)) ? question.correctAnswer : Number(question.correctAnswer))
-              : question.correctAnswer;
+            let studentAns = studentAnswer.answer;
+            let correctAns = question.correctAnswer;
+
+            // Convert to numbers if possible for comparison
+            if (typeof studentAns === 'string' && !isNaN(Number(studentAns))) {
+              studentAns = Number(studentAns);
+            }
+            if (typeof correctAns === 'string' && !isNaN(Number(correctAns))) {
+              correctAns = Number(correctAns);
+            }
 
             isCorrect = studentAns === correctAns;
           } else if (question.type === "short-answer") {
-            // For short answer, check if there's a non-empty answer
-            // In a real system, this would need manual grading
-            isCorrect = studentAnswer.answer &&
-                       studentAnswer.answer.toString().trim() !== "";
+            // For short answer, check if there's a meaningful answer
+            const answerText = studentAnswer.answer.toString().trim();
+            isCorrect = answerText.length > 0;
           }
 
           if (isCorrect) {
             totalScore += question.points;
+            questionsCorrect++;
           }
         }
       });
 
-      // Update the participant score regardless of previous value
+      // Return participant with calculated score and additional metrics
       return {
         ...p,
         score: totalScore,
+        questionsAnswered,
+        questionsCorrect,
+        calculatedAt: new Date().toISOString()
       };
     });
 
