@@ -433,32 +433,41 @@ export const submitQuiz: RequestHandler = (req, res) => {
       return res.status(404).json(errorResponse);
     }
 
-    // Calculate final score with improved answer comparison
+    // Calculate final score with comprehensive answer comparison
     let totalScore = 0;
+    let questionsAnswered = 0;
+    let questionsCorrect = 0;
 
     quiz.questions.forEach((question) => {
       const studentAnswer = participant.answers.find((a) => a.questionId === question.id);
 
-      if (studentAnswer) {
+      if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
+        questionsAnswered++;
         let isCorrect = false;
 
         if (question.type === "multiple-choice" || question.type === "true-false") {
           // Handle both string and number answers for compatibility
-          const studentAns = typeof studentAnswer.answer === 'string'
-            ? (isNaN(Number(studentAnswer.answer)) ? studentAnswer.answer : Number(studentAnswer.answer))
-            : studentAnswer.answer;
-          const correctAns = typeof question.correctAnswer === 'string'
-            ? (isNaN(Number(question.correctAnswer)) ? question.correctAnswer : Number(question.correctAnswer))
-            : question.correctAnswer;
+          let studentAns = studentAnswer.answer;
+          let correctAns = question.correctAnswer;
+
+          // Convert to numbers if possible for comparison
+          if (typeof studentAns === 'string' && !isNaN(Number(studentAns))) {
+            studentAns = Number(studentAns);
+          }
+          if (typeof correctAns === 'string' && !isNaN(Number(correctAns))) {
+            correctAns = Number(correctAns);
+          }
 
           isCorrect = studentAns === correctAns;
         } else if (question.type === "short-answer") {
-          isCorrect = studentAnswer.answer &&
-                     studentAnswer.answer.toString().trim() !== "";
+          // For short answer, check if there's a meaningful answer
+          const answerText = studentAnswer.answer.toString().trim();
+          isCorrect = answerText.length > 0;
         }
 
         if (isCorrect) {
           totalScore += question.points;
+          questionsCorrect++;
         }
       }
     });
