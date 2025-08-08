@@ -56,6 +56,7 @@ export default function QuizManagement() {
   const [participants, setParticipants] = useState<QuizParticipant[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
   // Quiz settings state
