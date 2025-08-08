@@ -412,25 +412,43 @@ export default function QuizManagement() {
     ];
     const csvContent = [
       headers.join(","),
-      ...participants.map((participant) => {
-        const scoreData = calculateStudentScore(participant);
-        const score = scoreData.score;
-        const totalPoints = getTotalPossiblePoints();
-        const percentage = ((score / totalPoints) * 100).toFixed(1);
-        const grade = getGrade(parseFloat(percentage));
-        const submissionTime = participant.submittedAt
-          ? new Date(participant.submittedAt).toLocaleString()
-          : "In Progress";
+      ...participants
+        .map((participant) => {
+          const scoreData = calculateStudentScore(participant);
+          const score = scoreData.score;
+          const totalPoints = getTotalPossiblePoints();
+          const percentage = totalPoints > 0 ? (score / totalPoints) * 100 : 0;
+          const grade = getGrade(percentage);
 
-        return [
-          `"${participant.name}"`,
-          score,
-          totalPoints,
-          `${percentage}%`,
-          grade,
-          `"${submissionTime}"`,
-        ].join(",");
-      }),
+          return { participant, scoreData, score, totalPoints, percentage, grade };
+        })
+        .sort((a, b) => {
+          // Same sorting logic as the table
+          if (b.percentage !== a.percentage) {
+            return b.percentage - a.percentage;
+          }
+          if (a.participant.submittedAt && !b.participant.submittedAt) return -1;
+          if (!a.participant.submittedAt && b.participant.submittedAt) return 1;
+          if (a.participant.submittedAt && b.participant.submittedAt) {
+            return new Date(a.participant.submittedAt).getTime() - new Date(b.participant.submittedAt).getTime();
+          }
+          return 0;
+        })
+        .map(({ participant, score, totalPoints, percentage, grade }, index) => {
+          const submissionTime = participant.submittedAt
+            ? new Date(participant.submittedAt).toLocaleString()
+            : "In Progress";
+
+          return [
+            index + 1, // Rank
+            `"${participant.name}"`,
+            score,
+            totalPoints,
+            `${percentage.toFixed(1)}%`,
+            grade,
+            `"${submissionTime}"`,
+          ].join(",");
+        }),
     ].join("\n");
 
     // Create and download file
