@@ -680,7 +680,7 @@ export const checkQuiz: RequestHandler = (req, res) => {
   try {
     const { roomCode } = req.params;
 
-    const quiz = quizzes.find((q) => q.roomCode === roomCode);
+    const quiz = quizzes.find((q) => q.roomCode.toUpperCase() === roomCode.toUpperCase());
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
