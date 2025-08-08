@@ -375,10 +375,9 @@ export default function QuizManagement() {
   };
 
   const getScoreColor = (percentage: number): string => {
-    if (percentage >= 90) return "text-quiz-success";
-    if (percentage >= 80) return "text-primary";
-    if (percentage >= 70) return "text-quiz-warning";
-    if (percentage >= 60) return "text-quiz-timer";
+    if (percentage >= 80) return "text-quiz-success";
+    if (percentage >= 50) return "text-primary";
+    if (percentage >= 30) return "text-quiz-warning";
     return "text-destructive";
   };
 
