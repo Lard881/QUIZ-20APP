@@ -239,11 +239,23 @@ export default function QuizTaking() {
         }
       }
 
-      setQuizCompleted(true);
-      toast({
-        title: "Quiz Submitted!",
-        description: "Your answers have been recorded successfully",
+      // Submit quiz for auto-scoring
+      const response = await fetch("/api/quiz/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        setQuizCompleted(true);
+        toast({
+          title: "Quiz Submitted!",
+          description: `Your score: ${data.score} points. Results calculated automatically.`,
+        });
+      } else {
+        throw new Error("Failed to submit quiz");
+      }
 
       // Redirect after a delay
       setTimeout(() => {
