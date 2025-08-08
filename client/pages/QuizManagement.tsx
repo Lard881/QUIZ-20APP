@@ -931,9 +931,14 @@ export default function QuizManagement() {
                     </CardDescription>
                   </div>
                   <div className="flex space-x-2">
-                    <Button onClick={fetchQuizData} variant="outline" size="sm">
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Refresh Data
+                    <Button
+                      onClick={handleRefresh}
+                      variant="outline"
+                      size="sm"
+                      disabled={refreshing}
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                      {refreshing ? "Refreshing..." : "Refresh Data"}
                     </Button>
                     <Button onClick={downloadExcel} variant="outline">
                       <BarChart3 className="w-4 h-4 mr-2" />
