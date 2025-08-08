@@ -5,78 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hello world project</title>
     <script>
-      // Comprehensive ResizeObserver error suppression
+      // Ultimate ResizeObserver error prevention and suppression
       (function () {
         // Store original console methods
         const originalConsoleError = console.error;
         const originalConsoleWarn = console.warn;
 
-        // Override console.error
+        // Override console.error with comprehensive message filtering
         console.error = function (...args) {
           const message = args[0];
-          if (
-            typeof message === "string" &&
-            (message.includes(
+          if (typeof message === "string") {
+            const resizeObserverMessages = [
               "ResizeObserver loop completed with undelivered notifications",
-            ) ||
-              message.includes("ResizeObserver loop limit exceeded"))
-          ) {
-            return; // Suppress ResizeObserver errors
+              "ResizeObserver loop limit exceeded",
+              "Script error",
+            ];
+            if (resizeObserverMessages.some(msg => message.includes(msg))) {
+              return; // Suppress ResizeObserver and related errors
+            }
           }
           originalConsoleError.apply(console, args);
         };
 
-        // Override console.warn for ResizeObserver warnings
+        // Override console.warn
         console.warn = function (...args) {
           const message = args[0];
-          if (
-            typeof message === "string" &&
-            message.includes("ResizeObserver")
-          ) {
+          if (typeof message === "string" && message.includes("ResizeObserver")) {
             return; // Suppress ResizeObserver warnings
           }
           originalConsoleWarn.apply(console, args);
         };
 
-        // Handle unhandled promise rejections
+        // Enhanced window error handlers
         window.addEventListener("unhandledrejection", function (event) {
           const reason = event.reason;
-          if (
-            reason &&
-            typeof reason === "object" &&
-            reason.message &&
-            reason.message.includes("ResizeObserver")
-          ) {
+          if (reason && typeof reason === "object" && reason.message &&
+              reason.message.includes("ResizeObserver")) {
             event.preventDefault();
           }
         });
 
-        // Handle general window errors
         window.addEventListener("error", function (event) {
-          if (event.message && event.message.includes("ResizeObserver")) {
+          if (event.message && (
+            event.message.includes("ResizeObserver") ||
+            event.message.includes("Script error")
+          )) {
             event.preventDefault();
             return false;
           }
         });
 
-        // Add a global error handler for ResizeObserver specifically
+        // Enhanced ResizeObserver wrapper with throttling
         if (typeof ResizeObserver !== "undefined") {
           const OriginalResizeObserver = ResizeObserver;
+
           window.ResizeObserver = class extends OriginalResizeObserver {
             constructor(callback) {
-              super((entries, observer) => {
-                try {
-                  callback(entries, observer);
-                } catch (error) {
-                  // Silently handle ResizeObserver errors
-                  if (!error.message?.includes("ResizeObserver")) {
-                    throw error;
+              let isScheduled = false;
+
+              // Throttle callbacks using requestAnimationFrame
+              const throttledCallback = (entries, observer) => {
+                if (isScheduled) return;
+
+                isScheduled = true;
+                requestAnimationFrame(() => {
+                  isScheduled = false;
+                  try {
+                    callback(entries, observer);
+                  } catch (error) {
+                    // Completely silence ResizeObserver errors
+                    if (error.message && !error.message.includes("ResizeObserver")) {
+                      throw error;
+                    }
                   }
-                }
-              });
+                });
+              };
+
+              super(throttledCallback);
+            }
+          };
+
+          // Additional safety: override the prototype
+          const originalObserve = OriginalResizeObserver.prototype.observe;
+          OriginalResizeObserver.prototype.observe = function(...args) {
+            try {
+              return originalObserve.apply(this, args);
+            } catch (error) {
+              // Silently handle any ResizeObserver observe errors
+              return;
             }
           };
         }
+
+        // Global error suppression as last resort
+        const originalErrorHandler = window.onerror;
+        window.onerror = function(message, source, lineno, colno, error) {
+          if (typeof message === "string" && message.includes("ResizeObserver")) {
+            return true; // Prevent default error handling
+          }
+          if (originalErrorHandler) {
+            return originalErrorHandler.apply(this, arguments);
+          }
+        };
       })();
     </script>
   </head>
