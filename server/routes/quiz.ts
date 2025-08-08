@@ -464,13 +464,15 @@ export const submitQuiz: RequestHandler = (req, res) => {
     });
 
     // Mark quiz as submitted with timestamp and score
+    // Allow resubmission - update timestamp and score each time
     participant.submittedAt = new Date().toISOString();
     participant.score = totalScore;
 
     res.json({
       success: true,
       score: totalScore,
-      submittedAt: participant.submittedAt
+      submittedAt: participant.submittedAt,
+      message: "Quiz submitted successfully. Score calculated automatically."
     });
   } catch (error) {
     const errorResponse: ErrorResponse = {
