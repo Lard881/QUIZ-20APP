@@ -190,15 +190,9 @@ export default function Settings() {
                     {formatDate(instructor.lastLogin)}
                   </p>
                 </div>
-                <div>
+                <div className="col-span-2">
                   <Label className="text-muted-foreground">Account ID</Label>
                   <p className="font-mono text-xs">{instructor.id}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Total Quizzes</Label>
-                  <p className="font-medium">
-                    {instructor.quizzes?.length || 0}
-                  </p>
                 </div>
               </div>
             </CardContent>
