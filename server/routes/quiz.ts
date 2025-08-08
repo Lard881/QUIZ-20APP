@@ -88,8 +88,58 @@ let quizzes: Quiz[] = [
   },
 ];
 
-let quizSessions: QuizSession[] = [];
-let participants: QuizParticipant[] = [];
+let quizSessions: QuizSession[] = [
+  {
+    id: "test-session-1",
+    quizId: "1", // JavaScript Fundamentals quiz
+    isActive: true,
+    startedAt: new Date(Date.now() - 3600000).toISOString(), // Started 1 hour ago
+    participantCount: 3,
+  }
+];
+
+let participants: QuizParticipant[] = [
+  // Test participants with different performance levels to demonstrate analytics
+  {
+    id: "test-participant-1",
+    sessionId: "test-session-1",
+    name: "Alex Johnson",
+    joinedAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    submittedAt: new Date(Date.now() - 3300000).toISOString(), // 55 minutes ago
+    ipAddress: "192.168.1.100",
+    deviceFingerprint: "test-device-1",
+    answers: [
+      { questionId: "q1", answer: 0, answeredAt: new Date(Date.now() - 3350000).toISOString() }, // Correct answer
+      { questionId: "q2", answer: 1, answeredAt: new Date(Date.now() - 3320000).toISOString() }  // Correct answer
+    ]
+  },
+  {
+    id: "test-participant-2",
+    sessionId: "test-session-1",
+    name: "Sarah Chen",
+    joinedAt: new Date(Date.now() - 3500000).toISOString(),
+    submittedAt: new Date(Date.now() - 3200000).toISOString(),
+    ipAddress: "192.168.1.101",
+    deviceFingerprint: "test-device-2",
+    answers: [
+      { questionId: "q1", answer: 0, answeredAt: new Date(Date.now() - 3250000).toISOString() }, // Correct answer
+      { questionId: "q2", answer: 0, answeredAt: new Date(Date.now() - 3220000).toISOString() }  // Wrong answer (should be 1)
+    ]
+  },
+  {
+    id: "test-participant-3",
+    sessionId: "test-session-1",
+    name: "Mike Rodriguez",
+    joinedAt: new Date(Date.now() - 3400000).toISOString(),
+    submittedAt: new Date(Date.now() - 3100000).toISOString(),
+    ipAddress: "192.168.1.102",
+    deviceFingerprint: "test-device-3",
+    answers: [
+      { questionId: "q1", answer: 1, answeredAt: new Date(Date.now() - 3150000).toISOString() }, // Wrong answer (should be 0)
+      { questionId: "q2", answer: 0, answeredAt: new Date(Date.now() - 3120000).toISOString() }  // Wrong answer (should be 1)
+    ]
+  }
+];
 
 // Helper function to generate room code
 const generateRoomCode = (): string => {
