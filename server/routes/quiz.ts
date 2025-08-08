@@ -219,7 +219,7 @@ export const joinQuiz: RequestHandler = (req, res) => {
       return res.status(400).json(errorResponse);
     }
 
-    const quiz = quizzes.find((q) => q.roomCode === roomCode);
+    const quiz = quizzes.find((q) => q.roomCode.toUpperCase() === roomCode.toUpperCase());
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
