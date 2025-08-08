@@ -43,6 +43,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Copy,
+  User,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
