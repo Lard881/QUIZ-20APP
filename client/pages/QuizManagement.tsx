@@ -858,10 +858,23 @@ export default function QuizManagement() {
           <TabsContent value="participants" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Participants ({participants.length})</CardTitle>
-                <CardDescription>
-                  View and manage quiz participants
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Participants ({participants.length})</CardTitle>
+                    <CardDescription>
+                      View and manage quiz participants
+                    </CardDescription>
+                  </div>
+                  <Button
+                    onClick={handleRefresh}
+                    variant="outline"
+                    size="sm"
+                    disabled={refreshing}
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                    {refreshing ? "Refreshing..." : "Refresh"}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {participants.length === 0 ? (
