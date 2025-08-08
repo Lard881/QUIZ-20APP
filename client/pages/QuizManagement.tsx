@@ -954,11 +954,11 @@ export default function QuizManagement() {
                           </thead>
                           <tbody>
                             {participants.map((participant) => {
-                              const scoreData =
-                                calculateStudentScore(participant);
+                              // Always recalculate score for each participant
+                              const scoreData = calculateStudentScore(participant);
                               const score = scoreData.score;
-                              const percentage =
-                                (score / getTotalPossiblePoints()) * 100;
+                              const totalPossible = getTotalPossiblePoints();
+                              const percentage = totalPossible > 0 ? (score / totalPossible) * 100 : 0;
                               const grade = getGrade(percentage);
 
                               return (
@@ -970,7 +970,7 @@ export default function QuizManagement() {
                                     {participant.name}
                                   </td>
                                   <td className="p-3">
-                                    {score} / {getTotalPossiblePoints()}
+                                    {score} / {totalPossible}
                                   </td>
                                   <td className="p-3">
                                     <span
