@@ -433,26 +433,50 @@ export const submitQuiz: RequestHandler = (req, res) => {
       return res.status(404).json(errorResponse);
     }
 
-    // Calculate final score
+    // Calculate final score with improved answer comparison
     let totalScore = 0;
-    quiz.questions.forEach((question) => {
+    console.log(`\n=== SCORING ${participant.name} ===`);
+    console.log(`Total answers provided: ${participant.answers.length}`);
+
+    quiz.questions.forEach((question, qIndex) => {
       const studentAnswer = participant.answers.find((a) => a.questionId === question.id);
+      console.log(`\nQuestion ${qIndex + 1} (${question.id}):`);
+      console.log(`  Type: ${question.type}`);
+      console.log(`  Correct answer: ${question.correctAnswer}`);
+      console.log(`  Student answer: ${studentAnswer?.answer || 'No answer'}`);
 
       if (studentAnswer) {
         let isCorrect = false;
 
         if (question.type === "multiple-choice" || question.type === "true-false") {
-          isCorrect = studentAnswer.answer === question.correctAnswer;
+          // Handle both string and number answers for compatibility
+          const studentAns = typeof studentAnswer.answer === 'string'
+            ? (isNaN(Number(studentAnswer.answer)) ? studentAnswer.answer : Number(studentAnswer.answer))
+            : studentAnswer.answer;
+          const correctAns = typeof question.correctAnswer === 'string'
+            ? (isNaN(Number(question.correctAnswer)) ? question.correctAnswer : Number(question.correctAnswer))
+            : question.correctAnswer;
+
+          isCorrect = studentAns === correctAns;
+          console.log(`  Comparison: ${studentAns} === ${correctAns} = ${isCorrect}`);
         } else if (question.type === "short-answer") {
           isCorrect = studentAnswer.answer &&
                      studentAnswer.answer.toString().trim() !== "";
+          console.log(`  Short answer valid: ${isCorrect}`);
         }
 
         if (isCorrect) {
           totalScore += question.points;
+          console.log(`  ✓ Correct! +${question.points} points. Total: ${totalScore}`);
+        } else {
+          console.log(`  ✗ Incorrect. Total: ${totalScore}`);
         }
+      } else {
+        console.log(`  No answer provided`);
       }
     });
+
+    console.log(`Final score for ${participant.name}: ${totalScore}`);
 
     // Mark quiz as submitted with timestamp and score
     participant.submittedAt = new Date().toISOString();
