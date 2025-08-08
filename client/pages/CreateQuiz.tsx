@@ -416,24 +416,6 @@ export default function CreateQuiz() {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="timeLimit">Time Limit (minutes)</Label>
-                <div className="flex items-center space-x-2 mt-1">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="timeLimit"
-                    type="number"
-                    min="1"
-                    max="180"
-                    value={timeLimit}
-                    onChange={(e) =>
-                      setTimeLimit(parseInt(e.target.value) || 30)
-                    }
-                    className="w-24"
-                  />
-                  <span className="text-sm text-muted-foreground">minutes</span>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
