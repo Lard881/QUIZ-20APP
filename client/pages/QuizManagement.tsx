@@ -825,24 +825,23 @@ export default function QuizManagement() {
                         <div>
                           <h4 className="font-medium">{participant.name}</h4>
                           <p className="text-sm text-muted-foreground">
-                            {participant.answers.length} /{" "}
-                            {quiz.questions.length} answered
                             {participant.submittedAt && (
-                              <span className="ml-2">
-                                • Submitted{" "}
+                              <span>
+                                Submitted{" "}
                                 {new Date(
                                   participant.submittedAt,
                                 ).toLocaleTimeString()}
                               </span>
                             )}
+                            {!participant.submittedAt && (
+                              <span>Taking quiz...</span>
+                            )}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {participant.submittedAt ? (
-                            <Badge variant="outline">
-                              Score: {getStudentScoreOnly(participant)}/{getTotalPossiblePoints()}
-                            </Badge>
-                          ) : null}
+                          <Badge variant="outline">
+                            Score: {getStudentScoreOnly(participant)}/{getTotalPossiblePoints()}
+                          </Badge>
                           <Badge
                             variant={
                               participant.submittedAt ? "default" : "secondary"
