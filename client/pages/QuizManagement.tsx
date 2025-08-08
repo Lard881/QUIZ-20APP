@@ -920,41 +920,20 @@ export default function QuizManagement() {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {participants.map((participant) => (
                       <div
                         key={participant.id}
-                        className="flex items-center justify-between p-4 border rounded-lg"
+                        className="flex items-center p-4 border rounded-lg hover:bg-muted/20 transition-colors"
                       >
-                        <div>
-                          <h4 className="font-medium">{participant.name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {participant.submittedAt && (
-                              <span>
-                                Submitted{" "}
-                                {new Date(
-                                  participant.submittedAt,
-                                ).toLocaleTimeString()}
-                              </span>
-                            )}
-                            {!participant.submittedAt && (
-                              <span>Taking quiz...</span>
-                            )}
-                          </p>
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-4">
+                          <User className="w-5 h-5 text-primary" />
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline">
-                            Score: {getStudentScoreOnly(participant)}/{getTotalPossiblePoints()}
-                          </Badge>
-                          <Badge
-                            variant={
-                              participant.submittedAt ? "default" : "secondary"
-                            }
-                          >
-                            {participant.submittedAt
-                              ? "Completed"
-                              : "In Progress"}
-                          </Badge>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-lg">{participant.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Participant ID: {participant.id.slice(-8)}
+                          </p>
                         </div>
                       </div>
                     ))}
