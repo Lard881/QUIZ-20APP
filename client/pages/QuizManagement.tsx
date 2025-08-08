@@ -896,10 +896,9 @@ export default function QuizManagement() {
                         <div className="text-2xl font-bold text-quiz-success">
                           {
                             participants.filter((p) => {
-                              const percentage =
-                                (getStudentScoreOnly(p) /
-                                  getTotalPossiblePoints()) *
-                                100;
+                              const scoreData = calculateStudentScore(p);
+                              const totalPossible = getTotalPossiblePoints();
+                              const percentage = totalPossible > 0 ? (scoreData.score / totalPossible) * 100 : 0;
                               return getGrade(percentage) !== "F";
                             }).length
                           }
@@ -912,10 +911,9 @@ export default function QuizManagement() {
                         <div className="text-2xl font-bold text-destructive">
                           {
                             participants.filter((p) => {
-                              const percentage =
-                                (getStudentScoreOnly(p) /
-                                  getTotalPossiblePoints()) *
-                                100;
+                              const scoreData = calculateStudentScore(p);
+                              const totalPossible = getTotalPossiblePoints();
+                              const percentage = totalPossible > 0 ? (scoreData.score / totalPossible) * 100 : 0;
                               return getGrade(percentage) === "F";
                             }).length
                           }
