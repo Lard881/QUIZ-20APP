@@ -136,7 +136,7 @@ export default function CreateQuiz() {
       const quizData: CreateQuizRequest = {
         title: title.trim(),
         description: description.trim(),
-        timeLimit,
+        timeLimit: durationUnit === "minutes" ? durationValue : durationValue * 24 * 60, // Convert days to minutes for compatibility
         questions: questions.map(({ tempId, ...q }) => q),
         allowRetries,
         randomizeQuestions,
