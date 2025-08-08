@@ -398,7 +398,6 @@ export default function QuizManagement() {
       "Total Points",
       "Percentage",
       "Grade",
-      "Questions Answered",
       "Submission Time",
     ];
     const csvContent = [
