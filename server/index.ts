@@ -52,6 +52,7 @@ export function createServer() {
   app.post("/api/quiz/join", joinQuiz);
   app.get("/api/quiz/session/:sessionId/start", startQuiz);
   app.post("/api/quiz/answer", submitAnswer);
+  app.post("/api/quiz/submit", submitQuiz);
   app.get("/api/quiz/:quizId/results", getQuizResults);
   app.patch("/api/quiz/:quizId/status", updateQuizStatus);
 
