@@ -155,13 +155,21 @@ export default function CreateQuiz() {
         throw new Error("Failed to create quiz");
       }
 
+      const responseData = await response.json();
+      const newQuizId = responseData.quiz?.id;
+
       toast({
         title: "Quiz Created!",
-        description: "Your quiz has been saved successfully",
+        description: "Your quiz has been saved successfully. Redirecting to quiz management...",
       });
 
-      // Navigate back to dashboard
-      navigate("/");
+      // Navigate to quiz management page
+      if (newQuizId) {
+        navigate(`/quiz/${newQuizId}/manage`);
+      } else {
+        // Fallback to dashboard if no quiz ID
+        navigate("/dashboard");
+      }
     } catch (error) {
       toast({
         title: "Error",
