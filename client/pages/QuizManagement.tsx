@@ -83,6 +83,38 @@ export default function QuizManagement() {
     fetchQuizData();
   }, [instructor, quizId, navigate]);
 
+  // Auto-refresh when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && quiz) {
+        // Only refresh participant data when tab becomes visible
+        handleRefresh();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [quiz]);
+
+  // Auto-refresh participants data every 30 seconds when on participants or analytics tab
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if ((activeTab === 'participants' || activeTab === 'analytics') && quiz && !refreshing) {
+      interval = setInterval(() => {
+        handleRefresh();
+      }, 30000); // 30 seconds
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [activeTab, quiz, refreshing]);
+
   const fetchQuizData = async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
