@@ -148,13 +148,15 @@ export default function QuizManagement() {
           throw new Error("Invalid quiz data received");
         }
       } else {
-        const errorData = await quizResponse
-          .json()
-          .catch(() => ({ message: "Unknown error" }));
-        throw new Error(
-          errorData.message ||
-            `HTTP ${quizResponse.status}: ${quizResponse.statusText}`,
-        );
+        let errorMessage = `HTTP ${quizResponse.status}: ${quizResponse.statusText}`;
+        try {
+          const errorData = await quizResponse.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          console.warn("Failed to parse error response:", parseError);
+          // Use the default HTTP error message
+        }
+        throw new Error(errorMessage);
       }
 
       // Fetch quiz results/participants with fresh data
