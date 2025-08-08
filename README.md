@@ -7,6 +7,7 @@ A comprehensive, real-time quiz management platform built with React, TypeScript
 ## 🌟 Key Features
 
 ### 👨‍🏫 **For Instructors**
+
 - **🎯 Complete Quiz Management**: Create, edit, delete, and organize quizzes with ease
 - **📝 Multiple Question Types**: Support for multiple choice, true/false, and short answer questions
 - **⚙️ Advanced Settings**: Customizable time limits, retry policies, question randomization, and attempt limits
@@ -19,6 +20,7 @@ A comprehensive, real-time quiz management platform built with React, TypeScript
 - **🔄 Auto-Refresh**: Real-time updates of student progress and submissions
 
 ### 🎓 **For Students**
+
 - **🚀 Easy Access**: Join quizzes via room codes or QR code scanning
 - **📱 Mobile Responsive**: Seamless experience across all devices and screen sizes
 - **⏱️ Real-time Timer**: Visual timer with auto-submission when time expires
@@ -28,6 +30,7 @@ A comprehensive, real-time quiz management platform built with React, TypeScript
 - **💾 Auto-save**: Automatic answer saving to prevent data loss
 
 ### 🔧 **Technical Features**
+
 - **🔐 Authentication System**: Secure instructor login/signup with session management
 - **💾 Session Persistence**: Maintains login state across browser sessions
 - **🚨 Error Handling**: Comprehensive error handling with user-friendly feedback
@@ -39,6 +42,7 @@ A comprehensive, real-time quiz management platform built with React, TypeScript
 ## 🛠️ Technology Stack
 
 ### Frontend Technologies
+
 ```
 React 18             - Modern React with hooks and concurrent features
 TypeScript           - Type-safe development with enhanced IDE support
@@ -51,6 +55,7 @@ React Query          - Server state management and caching
 ```
 
 ### Backend Technologies
+
 ```
 Express.js           - Fast, minimalist web framework for Node.js
 TypeScript           - Type-safe server-side development
@@ -60,6 +65,7 @@ In-memory Storage    - Fast data access (easily replaceable with database)
 ```
 
 ### Development Tools
+
 ```
 ESLint               - Code quality and consistency enforcement
 PostCSS              - CSS processing and optimization
@@ -79,6 +85,7 @@ Before running QuizMaster, ensure you have:
 ## 🚀 Quick Start Guide
 
 ### 1. Clone and Setup
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -89,6 +96,7 @@ npm install
 ```
 
 ### 2. Development Server
+
 ```bash
 # Start the development server
 npm run dev
@@ -99,6 +107,7 @@ npm run dev
 ```
 
 ### 3. First Time Setup
+
 1. Open your browser to `http://localhost:5173`
 2. Click "Instructor Login" to create an account
 3. Sign up with your details
@@ -109,18 +118,22 @@ npm run dev
 ### 🎯 **Instructor Workflow**
 
 #### Creating Your Account
+
 1. Navigate to the homepage
-2. Click "Instructor Login" 
+2. Click "Instructor Login"
 3. Choose "Sign Up" and fill in your details
 4. You'll be automatically logged in and redirected to the dashboard
 
 #### Creating a Quiz
+
 1. **Basic Information**
+
    - Click "Create Quiz" from the dashboard
    - Enter quiz title and description
    - Set quiz duration (minutes or days)
 
 2. **Adding Questions**
+
    - Click "Add Question" to create new questions
    - Choose question type (Multiple Choice, True/False, Short Answer)
    - Set point values for each question
@@ -129,6 +142,7 @@ npm run dev
    - For short answer: Students' responses are auto-graded based on content
 
 3. **Advanced Settings**
+
    - **Allow Retries**: Let students retake the quiz
    - **Maximum Attempts**: Set how many times students can attempt
    - **Randomize Questions**: Shuffle question order for each student
@@ -140,17 +154,21 @@ npm run dev
    - Share the room code or QR code with students
 
 #### Managing Quizzes
+
 1. **Quiz Overview**
+
    - View quiz status (Active/Inactive)
    - See participant count and question count
    - Monitor time remaining until expiration
 
 2. **Participants Tab**
+
    - Simple list of students who joined
    - Clean interface showing participant names
    - Real-time updates of new joiners
 
 3. **Analytics Tab**
+
    - **Performance Rankings**: Students ranked by score percentage
    - **Detailed Scores**: Individual scores, percentages, and grades
    - **Submission Times**: When each student completed the quiz
@@ -165,7 +183,9 @@ npm run dev
 ### 🎓 **Student Workflow**
 
 #### Joining a Quiz
+
 1. **Room Code Method**
+
    - Go to the student access page
    - Enter the 6-character room code provided by instructor
    - Enter your full name
@@ -177,13 +197,16 @@ npm run dev
    - Enter your name and start the quiz
 
 #### Taking a Quiz
+
 1. **Quiz Interface**
+
    - Clean, distraction-free design
    - Question counter shows progress (e.g., "Question 2 of 10")
    - Timer shows remaining time with visual progress bar
    - Navigation buttons to move between questions
 
 2. **Answering Questions**
+
    - **Multiple Choice**: Click on your chosen answer
    - **True/False**: Select True or False
    - **Short Answer**: Type your response in the text box
@@ -198,6 +221,7 @@ npm run dev
 ## 🔧 Configuration
 
 ### Environment Variables
+
 Create a `.env` file in the root directory:
 
 ```env
@@ -220,52 +244,60 @@ VITE_API_URL=https://your-domain.com/api
 ### Customization Options
 
 #### Grading Scale
+
 Modify the grading scale in `client/pages/QuizManagement.tsx`:
+
 ```typescript
 const getGrade = (percentage: number): string => {
-  if (percentage >= 80) return "A";  // Excellent
-  if (percentage >= 50) return "B";  // Good  
-  if (percentage >= 30) return "C";  // Satisfactory
-  return "F";                        // Needs Improvement
+  if (percentage >= 80) return "A"; // Excellent
+  if (percentage >= 50) return "B"; // Good
+  if (percentage >= 30) return "C"; // Satisfactory
+  return "F"; // Needs Improvement
 };
 ```
 
 #### Quiz Duration Limits
+
 Adjust duration limits in `client/pages/CreateQuiz.tsx`:
+
 ```typescript
 // Maximum duration values
 max={durationUnit === "days" ? "365" : "43200"} // 1 year or 30 days in minutes
 ```
 
 #### Theme Colors
+
 Customize colors in `tailwind.config.ts`:
+
 ```javascript
 export default {
   theme: {
     extend: {
       colors: {
-        primary: "hsl(210 40% 50%)",      // Main brand color
-        secondary: "hsl(210 40% 90%)",    // Secondary elements
+        primary: "hsl(210 40% 50%)", // Main brand color
+        secondary: "hsl(210 40% 90%)", // Secondary elements
         "quiz-success": "hsl(142 71% 45%)", // Success states
-        "quiz-warning": "hsl(38 92% 50%)",  // Warning states
-        "quiz-timer": "hsl(25 95% 53%)",    // Timer colors
-      }
-    }
-  }
-}
+        "quiz-warning": "hsl(38 92% 50%)", // Warning states
+        "quiz-timer": "hsl(25 95% 53%)", // Timer colors
+      },
+    },
+  },
+};
 ```
 
 ## 🌐 API Documentation
 
 ### Authentication Endpoints
+
 ```http
 POST /api/auth/login
-POST /api/auth/signup  
+POST /api/auth/signup
 PATCH /api/auth/update
 GET /api/auth/profile
 ```
 
 ### Quiz Management Endpoints
+
 ```http
 # Quiz CRUD Operations
 GET /api/quizzes              # Get all quizzes for instructor
@@ -281,6 +313,7 @@ GET /api/quiz/check/:roomCode # Verify room code exists
 ```
 
 ### Student Interaction Endpoints
+
 ```http
 POST /api/quiz/join           # Join quiz with room code
 GET /api/quiz/session/:id/start # Start quiz session
@@ -292,6 +325,7 @@ GET /api/quiz/:id/results     # Get quiz results and analytics
 ### Request/Response Examples
 
 #### Create Quiz
+
 ```json
 POST /api/quiz
 {
@@ -315,6 +349,7 @@ POST /api/quiz
 ```
 
 #### Join Quiz
+
 ```json
 POST /api/quiz/join
 {
@@ -328,17 +363,20 @@ POST /api/quiz/join
 ### Netlify Deployment (Recommended)
 
 1. **Prepare for Deployment**
+
    ```bash
    npm run build
    ```
 
 2. **Deploy to Netlify**
+
    - Connect your GitHub repository to Netlify
    - Set build command: `npm run build`
    - Set publish directory: `dist`
    - Environment variables: Add production environment variables
 
 3. **Netlify Configuration**
+
    ```toml
    # netlify.toml
    [build]
@@ -362,11 +400,13 @@ POST /api/quiz/join
 ### Manual Deployment
 
 1. **Build for Production**
+
    ```bash
    npm run build
    ```
 
 2. **Deploy Static Files**
+
    - Upload `dist/` folder to your web server
    - Configure server to serve SPA (redirect all routes to index.html)
    - Set up API endpoints on your server
@@ -379,6 +419,7 @@ POST /api/quiz/join
 ## 📊 Analytics and Reporting
 
 ### Student Performance Metrics
+
 - **Individual Scores**: Points earned vs. total possible
 - **Percentage Scores**: Calculated as (earned points / total points) × 100
 - **Letter Grades**: Automatic grade assignment based on percentage
@@ -386,6 +427,7 @@ POST /api/quiz/join
 - **Attempt Numbers**: Track multiple attempts per student
 
 ### Analytics Features
+
 - **Real-time Rankings**: Students automatically ranked by performance
 - **Grade Distribution**: Visual breakdown of class performance
 - **Export Capabilities**: Download Excel/CSV files with all data
@@ -393,6 +435,7 @@ POST /api/quiz/join
 - **Participation Metrics**: Monitor student engagement
 
 ### Data Export Format
+
 ```csv
 Rank,Student Name,Score,Total Points,Percentage,Grade,Submission Time
 1,"Alice Johnson",18,20,90.0%,A,"2024-01-15 10:30:00"
@@ -403,17 +446,20 @@ Rank,Student Name,Score,Total Points,Percentage,Grade,Submission Time
 ## 🛡️ Security Features
 
 ### Authentication & Authorization
+
 - **Secure Sessions**: Token-based authentication with automatic expiration
 - **Password Protection**: Secure password hashing and validation
 - **Session Management**: Persistent login across browser sessions
 
 ### Quiz Integrity
+
 - **IP Address Tracking**: Prevent multiple attempts from same device
 - **Device Fingerprinting**: Additional layer of attempt verification
 - **Room Code Security**: Unique, time-limited access codes
 - **Attempt Limits**: Configurable maximum attempts per student
 
 ### Data Protection
+
 - **Input Validation**: All user inputs validated and sanitized
 - **CORS Configuration**: Secure cross-origin request handling
 - **Error Handling**: Secure error messages that don't leak sensitive data
@@ -422,6 +468,7 @@ Rank,Student Name,Score,Total Points,Percentage,Grade,Submission Time
 ## 🔍 Development
 
 ### Project Structure
+
 ```
 quiz-management-system/
 ├── client/                     # React frontend application
@@ -470,11 +517,13 @@ npm run test:coverage    # Generate test coverage report
 ### Adding New Features
 
 #### Frontend Components
+
 1. **Create Component**
+
    ```bash
    # Add new page component
    touch client/pages/NewFeature.tsx
-   
+
    # Add reusable component
    touch client/components/NewComponent.tsx
    ```
@@ -486,7 +535,9 @@ npm run test:coverage    # Generate test coverage report
    ```
 
 #### Backend API Endpoints
+
 1. **Create Route Handler**
+
    ```typescript
    // In server/routes/newFeature.ts
    export const newFeatureHandler: RequestHandler = (req, res) => {
@@ -501,9 +552,11 @@ npm run test:coverage    # Generate test coverage report
    ```
 
 #### Database Integration
+
 To replace in-memory storage with a database:
 
 1. **Install Database Driver**
+
    ```bash
    npm install prisma @prisma/client  # For Prisma ORM
    # or
@@ -520,7 +573,9 @@ To replace in-memory storage with a database:
 We welcome contributions to QuizMaster! Here's how to get started:
 
 ### Development Setup
+
 1. **Fork the Repository**
+
    ```bash
    git clone https://github.com/your-username/quiz-management-system.git
    cd quiz-management-system
@@ -528,11 +583,13 @@ We welcome contributions to QuizMaster! Here's how to get started:
    ```
 
 2. **Create Feature Branch**
+
    ```bash
    git checkout -b feature/amazing-new-feature
    ```
 
 3. **Development Guidelines**
+
    - Follow TypeScript best practices
    - Write descriptive commit messages
    - Add comments for complex logic
@@ -540,6 +597,7 @@ We welcome contributions to QuizMaster! Here's how to get started:
    - Update documentation as needed
 
 4. **Commit and Push**
+
    ```bash
    git add .
    git commit -m "Add: Amazing new feature that improves user experience"
@@ -552,6 +610,7 @@ We welcome contributions to QuizMaster! Here's how to get started:
    - Reference any related issues
 
 ### Code Style Guidelines
+
 - **TypeScript**: Use strict type checking
 - **React**: Functional components with hooks
 - **CSS**: Tailwind utility classes, minimal custom CSS
@@ -563,6 +622,7 @@ We welcome contributions to QuizMaster! Here's how to get started:
 ### Common Issues and Solutions
 
 #### Students Can't Join Quiz
+
 ```
 Problem: Room code not working
 Solutions:
@@ -573,6 +633,7 @@ Solutions:
 ```
 
 #### Scores Not Calculating
+
 ```
 Problem: Students show 0 scores in analytics
 Solutions:
@@ -583,6 +644,7 @@ Solutions:
 ```
 
 #### Quiz Not Loading
+
 ```
 Problem: White screen or loading forever
 Solutions:
@@ -593,6 +655,7 @@ Solutions:
 ```
 
 #### Export Not Working
+
 ```
 Problem: Excel download fails
 Solutions:
@@ -603,6 +666,7 @@ Solutions:
 ```
 
 #### Performance Issues
+
 ```
 Problem: Slow loading or laggy interface
 Solutions:
@@ -613,7 +677,9 @@ Solutions:
 ```
 
 ### Debug Mode
+
 Enable debug logging by adding to `.env`:
+
 ```env
 VITE_DEBUG=true
 NODE_ENV=development
@@ -629,7 +695,9 @@ NODE_ENV=development
 ## 🎯 Roadmap & Future Features
 
 ### Version 2.0 - Enhanced Features
+
 - [ ] **Advanced Question Types**
+
   - Fill-in-the-blank questions
   - Matching questions
   - Drag-and-drop sorting
@@ -642,7 +710,9 @@ NODE_ENV=development
   - Mathematical equation support
 
 ### Version 2.1 - Collaboration Features
+
 - [ ] **Team Management**
+
   - Multiple instructors per quiz
   - Department-level organization
   - Shared question banks
@@ -655,7 +725,9 @@ NODE_ENV=development
   - Detailed question analysis
 
 ### Version 2.2 - Enterprise Features
+
 - [ ] **Integration Capabilities**
+
   - LMS integration (Canvas, Blackboard, Moodle)
   - Single Sign-On (SSO) support
   - Google Classroom integration
@@ -668,7 +740,9 @@ NODE_ENV=development
   - Anti-cheating measures
 
 ### Version 3.0 - AI-Powered Features
+
 - [ ] **Intelligent Features**
+
   - AI-powered question generation
   - Automatic essay grading
   - Personalized learning paths
@@ -711,7 +785,7 @@ copies or substantial portions of the Software.
 
 **QuizMaster** - Transforming education through technology 🎓
 
-*Built with ❤️ for educators worldwide*
+_Built with ❤️ for educators worldwide_
 
 **Version 1.0.0** | **Last Updated**: January 2024
 

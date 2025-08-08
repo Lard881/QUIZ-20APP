@@ -138,7 +138,8 @@ export default function StudentAccess() {
       console.error("Error checking quiz:", error); // Debug log
       toast({
         title: "Connection Error",
-        description: "Failed to connect to quiz server. Please check your internet connection and try again.",
+        description:
+          "Failed to connect to quiz server. Please check your internet connection and try again.",
         variant: "destructive",
       });
     }

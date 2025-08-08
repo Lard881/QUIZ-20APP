@@ -136,7 +136,8 @@ export default function CreateQuiz() {
       const quizData: CreateQuizRequest = {
         title: title.trim(),
         description: description.trim(),
-        timeLimit: durationUnit === "minutes" ? durationValue : durationValue * 24 * 60, // Convert days to minutes for compatibility
+        timeLimit:
+          durationUnit === "minutes" ? durationValue : durationValue * 24 * 60, // Convert days to minutes for compatibility
         questions: questions.map(({ tempId, ...q }) => q),
         allowRetries,
         randomizeQuestions,
@@ -160,7 +161,8 @@ export default function CreateQuiz() {
 
       toast({
         title: "Quiz Created!",
-        description: "Your quiz has been saved successfully. Redirecting to quiz management...",
+        description:
+          "Your quiz has been saved successfully. Redirecting to quiz management...",
       });
 
       // Navigate to quiz management page
@@ -423,7 +425,6 @@ export default function CreateQuiz() {
                   className="mt-1"
                 />
               </div>
-
             </CardContent>
           </Card>
 

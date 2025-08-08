@@ -219,7 +219,9 @@ export const joinQuiz: RequestHandler = (req, res) => {
       return res.status(400).json(errorResponse);
     }
 
-    const quiz = quizzes.find((q) => q.roomCode.toUpperCase() === roomCode.toUpperCase());
+    const quiz = quizzes.find(
+      (q) => q.roomCode.toUpperCase() === roomCode.toUpperCase(),
+    );
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",
@@ -439,22 +441,31 @@ export const submitQuiz: RequestHandler = (req, res) => {
     let questionsCorrect = 0;
 
     quiz.questions.forEach((question) => {
-      const studentAnswer = participant.answers.find((a) => a.questionId === question.id);
+      const studentAnswer = participant.answers.find(
+        (a) => a.questionId === question.id,
+      );
 
-      if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
+      if (
+        studentAnswer &&
+        studentAnswer.answer !== undefined &&
+        studentAnswer.answer !== null
+      ) {
         questionsAnswered++;
         let isCorrect = false;
 
-        if (question.type === "multiple-choice" || question.type === "true-false") {
+        if (
+          question.type === "multiple-choice" ||
+          question.type === "true-false"
+        ) {
           // Handle both string and number answers for compatibility
           let studentAns = studentAnswer.answer;
           let correctAns = question.correctAnswer;
 
           // Convert to numbers if possible for comparison
-          if (typeof studentAns === 'string' && !isNaN(Number(studentAns))) {
+          if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
             studentAns = Number(studentAns);
           }
-          if (typeof correctAns === 'string' && !isNaN(Number(correctAns))) {
+          if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
             correctAns = Number(correctAns);
           }
 
@@ -481,7 +492,7 @@ export const submitQuiz: RequestHandler = (req, res) => {
       success: true,
       score: totalScore,
       submittedAt: participant.submittedAt,
-      message: "Quiz submitted successfully. Score calculated automatically."
+      message: "Quiz submitted successfully. Score calculated automatically.",
     });
   } catch (error) {
     const errorResponse: ErrorResponse = {
@@ -519,22 +530,31 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
       // Calculate actual score based on correct answers for each participant
       quiz.questions.forEach((question) => {
-        const studentAnswer = p.answers.find((a) => a.questionId === question.id);
+        const studentAnswer = p.answers.find(
+          (a) => a.questionId === question.id,
+        );
 
-        if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
+        if (
+          studentAnswer &&
+          studentAnswer.answer !== undefined &&
+          studentAnswer.answer !== null
+        ) {
           questionsAnswered++;
           let isCorrect = false;
 
-          if (question.type === "multiple-choice" || question.type === "true-false") {
+          if (
+            question.type === "multiple-choice" ||
+            question.type === "true-false"
+          ) {
             // Handle both string and number answers for compatibility
             let studentAns = studentAnswer.answer;
             let correctAns = question.correctAnswer;
 
             // Convert to numbers if possible for comparison
-            if (typeof studentAns === 'string' && !isNaN(Number(studentAns))) {
+            if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
               studentAns = Number(studentAns);
             }
-            if (typeof correctAns === 'string' && !isNaN(Number(correctAns))) {
+            if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
               correctAns = Number(correctAns);
             }
 
@@ -558,7 +578,7 @@ export const getQuizResults: RequestHandler = (req, res) => {
         score: totalScore,
         questionsAnswered,
         questionsCorrect,
-        calculatedAt: new Date().toISOString()
+        calculatedAt: new Date().toISOString(),
       };
     });
 
@@ -718,7 +738,9 @@ export const checkQuiz: RequestHandler = (req, res) => {
   try {
     const { roomCode } = req.params;
 
-    const quiz = quizzes.find((q) => q.roomCode.toUpperCase() === roomCode.toUpperCase());
+    const quiz = quizzes.find(
+      (q) => q.roomCode.toUpperCase() === roomCode.toUpperCase(),
+    );
     if (!quiz) {
       const errorResponse: ErrorResponse = {
         error: "QUIZ_NOT_FOUND",

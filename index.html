@@ -20,7 +20,7 @@
               "ResizeObserver loop limit exceeded",
               "Script error",
             ];
-            if (resizeObserverMessages.some(msg => message.includes(msg))) {
+            if (resizeObserverMessages.some((msg) => message.includes(msg))) {
               return; // Suppress ResizeObserver and related errors
             }
           }
@@ -30,7 +30,10 @@
         // Override console.warn
         console.warn = function (...args) {
           const message = args[0];
-          if (typeof message === "string" && message.includes("ResizeObserver")) {
+          if (
+            typeof message === "string" &&
+            message.includes("ResizeObserver")
+          ) {
             return; // Suppress ResizeObserver warnings
           }
           originalConsoleWarn.apply(console, args);
@@ -39,17 +42,22 @@
         // Enhanced window error handlers
         window.addEventListener("unhandledrejection", function (event) {
           const reason = event.reason;
-          if (reason && typeof reason === "object" && reason.message &&
-              reason.message.includes("ResizeObserver")) {
+          if (
+            reason &&
+            typeof reason === "object" &&
+            reason.message &&
+            reason.message.includes("ResizeObserver")
+          ) {
             event.preventDefault();
           }
         });
 
         window.addEventListener("error", function (event) {
-          if (event.message && (
-            event.message.includes("ResizeObserver") ||
-            event.message.includes("Script error")
-          )) {
+          if (
+            event.message &&
+            (event.message.includes("ResizeObserver") ||
+              event.message.includes("Script error"))
+          ) {
             event.preventDefault();
             return false;
           }
@@ -74,7 +82,10 @@
                     callback(entries, observer);
                   } catch (error) {
                     // Completely silence ResizeObserver errors
-                    if (error.message && !error.message.includes("ResizeObserver")) {
+                    if (
+                      error.message &&
+                      !error.message.includes("ResizeObserver")
+                    ) {
                       throw error;
                     }
                   }
@@ -87,7 +98,7 @@
 
           // Additional safety: override the prototype
           const originalObserve = OriginalResizeObserver.prototype.observe;
-          OriginalResizeObserver.prototype.observe = function(...args) {
+          OriginalResizeObserver.prototype.observe = function (...args) {
             try {
               return originalObserve.apply(this, args);
             } catch (error) {
@@ -99,8 +110,11 @@
 
         // Global error suppression as last resort
         const originalErrorHandler = window.onerror;
-        window.onerror = function(message, source, lineno, colno, error) {
-          if (typeof message === "string" && message.includes("ResizeObserver")) {
+        window.onerror = function (message, source, lineno, colno, error) {
+          if (
+            typeof message === "string" &&
+            message.includes("ResizeObserver")
+          ) {
             return true; // Prevent default error handling
           }
           if (originalErrorHandler) {

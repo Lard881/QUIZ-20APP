@@ -93,9 +93,9 @@ export default function QuizManagement() {
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [quiz]);
 
@@ -103,7 +103,11 @@ export default function QuizManagement() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if ((activeTab === 'participants' || activeTab === 'analytics') && quiz && !refreshing) {
+    if (
+      (activeTab === "participants" || activeTab === "analytics") &&
+      quiz &&
+      !refreshing
+    ) {
       interval = setInterval(() => {
         handleRefresh();
       }, 30000); // 30 seconds
@@ -124,11 +128,11 @@ export default function QuizManagement() {
     try {
       // Fetch quiz details with minimal headers first
       const quizResponse = await fetch(`/api/quiz/${quizId}`, {
-        cache: 'no-cache', // Force fresh data
+        cache: "no-cache", // Force fresh data
         headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
       });
 
       if (quizResponse.ok) {
@@ -156,11 +160,11 @@ export default function QuizManagement() {
       // Fetch quiz results/participants with fresh data
       try {
         const resultsResponse = await fetch(`/api/quiz/${quizId}/results`, {
-          cache: 'no-cache', // Force fresh data
+          cache: "no-cache", // Force fresh data
           headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
         });
 
         if (resultsResponse.ok) {
@@ -182,7 +186,8 @@ export default function QuizManagement() {
           if (isRefresh) {
             toast({
               title: "Partial Refresh",
-              description: "Quiz data updated, but participant data may be outdated",
+              description:
+                "Quiz data updated, but participant data may be outdated",
               variant: "destructive",
             });
           }
@@ -233,12 +238,12 @@ export default function QuizManagement() {
     try {
       // Force a fresh fetch of results which will recalculate all scores
       const response = await fetch(`/api/quiz/${quizId}/results`, {
-        method: 'POST', // Use POST to trigger recalculation
+        method: "POST", // Use POST to trigger recalculation
         headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache'
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
         },
-        body: JSON.stringify({ forceRecalculate: true })
+        body: JSON.stringify({ forceRecalculate: true }),
       });
 
       if (response.ok) {
@@ -404,8 +409,19 @@ export default function QuizManagement() {
   // Analytics helper functions
   const calculateStudentScore = (
     participant: QuizParticipant,
-  ): { score: number; details: any[]; questionsAnswered: number; questionsCorrect: number } => {
-    if (!quiz) return { score: 0, details: [], questionsAnswered: 0, questionsCorrect: 0 };
+  ): {
+    score: number;
+    details: any[];
+    questionsAnswered: number;
+    questionsCorrect: number;
+  } => {
+    if (!quiz)
+      return {
+        score: 0,
+        details: [],
+        questionsAnswered: 0,
+        questionsCorrect: 0,
+      };
 
     let totalScore = 0;
     let questionsAnswered = 0;
@@ -419,7 +435,11 @@ export default function QuizManagement() {
       let isCorrect = false;
       let pointsEarned = 0;
 
-      if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
+      if (
+        studentAnswer &&
+        studentAnswer.answer !== undefined &&
+        studentAnswer.answer !== null
+      ) {
         questionsAnswered++;
 
         if (
@@ -431,10 +451,10 @@ export default function QuizManagement() {
           let correctAns = question.correctAnswer;
 
           // Convert to numbers if possible for accurate comparison
-          if (typeof studentAns === 'string' && !isNaN(Number(studentAns))) {
+          if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
             studentAns = Number(studentAns);
           }
-          if (typeof correctAns === 'string' && !isNaN(Number(correctAns))) {
+          if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
             correctAns = Number(correctAns);
           }
 
@@ -463,7 +483,10 @@ export default function QuizManagement() {
         isCorrect,
         pointsEarned,
         maxPoints: question.points,
-        answered: studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null,
+        answered:
+          studentAnswer &&
+          studentAnswer.answer !== undefined &&
+          studentAnswer.answer !== null,
       });
     });
 
@@ -556,35 +579,48 @@ export default function QuizManagement() {
           const percentage = totalPoints > 0 ? (score / totalPoints) * 100 : 0;
           const grade = getGrade(percentage);
 
-          return { participant, scoreData, score, totalPoints, percentage, grade };
+          return {
+            participant,
+            scoreData,
+            score,
+            totalPoints,
+            percentage,
+            grade,
+          };
         })
         .sort((a, b) => {
           // Same sorting logic as the table
           if (b.percentage !== a.percentage) {
             return b.percentage - a.percentage;
           }
-          if (a.participant.submittedAt && !b.participant.submittedAt) return -1;
+          if (a.participant.submittedAt && !b.participant.submittedAt)
+            return -1;
           if (!a.participant.submittedAt && b.participant.submittedAt) return 1;
           if (a.participant.submittedAt && b.participant.submittedAt) {
-            return new Date(a.participant.submittedAt).getTime() - new Date(b.participant.submittedAt).getTime();
+            return (
+              new Date(a.participant.submittedAt).getTime() -
+              new Date(b.participant.submittedAt).getTime()
+            );
           }
           return 0;
         })
-        .map(({ participant, score, totalPoints, percentage, grade }, index) => {
-          const submissionTime = participant.submittedAt
-            ? new Date(participant.submittedAt).toLocaleString()
-            : "In Progress";
+        .map(
+          ({ participant, score, totalPoints, percentage, grade }, index) => {
+            const submissionTime = participant.submittedAt
+              ? new Date(participant.submittedAt).toLocaleString()
+              : "In Progress";
 
-          return [
-            index + 1, // Rank
-            `"${participant.name}"`,
-            score,
-            totalPoints,
-            `${percentage.toFixed(1)}%`,
-            grade,
-            `"${submissionTime}"`,
-          ].join(",");
-        }),
+            return [
+              index + 1, // Rank
+              `"${participant.name}"`,
+              score,
+              totalPoints,
+              `${percentage.toFixed(1)}%`,
+              grade,
+              `"${submissionTime}"`,
+            ].join(",");
+          },
+        ),
     ].join("\n");
 
     // Create and download file
@@ -950,7 +986,8 @@ export default function QuizManagement() {
                   <div>
                     <CardTitle>Participants ({participants.length})</CardTitle>
                     <CardDescription>
-                      List of students who have joined this quiz. For detailed scores and performance, check the Analytics tab.
+                      List of students who have joined this quiz. For detailed
+                      scores and performance, check the Analytics tab.
                     </CardDescription>
                   </div>
                   <Button
@@ -959,7 +996,9 @@ export default function QuizManagement() {
                     size="sm"
                     disabled={refreshing}
                   >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                    <RefreshCw
+                      className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+                    />
                     {refreshing ? "Refreshing..." : "Refresh"}
                   </Button>
                 </div>
@@ -986,7 +1025,9 @@ export default function QuizManagement() {
                           <User className="w-5 h-5 text-primary" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-medium text-lg">{participant.name}</h4>
+                          <h4 className="font-medium text-lg">
+                            {participant.name}
+                          </h4>
                           <p className="text-sm text-muted-foreground">
                             Participant ID: {participant.id.slice(-8)}
                           </p>
@@ -1017,7 +1058,9 @@ export default function QuizManagement() {
                       size="sm"
                       disabled={refreshing}
                     >
-                      <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                      <RefreshCw
+                        className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+                      />
                       {refreshing ? "Refreshing..." : "Refresh Data"}
                     </Button>
                     <Button
@@ -1073,7 +1116,10 @@ export default function QuizManagement() {
                             participants.filter((p) => {
                               const scoreData = calculateStudentScore(p);
                               const totalPossible = getTotalPossiblePoints();
-                              const percentage = totalPossible > 0 ? (scoreData.score / totalPossible) * 100 : 0;
+                              const percentage =
+                                totalPossible > 0
+                                  ? (scoreData.score / totalPossible) * 100
+                                  : 0;
                               return getGrade(percentage) !== "F";
                             }).length
                           }
@@ -1088,7 +1134,10 @@ export default function QuizManagement() {
                             participants.filter((p) => {
                               const scoreData = calculateStudentScore(p);
                               const totalPossible = getTotalPossiblePoints();
-                              const percentage = totalPossible > 0 ? (scoreData.score / totalPossible) * 100 : 0;
+                              const percentage =
+                                totalPossible > 0
+                                  ? (scoreData.score / totalPossible) * 100
+                                  : 0;
                               return getGrade(percentage) === "F";
                             }).length
                           }
@@ -1129,13 +1178,24 @@ export default function QuizManagement() {
                             {participants
                               .map((participant) => {
                                 // Always recalculate score for each participant
-                                const scoreData = calculateStudentScore(participant);
+                                const scoreData =
+                                  calculateStudentScore(participant);
                                 const score = scoreData.score;
                                 const totalPossible = getTotalPossiblePoints();
-                                const percentage = totalPossible > 0 ? (score / totalPossible) * 100 : 0;
+                                const percentage =
+                                  totalPossible > 0
+                                    ? (score / totalPossible) * 100
+                                    : 0;
                                 const grade = getGrade(percentage);
 
-                                return { participant, scoreData, score, totalPossible, percentage, grade };
+                                return {
+                                  participant,
+                                  scoreData,
+                                  score,
+                                  totalPossible,
+                                  percentage,
+                                  grade,
+                                };
                               })
                               .sort((a, b) => {
                                 // Sort by percentage (highest first), then by submission time
@@ -1143,57 +1203,86 @@ export default function QuizManagement() {
                                   return b.percentage - a.percentage;
                                 }
                                 // If same percentage, prioritize submitted over in-progress
-                                if (a.participant.submittedAt && !b.participant.submittedAt) return -1;
-                                if (!a.participant.submittedAt && b.participant.submittedAt) return 1;
+                                if (
+                                  a.participant.submittedAt &&
+                                  !b.participant.submittedAt
+                                )
+                                  return -1;
+                                if (
+                                  !a.participant.submittedAt &&
+                                  b.participant.submittedAt
+                                )
+                                  return 1;
                                 // If both submitted or both in-progress, sort by submission time
-                                if (a.participant.submittedAt && b.participant.submittedAt) {
-                                  return new Date(a.participant.submittedAt).getTime() - new Date(b.participant.submittedAt).getTime();
+                                if (
+                                  a.participant.submittedAt &&
+                                  b.participant.submittedAt
+                                ) {
+                                  return (
+                                    new Date(
+                                      a.participant.submittedAt,
+                                    ).getTime() -
+                                    new Date(
+                                      b.participant.submittedAt,
+                                    ).getTime()
+                                  );
                                 }
                                 return 0;
                               })
-                              .map(({ participant, scoreData, score, totalPossible, percentage, grade }, index) => {
-
-                              return (
-                                <tr
-                                  key={participant.id}
-                                  className="border-b hover:bg-muted/20"
-                                >
-                                  <td className="p-3 font-medium">
-                                    <div className="flex items-center space-x-3">
-                                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                                        {index + 1}
-                                      </div>
-                                      <span>{participant.name}</span>
-                                    </div>
-                                  </td>
-                                  <td className="p-3">
-                                    {score} / {totalPossible}
-                                  </td>
-                                  <td className="p-3">
-                                    <span
-                                      className={`font-medium ${getScoreColor(percentage)}`}
+                              .map(
+                                (
+                                  {
+                                    participant,
+                                    scoreData,
+                                    score,
+                                    totalPossible,
+                                    percentage,
+                                    grade,
+                                  },
+                                  index,
+                                ) => {
+                                  return (
+                                    <tr
+                                      key={participant.id}
+                                      className="border-b hover:bg-muted/20"
                                     >
-                                      {percentage.toFixed(1)}%
-                                    </span>
-                                  </td>
-                                  <td className="p-3">
-                                    <Badge
-                                      variant={getGradeVariant(grade)}
-                                      className="font-bold"
-                                    >
-                                      {grade}
-                                    </Badge>
-                                  </td>
-                                  <td className="p-3 text-sm text-muted-foreground">
-                                    {participant.submittedAt
-                                      ? new Date(
-                                          participant.submittedAt,
-                                        ).toLocaleString()
-                                      : "In Progress"}
-                                  </td>
-                                </tr>
-                              );
-                            })}
+                                      <td className="p-3 font-medium">
+                                        <div className="flex items-center space-x-3">
+                                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                                            {index + 1}
+                                          </div>
+                                          <span>{participant.name}</span>
+                                        </div>
+                                      </td>
+                                      <td className="p-3">
+                                        {score} / {totalPossible}
+                                      </td>
+                                      <td className="p-3">
+                                        <span
+                                          className={`font-medium ${getScoreColor(percentage)}`}
+                                        >
+                                          {percentage.toFixed(1)}%
+                                        </span>
+                                      </td>
+                                      <td className="p-3">
+                                        <Badge
+                                          variant={getGradeVariant(grade)}
+                                          className="font-bold"
+                                        >
+                                          {grade}
+                                        </Badge>
+                                      </td>
+                                      <td className="p-3 text-sm text-muted-foreground">
+                                        {participant.submittedAt
+                                          ? new Date(
+                                              participant.submittedAt,
+                                            ).toLocaleString()
+                                          : "In Progress"}
+                                      </td>
+                                    </tr>
+                                  );
+                                },
+                              )}
                           </tbody>
                         </table>
                       </div>
