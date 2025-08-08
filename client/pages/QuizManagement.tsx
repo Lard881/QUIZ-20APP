@@ -272,7 +272,8 @@ export default function QuizManagement() {
   const generateQRCode = () => {
     if (!quiz) return "";
     const baseUrl = window.location.origin;
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${baseUrl}/student?code=${quiz.roomCode}`)}`;
+    const studentUrl = `${baseUrl}/student?code=${quiz.roomCode}`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(studentUrl)}`;
   };
 
   // Analytics helper functions
