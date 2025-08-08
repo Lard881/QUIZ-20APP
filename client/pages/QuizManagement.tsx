@@ -990,10 +990,6 @@ export default function QuizManagement() {
                                       {grade}
                                     </Badge>
                                   </td>
-                                  <td className="p-3">
-                                    {participant.answers.length} /{" "}
-                                    {quiz?.questions.length || 0}
-                                  </td>
                                   <td className="p-3 text-sm text-muted-foreground">
                                     {participant.submittedAt
                                       ? new Date(
