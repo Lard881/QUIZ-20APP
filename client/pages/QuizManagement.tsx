@@ -125,6 +125,10 @@ export default function QuizManagement() {
       setRefreshing(true);
     }
 
+    if (!quizId) {
+      throw new Error("Quiz ID is missing from URL parameters");
+    }
+
     try {
       console.log("Fetching quiz data for ID:", quizId);
       // Fetch quiz details with minimal headers first
