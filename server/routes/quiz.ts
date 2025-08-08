@@ -401,6 +401,77 @@ export const submitAnswer: RequestHandler = (req, res) => {
   }
 };
 
+// Submit entire quiz with auto-scoring
+export const submitQuiz: RequestHandler = (req, res) => {
+  try {
+    const { sessionId } = req.body;
+
+    const participant = participants.find((p) => p.sessionId === sessionId);
+    if (!participant) {
+      const errorResponse: ErrorResponse = {
+        error: "PARTICIPANT_NOT_FOUND",
+        message: "Participant not found",
+      };
+      return res.status(404).json(errorResponse);
+    }
+
+    const session = quizSessions.find((s) => s.id === participant.sessionId);
+    if (!session) {
+      const errorResponse: ErrorResponse = {
+        error: "SESSION_NOT_FOUND",
+        message: "Quiz session not found",
+      };
+      return res.status(404).json(errorResponse);
+    }
+
+    const quiz = quizzes.find((q) => q.id === session.quizId);
+    if (!quiz) {
+      const errorResponse: ErrorResponse = {
+        error: "QUIZ_NOT_FOUND",
+        message: "Quiz not found",
+      };
+      return res.status(404).json(errorResponse);
+    }
+
+    // Calculate final score
+    let totalScore = 0;
+    quiz.questions.forEach((question) => {
+      const studentAnswer = participant.answers.find((a) => a.questionId === question.id);
+
+      if (studentAnswer) {
+        let isCorrect = false;
+
+        if (question.type === "multiple-choice" || question.type === "true-false") {
+          isCorrect = studentAnswer.answer === question.correctAnswer;
+        } else if (question.type === "short-answer") {
+          isCorrect = studentAnswer.answer &&
+                     studentAnswer.answer.toString().trim() !== "";
+        }
+
+        if (isCorrect) {
+          totalScore += question.points;
+        }
+      }
+    });
+
+    // Mark quiz as submitted with timestamp and score
+    participant.submittedAt = new Date().toISOString();
+    participant.score = totalScore;
+
+    res.json({
+      success: true,
+      score: totalScore,
+      submittedAt: participant.submittedAt
+    });
+  } catch (error) {
+    const errorResponse: ErrorResponse = {
+      error: "SUBMIT_QUIZ_FAILED",
+      message: "Failed to submit quiz",
+    };
+    res.status(500).json(errorResponse);
+  }
+};
+
 // Get quiz results
 export const getQuizResults: RequestHandler = (req, res) => {
   try {
