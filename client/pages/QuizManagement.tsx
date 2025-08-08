@@ -974,20 +974,12 @@ export default function QuizManagement() {
                           </thead>
                           <tbody>
                             {participants.map((participant) => {
-                              // Debug logging
-                              console.log(`Processing participant: ${participant.name}`);
-                              console.log(`Participant data:`, participant);
-                              console.log(`Participant answers:`, participant.answers);
-
                               // Always recalculate score for each participant
                               const scoreData = calculateStudentScore(participant);
                               const score = scoreData.score;
                               const totalPossible = getTotalPossiblePoints();
                               const percentage = totalPossible > 0 ? (score / totalPossible) * 100 : 0;
                               const grade = getGrade(percentage);
-
-                              console.log(`${participant.name} - Score: ${score}/${totalPossible} (${percentage}%) Grade: ${grade}`);
-                              console.log(`Score details:`, scoreData.details);
 
                               return (
                                 <tr
