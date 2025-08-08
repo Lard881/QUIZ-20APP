@@ -998,7 +998,12 @@ export default function QuizManagement() {
                                   className="border-b hover:bg-muted/20"
                                 >
                                   <td className="p-3 font-medium">
-                                    {participant.name}
+                                    <div className="flex items-center space-x-3">
+                                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                                        {index + 1}
+                                      </div>
+                                      <span>{participant.name}</span>
+                                    </div>
                                   </td>
                                   <td className="p-3">
                                     {score} / {totalPossible}
