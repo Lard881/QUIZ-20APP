@@ -948,7 +948,7 @@ export default function QuizManagement() {
                           <thead className="bg-muted/30">
                             <tr>
                               <th className="text-left p-3 font-medium">
-                                Student Name
+                                Rank & Student Name
                               </th>
                               <th className="text-left p-3 font-medium">
                                 Score
