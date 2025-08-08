@@ -83,10 +83,20 @@ export default function QuizManagement() {
     fetchQuizData();
   }, [instructor, quizId, navigate]);
 
-  const fetchQuizData = async () => {
+  const fetchQuizData = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    }
+
     try {
       // Fetch quiz details with minimal headers first
-      const quizResponse = await fetch(`/api/quiz/${quizId}`);
+      const quizResponse = await fetch(`/api/quiz/${quizId}`, {
+        cache: 'no-cache', // Force fresh data
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
 
       if (quizResponse.ok) {
         const quizData = await quizResponse.json();
@@ -110,39 +120,76 @@ export default function QuizManagement() {
         );
       }
 
-      // Fetch quiz results/participants
+      // Fetch quiz results/participants with fresh data
       try {
-        const resultsResponse = await fetch(`/api/quiz/${quizId}/results`);
+        const resultsResponse = await fetch(`/api/quiz/${quizId}/results`, {
+          cache: 'no-cache', // Force fresh data
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
 
         if (resultsResponse.ok) {
           const resultsData = await resultsResponse.json();
           setParticipants(resultsData.participants || []);
+
+          if (isRefresh) {
+            toast({
+              title: "Data Refreshed",
+              description: `Updated quiz data with ${resultsData.participants?.length || 0} participants`,
+            });
+          }
         } else {
           // Results endpoint failure is not critical, just log it
           console.warn(
             "Could not fetch quiz results:",
             resultsResponse.statusText,
           );
+          if (isRefresh) {
+            toast({
+              title: "Partial Refresh",
+              description: "Quiz data updated, but participant data may be outdated",
+              variant: "destructive",
+            });
+          }
         }
       } catch (resultsError) {
         console.warn("Error fetching quiz results:", resultsError);
+        if (isRefresh) {
+          toast({
+            title: "Refresh Warning",
+            description: "Could not update participant data. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error("Error fetching quiz data:", error);
       toast({
-        title: "Error",
+        title: isRefresh ? "Refresh Failed" : "Error",
         description:
           error instanceof Error ? error.message : "Failed to load quiz data",
         variant: "destructive",
       });
 
-      // Navigate back to dashboard on critical errors
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
+      // Only navigate away on initial load errors, not refresh errors
+      if (!isRefresh) {
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+      }
     } finally {
       setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      }
     }
+  };
+
+  // Create dedicated refresh function
+  const handleRefresh = async () => {
+    await fetchQuizData(true);
   };
 
   const updateQuizSettings = async () => {
