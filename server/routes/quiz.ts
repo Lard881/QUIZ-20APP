@@ -435,15 +435,9 @@ export const submitQuiz: RequestHandler = (req, res) => {
 
     // Calculate final score with improved answer comparison
     let totalScore = 0;
-    console.log(`\n=== SCORING ${participant.name} ===`);
-    console.log(`Total answers provided: ${participant.answers.length}`);
 
-    quiz.questions.forEach((question, qIndex) => {
+    quiz.questions.forEach((question) => {
       const studentAnswer = participant.answers.find((a) => a.questionId === question.id);
-      console.log(`\nQuestion ${qIndex + 1} (${question.id}):`);
-      console.log(`  Type: ${question.type}`);
-      console.log(`  Correct answer: ${question.correctAnswer}`);
-      console.log(`  Student answer: ${studentAnswer?.answer || 'No answer'}`);
 
       if (studentAnswer) {
         let isCorrect = false;
@@ -458,25 +452,16 @@ export const submitQuiz: RequestHandler = (req, res) => {
             : question.correctAnswer;
 
           isCorrect = studentAns === correctAns;
-          console.log(`  Comparison: ${studentAns} === ${correctAns} = ${isCorrect}`);
         } else if (question.type === "short-answer") {
           isCorrect = studentAnswer.answer &&
                      studentAnswer.answer.toString().trim() !== "";
-          console.log(`  Short answer valid: ${isCorrect}`);
         }
 
         if (isCorrect) {
           totalScore += question.points;
-          console.log(`  ✓ Correct! +${question.points} points. Total: ${totalScore}`);
-        } else {
-          console.log(`  ✗ Incorrect. Total: ${totalScore}`);
         }
-      } else {
-        console.log(`  No answer provided`);
       }
     });
-
-    console.log(`Final score for ${participant.name}: ${totalScore}`);
 
     // Mark quiz as submitted with timestamp and score
     participant.submittedAt = new Date().toISOString();
