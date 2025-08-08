@@ -895,7 +895,7 @@ export default function QuizManagement() {
                   <div>
                     <CardTitle>Participants ({participants.length})</CardTitle>
                     <CardDescription>
-                      View and manage quiz participants
+                      List of students who have joined this quiz. For detailed scores and performance, check the Analytics tab.
                     </CardDescription>
                   </div>
                   <Button
