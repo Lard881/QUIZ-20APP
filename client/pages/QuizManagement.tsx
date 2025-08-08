@@ -115,8 +115,6 @@ export default function QuizManagement() {
 
         if (resultsResponse.ok) {
           const resultsData = await resultsResponse.json();
-          console.log("Quiz results data received:", resultsData);
-          console.log("Participants data:", resultsData.participants);
           setParticipants(resultsData.participants || []);
         } else {
           // Results endpoint failure is not critical, just log it
