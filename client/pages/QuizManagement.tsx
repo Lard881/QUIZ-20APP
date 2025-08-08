@@ -81,8 +81,23 @@ export default function QuizManagement() {
       navigate("/dashboard");
       return;
     }
-    fetchQuizData();
-  }, [instructor, quizId, navigate]);
+    fetchQuizData()
+      .catch((error) => {
+        console.error("Error in initial quiz data fetch:", error);
+        toast({
+          title: "Error Loading Quiz",
+          description: error.message || "Failed to load quiz data. The quiz may not exist.",
+          variant: "destructive",
+        });
+        // Navigate back to dashboard if quiz not found
+        if (error.message?.includes("404") || error.message?.includes("not found")) {
+          setTimeout(() => navigate("/dashboard"), 2000);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [instructor, quizId, navigate, toast]);
 
   // Auto-refresh when tab becomes visible
   useEffect(() => {
