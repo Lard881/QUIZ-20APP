@@ -951,9 +951,6 @@ export default function QuizManagement() {
                                 Grade
                               </th>
                               <th className="text-left p-3 font-medium">
-                                Questions Answered
-                              </th>
-                              <th className="text-left p-3 font-medium">
                                 Submission Time
                               </th>
                             </tr>
