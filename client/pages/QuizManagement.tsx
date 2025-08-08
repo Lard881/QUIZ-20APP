@@ -225,6 +225,50 @@ export default function QuizManagement() {
     await fetchQuizData(true);
   };
 
+  // Force recalculate scores for all participants
+  const forceRecalculateScores = async () => {
+    if (!quiz || !quizId) return;
+
+    setRefreshing(true);
+    try {
+      // Force a fresh fetch of results which will recalculate all scores
+      const response = await fetch(`/api/quiz/${quizId}/results`, {
+        method: 'POST', // Use POST to trigger recalculation
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
+        body: JSON.stringify({ forceRecalculate: true })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setParticipants(data.participants || []);
+        toast({
+          title: "Scores Recalculated",
+          description: `Successfully recalculated scores for ${data.participants?.length || 0} participants`,
+        });
+      } else {
+        // Fallback to regular refresh if POST endpoint doesn't exist
+        await handleRefresh();
+        toast({
+          title: "Scores Updated",
+          description: "Refreshed participant data and recalculated scores",
+        });
+      }
+    } catch (error) {
+      console.error("Error recalculating scores:", error);
+      // Fallback to regular refresh
+      await handleRefresh();
+      toast({
+        title: "Scores Updated",
+        description: "Refreshed participant data and recalculated scores",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const updateQuizSettings = async () => {
     if (!quiz) return;
 
