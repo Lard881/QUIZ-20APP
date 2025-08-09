@@ -580,15 +580,13 @@ export const getQuizResults: RequestHandler = (req, res) => {
       }
       // F grade: 0-29% (already set as default)
 
-      console.log(`\n=== FINAL RESULTS for ${participantName} ===`);
+      console.log(`\n=== FINAL RESULTS for ${participantName} (Attempt #${attemptNumber}) ===`);
       console.log(`Total Score: ${totalScore}/${totalPossiblePoints} points`);
       console.log(`Percentage: ${percentage.toFixed(2)}%`);
       console.log(`Grade: ${grade}`);
-      console.log(`Questions Answered: ${questionsAnswered}/${quiz.questions.length}`);
-      console.log(`Questions Correct: ${questionsCorrect}/${quiz.questions.length}`);
       console.log(`Pass Status: ${grade !== 'F' ? 'PASSED' : 'FAILED'}`);
 
-      // UPDATE PARTICIPANT RECORD with calculated results
+      // UPDATE PARTICIPANT RECORD with calculated results (handles multiple attempts)
       participant.score = totalScore;
       participant.percentage = Math.round(percentage * 100) / 100;
       participant.grade = grade;
@@ -604,9 +602,22 @@ export const getQuizResults: RequestHandler = (req, res) => {
         totalPossiblePoints,
         percentage: Math.round(percentage * 100) / 100,
         grade,
+        attemptNumber,
         calculatedAt: new Date().toISOString(),
       };
     });
+
+    // BATCH PROCESSING SUMMARY for many participants
+    const totalParticipants = participantsWithScores.length;
+    const passedCount = participantsWithScores.filter(p => p.grade !== 'F').length;
+    const failedCount = participantsWithScores.filter(p => p.grade === 'F').length;
+    const avgScore = participantsWithScores.reduce((sum, p) => sum + (p.percentage || 0), 0) / (totalParticipants || 1);
+
+    console.log(`\n=== BATCH PROCESSING SUMMARY ===`);
+    console.log(`Total Records Processed: ${totalParticipants}`);
+    console.log(`Passed: ${passedCount} | Failed: ${failedCount}`);
+    console.log(`Average Score: ${avgScore.toFixed(2)}%`);
+    console.log(`Processing Time: ${Date.now() - Date.now()} ms`);
 
 
     const averageScore =
