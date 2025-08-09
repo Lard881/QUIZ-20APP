@@ -326,6 +326,16 @@ export const submitAnswer: RequestHandler = (req, res) => {
       participant.answers.push(answerData);
     }
 
+    // AUTO-SUBMISSION: Check if this was the last question and auto-mark as submitted
+    const session = quizSessions.find((s) => s.id === sessionId);
+    if (session) {
+      const quiz = quizzes.find((q) => q.id === session.quizId);
+      if (quiz && participant.answers.length >= quiz.questions.length && !participant.submittedAt) {
+        participant.submittedAt = answerData.timeStamp;
+        console.log(`Auto-submitted quiz for ${participant.name} - answered all ${quiz.questions.length} questions`);
+      }
+    }
+
     res.json({ success: true });
   } catch (error) {
     const errorResponse: ErrorResponse = {
