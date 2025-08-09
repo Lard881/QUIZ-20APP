@@ -453,9 +453,10 @@ export default function QuizManagement() {
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(studentUrl)}`;
   };
 
-  // Analytics helper functions - Enhanced Score Calculator with proper 0 handling
+  // Universal Score Calculator - Works for ANY participant dynamically
   const calculateStudentPerformance = (participant: QuizParticipant) => {
-    if (!quiz) {
+    // Robust validation for any participant
+    if (!quiz || !participant) {
       return {
         score: 0,
         percentage: 0,
@@ -473,9 +474,11 @@ export default function QuizManagement() {
     let questionsAnswered = 0;
     const details: any[] = [];
 
-    // If student didn't answer any questions, give them 0 score immediately
-    if (!participant.answers || participant.answers.length === 0) {
-      console.log(`Frontend: Student ${participant.name} has no answers - giving 0 score`);
+    // Handle ANY participant - whether they answered or not
+    const hasAnswers = participant.answers && Array.isArray(participant.answers) && participant.answers.length > 0;
+
+    if (!hasAnswers) {
+      console.log(`Participant ${participant.name || 'Unknown'} has no answers - assigning 0 score`);
 
       // Create details for each question showing they didn't answer
       quiz.questions.forEach((question) => {
@@ -491,7 +494,7 @@ export default function QuizManagement() {
 
       const submissionTime = participant.submittedAt
         ? new Date(participant.submittedAt).toLocaleString()
-        : 'Not Submitted';
+        : participant.answers?.length > 0 ? 'Completed (no timestamp)' : 'Not Started';
 
       return {
         score: 0,
