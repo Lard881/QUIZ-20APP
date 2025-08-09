@@ -1248,11 +1248,24 @@ export default function QuizManagement() {
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-destructive">
                           {
-                            participants.filter((p) => {
-                              const performance = calculateStudentPerformance(p);
-                              // Only F grade is fail
-                              return performance.grade === "F";
-                            }).length
+                            (() => {
+                              if (!participants || participants.length === 0) return 0;
+
+                              let failedCount = 0;
+                              participants.forEach((participant) => {
+                                try {
+                                  const performance = calculateStudentPerformance(participant);
+                                  // Only F grade is fail - works for ANY participant
+                                  if (performance && performance.grade === "F") {
+                                    failedCount++;
+                                  }
+                                } catch (error) {
+                                  console.warn(`Error calculating fail status for participant ${participant.name}:`, error);
+                                }
+                              });
+
+                              return failedCount;
+                            })()
                           }
                         </div>
                         <div className="text-sm text-muted-foreground">
