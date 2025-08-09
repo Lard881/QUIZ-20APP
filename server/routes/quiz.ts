@@ -714,30 +714,77 @@ export const submitQuiz: RequestHandler = (req, res) => {
       }
     });
 
-    // IMMEDIATE SCORE FINALIZATION AND STORAGE
+    // COMPREHENSIVE MULTI-ATTEMPT SCORING SYSTEM (1-3 attempts)
     const submissionTime = new Date().toISOString();
-    participant.submittedAt = submissionTime;
-    participant.score = totalScore;
+    const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
+    const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
 
-    // Calculate comprehensive scoring metadata
-    const totalPossiblePoints = quiz.questions.reduce(
-      (sum, q) => sum + q.points,
-      0,
-    );
-    const percentage =
-      totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
     let grade = "F";
     if (percentage >= 80) grade = "A";
     else if (percentage >= 50) grade = "B";
     else if (percentage >= 30) grade = "C";
 
-    // SAVE ALL SCORING DATA TO PARTICIPANT RECORD
-    participant.percentage = Math.round(percentage * 100) / 100;
-    participant.grade = grade;
-    participant.questionsCorrect = questionsCorrect;
-    participant.questionsAnswered = questionsAnswered;
-    participant.scoreDetails = scoreDetails;
+    // Current attempt data
+    const currentAttempt = {
+      attemptNumber: participant.attemptNumber || 1,
+      score: totalScore,
+      percentage: Math.round(percentage * 100) / 100,
+      grade: grade,
+      questionsCorrect: questionsCorrect,
+      questionsAnswered: questionsAnswered,
+      scoreDetails: scoreDetails,
+      submittedAt: submissionTime,
+      calculatedAt: submissionTime
+    };
+
+    console.log(`\n📊 ATTEMPT #${currentAttempt.attemptNumber} COMPLETED:`);
+    console.log(`Score: ${totalScore}/${totalPossiblePoints} points (${percentage.toFixed(2)}%)`);
+    console.log(`Grade: ${grade}`);
+
+    // Initialize attempt history if it doesn't exist
+    if (!participant.attemptHistory) {
+      participant.attemptHistory = [];
+    }
+
+    // Add current attempt to history
+    participant.attemptHistory.push(currentAttempt);
+
+    // MULTI-ATTEMPT SCORING STRATEGY: Use BEST score across all attempts
+    const bestAttempt = participant.attemptHistory.reduce((best, current) => {
+      return current.score > best.score ? current : best;
+    });
+
+    // Calculate improvement across attempts
+    let improvement = 0;
+    if (participant.attemptHistory.length > 1) {
+      const firstAttempt = participant.attemptHistory[0];
+      const latestAttempt = participant.attemptHistory[participant.attemptHistory.length - 1];
+      improvement = latestAttempt.score - firstAttempt.score;
+    }
+
+    console.log(`\n🏆 MULTI-ATTEMPT ANALYSIS:`);
+    console.log(`Total Attempts: ${participant.attemptHistory.length}`);
+    console.log(`Best Score: ${bestAttempt.score}/${totalPossiblePoints} (Attempt #${bestAttempt.attemptNumber})`);
+    console.log(`Best Grade: ${bestAttempt.grade}`);
+    console.log(`Latest Score: ${currentAttempt.score}/${totalPossiblePoints}`);
+    console.log(`Improvement: ${improvement > 0 ? '+' : ''}${improvement} points`);
+
+    // SAVE PARTICIPANT RECORD WITH BEST PERFORMANCE
+    participant.submittedAt = submissionTime;  // Latest submission time
+    participant.score = bestAttempt.score;      // Best score achieved
+    participant.percentage = bestAttempt.percentage;  // Best percentage
+    participant.grade = bestAttempt.grade;      // Best grade
+    participant.questionsCorrect = bestAttempt.questionsCorrect;
+    participant.questionsAnswered = bestAttempt.questionsAnswered;
+    participant.scoreDetails = bestAttempt.scoreDetails;
     participant.calculatedAt = submissionTime;
+
+    // Multi-attempt metadata
+    participant.totalAttempts = participant.attemptHistory.length;
+    participant.latestAttemptScore = totalScore;
+    participant.latestAttemptGrade = grade;
+    participant.improvementPoints = improvement;
+    participant.bestAttemptNumber = bestAttempt.attemptNumber;
 
     console.log(
       `\n🎯 FINAL SCORE CALCULATION COMPLETE FOR: ${participant.name}`,
