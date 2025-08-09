@@ -146,14 +146,25 @@ export default function QuizManagement() {
 
     try {
       console.log("Fetching quiz data for ID:", quizId);
-      // Fetch quiz details with minimal headers first
-      const quizResponse = await fetch(`/api/quiz/${quizId}`, {
-        cache: "no-cache", // Force fresh data
-        headers: {
-          "Cache-Control": "no-cache",
-          Pragma: "no-cache",
-        },
-      });
+
+      // Robust fetch with error handling
+      let quizResponse;
+      try {
+        quizResponse = await fetch(`/api/quiz/${quizId}`, {
+          method: "GET",
+          cache: "no-cache",
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+          },
+          // Add timeout and error handling
+          signal: AbortSignal.timeout(10000), // 10 second timeout
+        });
+      } catch (fetchError) {
+        console.error("Network fetch error:", fetchError);
+        throw new Error(`Network error: Unable to connect to server. Please check your connection.`);
+      }
 
       if (quizResponse.ok) {
         const quizData = await quizResponse.json();
