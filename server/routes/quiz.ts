@@ -739,14 +739,17 @@ export const submitQuiz: RequestHandler = (req, res) => {
 
     // Store only essential data to minimize memory usage
     const attemptKey = `a${attemptNumber}`;
-    participant.attempts.set(attemptKey, {
+    const currentAttempt = {
       s: totalScore,           // score (compressed key)
       p: Math.round(percentage * 100) / 100, // percentage
       g: grade,                // grade
       c: questionsCorrect,     // correct count
       a: questionsAnswered,    // answered count
-      t: submissionTime        // timestamp
-    });
+      t: submissionTime,       // timestamp
+      attemptNumber: attemptNumber
+    };
+
+    participant.attempts.set(attemptKey, currentAttempt);
 
     // LIGHTNING-FAST BEST SCORE CALCULATION
     let bestScore = totalScore;
