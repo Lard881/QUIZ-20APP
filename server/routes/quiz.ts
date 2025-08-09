@@ -326,15 +326,21 @@ export const submitAnswer: RequestHandler = (req, res) => {
 
     // OPTIMIZED SEARCH for massive scale (400k+ participants)
     const searchStart = Date.now();
-    const matchingParticipants = participants.filter(p => p.sessionId === sessionId);
+    const matchingParticipants = participants.filter(
+      (p) => p.sessionId === sessionId,
+    );
     const searchTime = Date.now() - searchStart;
 
-    console.log(`🔍 Session search completed in ${searchTime}ms - Found ${matchingParticipants.length} matches`);
+    console.log(
+      `🔍 Session search completed in ${searchTime}ms - Found ${matchingParticipants.length} matches`,
+    );
 
     // Only log details for small numbers to avoid console overflow
     if (matchingParticipants.length <= 10) {
       matchingParticipants.forEach((p, index) => {
-        console.log(`Match ${index + 1}: ${p.name} (ID: ${p.id}) - Answers: ${p.answers?.length || 0}`);
+        console.log(
+          `Match ${index + 1}: ${p.name} (ID: ${p.id}) - Answers: ${p.answers?.length || 0}`,
+        );
       });
     } else {
       console.log(`📊 Large participant count detected - showing summary only`);
@@ -358,19 +364,23 @@ export const submitAnswer: RequestHandler = (req, res) => {
 
       // BULLETPROOF PARTICIPANT SELECTION for 400k+ participants scale
       const clientIP = getClientIP(req);
-      const userAgent = req.headers['user-agent'] || 'unknown';
+      const userAgent = req.headers["user-agent"] || "unknown";
 
-      console.log(`🔍 Identifying correct participant from ${sameSessionParticipants.length} candidates...`);
+      console.log(
+        `🔍 Identifying correct participant from ${sameSessionParticipants.length} candidates...`,
+      );
       console.log(`Client IP: ${clientIP}`);
 
       // PRIORITY 1: Exact IP + User Agent match (most reliable)
-      let selectedParticipant = sameSessionParticipants.find(p =>
-        p.ipAddress === clientIP && p.deviceFingerprint === userAgent
+      let selectedParticipant = sameSessionParticipants.find(
+        (p) => p.ipAddress === clientIP && p.deviceFingerprint === userAgent,
       );
 
       if (!selectedParticipant) {
         // PRIORITY 2: IP match only (good reliability)
-        selectedParticipant = sameSessionParticipants.find(p => p.ipAddress === clientIP);
+        selectedParticipant = sameSessionParticipants.find(
+          (p) => p.ipAddress === clientIP,
+        );
         if (selectedParticipant) {
           console.log(`🔄 Using IP-only match for participant selection`);
         }
@@ -378,23 +388,34 @@ export const submitAnswer: RequestHandler = (req, res) => {
 
       if (!selectedParticipant) {
         // PRIORITY 3: Most recent participant by timestamp (prevents Lord's issue)
-        selectedParticipant = sameSessionParticipants.reduce((latest, current) => {
-          const latestId = parseInt(latest.id.split("_")[1] || "0");
-          const currentId = parseInt(current.id.split("_")[1] || "0");
-          return currentId > latestId ? current : latest;
-        });
-        console.log(`⚠️ Using most recent participant as fallback - this prevents Lord's issue`);
+        selectedParticipant = sameSessionParticipants.reduce(
+          (latest, current) => {
+            const latestId = parseInt(latest.id.split("_")[1] || "0");
+            const currentId = parseInt(current.id.split("_")[1] || "0");
+            return currentId > latestId ? current : latest;
+          },
+        );
+        console.log(
+          `⚠️ Using most recent participant as fallback - this prevents Lord's issue`,
+        );
       }
 
       // CRITICAL PROTECTION: Ensure we don't overwrite someone else's answers
-      if (selectedParticipant && selectedParticipant.answers && selectedParticipant.answers.length > 0) {
+      if (
+        selectedParticipant &&
+        selectedParticipant.answers &&
+        selectedParticipant.answers.length > 0
+      ) {
         // Check if this IP is trying to submit to a participant with existing answers
-        const participantWithoutAnswers = sameSessionParticipants.find(p =>
-          (!p.answers || p.answers.length === 0) && p.ipAddress === clientIP
+        const participantWithoutAnswers = sameSessionParticipants.find(
+          (p) =>
+            (!p.answers || p.answers.length === 0) && p.ipAddress === clientIP,
         );
 
         if (participantWithoutAnswers) {
-          console.log(`🔀 Switching to participant without answers to prevent data loss`);
+          console.log(
+            `🔀 Switching to participant without answers to prevent data loss`,
+          );
           selectedParticipant = participantWithoutAnswers;
         }
       }
@@ -718,10 +739,16 @@ export const submitQuiz: RequestHandler = (req, res) => {
     const submissionTime = new Date().toISOString();
     const startTime = Date.now();
 
-    console.log(`\n⚡ OPTIMIZED SCORING FOR MASSIVE SCALE - Participant: ${participant.name}`);
+    console.log(
+      `\n⚡ OPTIMIZED SCORING FOR MASSIVE SCALE - Participant: ${participant.name}`,
+    );
 
-    const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
-    const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
+    const totalPossiblePoints = quiz.questions.reduce(
+      (sum, q) => sum + q.points,
+      0,
+    );
+    const percentage =
+      totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
 
     // Fast grade calculation
     let grade = "F";
@@ -740,13 +767,13 @@ export const submitQuiz: RequestHandler = (req, res) => {
     // Store only essential data to minimize memory usage
     const attemptKey = `a${attemptNumber}`;
     const currentAttempt = {
-      s: totalScore,           // score (compressed key)
+      s: totalScore, // score (compressed key)
       p: Math.round(percentage * 100) / 100, // percentage
-      g: grade,                // grade
-      c: questionsCorrect,     // correct count
-      a: questionsAnswered,    // answered count
-      t: submissionTime,       // timestamp
-      attemptNumber: attemptNumber
+      g: grade, // grade
+      c: questionsCorrect, // correct count
+      a: questionsAnswered, // answered count
+      t: submissionTime, // timestamp
+      attemptNumber: attemptNumber,
     };
 
     participant.attempts.set(attemptKey, currentAttempt);
@@ -775,7 +802,9 @@ export const submitQuiz: RequestHandler = (req, res) => {
 
     // MINIMAL LOGGING for 400k+ scale (only essentials)
     const processingTime = Date.now() - startTime;
-    console.log(`✅ Attempt ${attemptNumber}: ${totalScore}/${totalPossiblePoints} (${grade}) | Best: ${bestScore} (A#${bestAttemptNum}) | ${processingTime}ms`);
+    console.log(
+      `✅ Attempt ${attemptNumber}: ${totalScore}/${totalPossiblePoints} (${grade}) | Best: ${bestScore} (A#${bestAttemptNum}) | ${processingTime}ms`,
+    );
 
     // OPTIMIZED PARTICIPANT DATA STORAGE
     participant.submittedAt = submissionTime;
@@ -793,7 +822,10 @@ export const submitQuiz: RequestHandler = (req, res) => {
     participant.bestAttemptNumber = bestAttemptNum;
     participant.latestAttemptScore = totalScore;
     participant.latestAttemptGrade = grade;
-    participant.improvementPoints = bestScore > totalScore ? 0 : totalScore - (bestScore === totalScore ? 0 : bestScore);
+    participant.improvementPoints =
+      bestScore > totalScore
+        ? 0
+        : totalScore - (bestScore === totalScore ? 0 : bestScore);
 
     // Memory optimization: Store only lightweight scoreDetails for best attempt
     if (bestAttemptNum === attemptNumber) {
@@ -859,7 +891,7 @@ export const submitQuiz: RequestHandler = (req, res) => {
     if (!res.headersSent) {
       res.json({
         success: true,
-        score: participant.score,  // Best score across attempts
+        score: participant.score, // Best score across attempts
         totalPossible: totalPossiblePoints,
         percentage: participant.percentage,
         grade: participant.grade,
@@ -876,9 +908,10 @@ export const submitQuiz: RequestHandler = (req, res) => {
         latestAttemptGrade: participant.latestAttemptGrade,
         bestAttemptNumber: participant.bestAttemptNumber,
         improvementPoints: participant.improvementPoints,
-        message: participant.totalAttempts > 1
-          ? `Attempt #${attemptNumber} completed! Best score: ${participant.score}/${totalPossiblePoints} (${participant.grade}) from Attempt #${participant.bestAttemptNumber}`
-          : `Quiz submitted successfully! Score: ${participant.score}/${totalPossiblePoints} (${participant.grade}) - SAVED TO SERVER`,
+        message:
+          participant.totalAttempts > 1
+            ? `Attempt #${attemptNumber} completed! Best score: ${participant.score}/${totalPossiblePoints} (${participant.grade}) from Attempt #${participant.bestAttemptNumber}`
+            : `Quiz submitted successfully! Score: ${participant.score}/${totalPossiblePoints} (${participant.grade}) - SAVED TO SERVER`,
       });
     } else {
       console.log(`⚠️ Headers already sent, response already completed`);
@@ -980,7 +1013,9 @@ export const getQuizResults: RequestHandler = (req, res) => {
     );
 
     // HYPER-OPTIMIZED BATCH PROCESSING for 400k+ participants
-    console.log(`⚡ MASSIVE SCALE PROCESSING: ${allParticipants.length} participants`);
+    console.log(
+      `⚡ MASSIVE SCALE PROCESSING: ${allParticipants.length} participants`,
+    );
     const batchStart = Date.now();
 
     const participantsWithScores = allParticipants.map((participant, index) => {
@@ -990,7 +1025,9 @@ export const getQuizResults: RequestHandler = (req, res) => {
       // Progress logging for large batches
       if (allParticipants.length > 1000 && index % 1000 === 0) {
         const elapsed = Date.now() - batchStart;
-        console.log(`📊 Processed ${index}/${allParticipants.length} participants (${elapsed}ms)`);
+        console.log(
+          `📊 Processed ${index}/${allParticipants.length} participants (${elapsed}ms)`,
+        );
       }
 
       console.log(

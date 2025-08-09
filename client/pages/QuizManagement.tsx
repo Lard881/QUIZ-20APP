@@ -1063,7 +1063,8 @@ export default function QuizManagement() {
                       className="w-24 mt-1"
                     />
                     <p className="text-sm text-muted-foreground mt-1">
-                      Number of times students can attempt the quiz (1-3 attempts recommended)
+                      Number of times students can attempt the quiz (1-3
+                      attempts recommended)
                     </p>
                   </div>
                 )}
