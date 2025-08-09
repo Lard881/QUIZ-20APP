@@ -322,10 +322,17 @@ export const submitAnswer: RequestHandler = (req, res) => {
     console.log(`\n📋 SEARCHING FOR PARTICIPANT WITH SESSION: ${sessionId}`);
     console.log(`Total participants in system: ${participants.length}`);
     participants.forEach((p, index) => {
-      console.log(`Participant ${index + 1}: ${p.name} (Session: ${p.sessionId})`);
+      console.log(`Participant ${index + 1}: ${p.name} (Session: ${p.sessionId}) - Answers: ${p.answers?.length || 0}`);
     });
 
     const participant = participants.find((p) => p.sessionId === sessionId);
+
+    // Also check if there are multiple participants with same session (debugging)
+    const sameSessionParticipants = participants.filter((p) => p.sessionId === sessionId);
+    if (sameSessionParticipants.length > 1) {
+      console.log(`⚠️ WARNING: Found ${sameSessionParticipants.length} participants with same session ID:`,
+        sameSessionParticipants.map(p => ({name: p.name, id: p.id, answersCount: p.answers?.length || 0})));
+    }
     if (!participant) {
       console.log(`❌ PARTICIPANT NOT FOUND FOR SESSION: ${sessionId}`);
       const errorResponse: ErrorResponse = {
