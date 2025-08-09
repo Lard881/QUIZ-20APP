@@ -550,69 +550,64 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
     console.log(`${forceRecalculate ? 'Force recalculating' : 'Getting'} scores for ${allParticipants.length} participants in quiz: ${quiz.title}`);
 
-    // Process all participants - no demo answers, give 0 score to those who didn't answer
-
-    // Process student responses and calculate proper scores for each participant
+    // Calculate scores from REAL participant answers only (no demo data)
     const participantsWithScores = allParticipants.map((participant, index) => {
-      console.log(`\n=== Processing Participant ${index + 1}: ${participant.name} ===`);
-      console.log(`Participant ID: ${participant.id}, Session: ${participant.sessionId}`);
-      console.log(`Student answers:`, participant.answers);
+      console.log(`\n=== Calculating Score for ${participant.name} ===`);
+      console.log(`Answers provided:`, participant.answers.length);
 
       let totalScore = 0;
       let questionsAnswered = 0;
       let questionsCorrect = 0;
       const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
-      const scoreDetails: any[] = [];
 
-      // If student didn't answer any questions, give them 0 score
-      if (!participant.answers || participant.answers.length === 0) {
-        console.log(`Student ${participant.name} did not answer any questions - Score: 0`);
+      // Process each question and compare with participant's actual answers
+      quiz.questions.forEach((question) => {
+        const studentAnswer = participant.answers.find(a => a.questionId === question.id);
 
-        // Create score details for each question showing they didn't answer
-        quiz.questions.forEach((question) => {
-          scoreDetails.push({
-            questionId: question.id,
-            question: question.question,
-            correctAnswer: question.correctAnswer,
-            studentAnswer: null,
-            isCorrect: false,
-            pointsEarned: 0,
-            maxPoints: question.points,
-            answered: false
-          });
-        });
+        if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
+          questionsAnswered++;
 
-        // Calculate final results - 0% and F grade
-        const percentage = 0;
-        const grade = 'F';
+          // Compare student answer with correct answer
+          let isCorrect = false;
+          if (question.type === "multiple-choice" || question.type === "true-false") {
+            // Normalize both answers for comparison
+            let studentAns = studentAnswer.answer;
+            let correctAns = question.correctAnswer;
 
-        console.log(`\n=== Final Results for ${participant.name} ===`);
-        console.log(`Total Score: ${totalScore}/${totalPossiblePoints} points (No answers submitted)`);
-        console.log(`Percentage: ${percentage.toFixed(1)}%`);
-        console.log(`Grade: ${grade}`);
+            // Convert string numbers to numbers if needed
+            if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
+              studentAns = Number(studentAns);
+            }
+            if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
+              correctAns = Number(correctAns);
+            }
 
-        // Update participant record if forced recalculation
-        if (forceRecalculate) {
-          participant.score = totalScore;
-          participant.percentage = percentage;
-          participant.grade = grade;
-          participant.questionsCorrect = questionsCorrect;
-          participant.questionsAnswered = questionsAnswered;
-          participant.calculatedAt = new Date().toISOString();
+            isCorrect = studentAns === correctAns;
+            console.log(`Q${question.id}: ${studentAns} === ${correctAns} = ${isCorrect}`);
+          }
+
+          if (isCorrect) {
+            totalScore += question.points;
+            questionsCorrect++;
+          }
         }
+      });
 
-        return {
-          ...participant,
-          score: totalScore,
-          questionsAnswered,
-          questionsCorrect,
-          totalPossiblePoints,
-          percentage,
-          grade,
-          scoreDetails,
-          calculatedAt: new Date().toISOString(),
-        };
-      }
+      // Calculate percentage and grade based on ACTUAL performance
+      const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
+      let grade = 'F';
+      if (percentage >= 80) grade = 'A';
+      else if (percentage >= 50) grade = 'B';
+      else if (percentage >= 30) grade = 'C';
+
+      console.log(`Final: ${totalScore}/${totalPossiblePoints} (${percentage.toFixed(1)}%) - Grade: ${grade}`);
+
+      // Update participant record with calculated scores
+      participant.score = totalScore;
+      participant.percentage = Math.round(percentage * 100) / 100;
+      participant.grade = grade;
+      participant.questionsCorrect = questionsCorrect;
+      participant.questionsAnswered = questionsAnswered;
 
       // Process each question for this participant
       quiz.questions.forEach((question, qIndex) => {
