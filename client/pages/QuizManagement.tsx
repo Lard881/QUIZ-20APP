@@ -568,9 +568,27 @@ export default function QuizManagement() {
     else if (percentage >= 50) grade = 'B';
     else if (percentage >= 30) grade = 'C';
 
-    const submissionTime = participant.submittedAt
-      ? new Date(participant.submittedAt).toLocaleString()
-      : participant.answers?.length > 0 ? 'Completed (no timestamp)' : 'Not Started';
+    // FIXED: Proper submission time detection for ALL students who have answered questions
+    let submissionTime = 'Not Started';
+
+    if (participant.submittedAt) {
+      // Has official submission timestamp
+      submissionTime = new Date(participant.submittedAt).toLocaleString();
+    } else if (participant.answers && participant.answers.length > 0) {
+      // Has answers but no official submission - use last answer timestamp
+      const lastAnswer = participant.answers.reduce((latest, current) => {
+        if (!latest) return current;
+        const latestTime = new Date(latest.timeStamp || 0);
+        const currentTime = new Date(current.timeStamp || 0);
+        return currentTime > latestTime ? current : latest;
+      }, null);
+
+      if (lastAnswer && lastAnswer.timeStamp) {
+        submissionTime = new Date(lastAnswer.timeStamp).toLocaleString() + ' (Auto-detected)';
+      } else {
+        submissionTime = 'Submitted (Time unknown)';
+      }
+    }
 
     console.log(`\n🎯 RESULT for ${participant.name}:`);
     console.log(`📊 Score: ${score}/${totalQuestions} (${percentage.toFixed(2)}%)`);
