@@ -305,7 +305,7 @@ export const startQuiz: RequestHandler = (req, res) => {
 
 // Submit answer
 export const submitAnswer: RequestHandler = (req, res) => {
-  console.log(`\n🔥🔥���� NEW ANSWER SUBMISSION ATTEMPT 🔥🔥🔥`);
+  console.log(`\n🔥🔥🔥 NEW ANSWER SUBMISSION ATTEMPT 🔥🔥🔥`);
   console.log(`Timestamp: ${new Date().toISOString()}`);
   console.log(`Request headers:`, req.headers);
   console.log(`Request IP:`, req.ip || req.connection.remoteAddress);
@@ -375,8 +375,13 @@ export const submitAnswer: RequestHandler = (req, res) => {
       }
     }
 
+    console.log(`\n✅ ANSWER SUBMISSION SUCCESSFUL for ${participant.name}`);
+    console.log(`Total answers now: ${participant.answers.length}`);
+    console.log(`Responding with success: true\n`);
+
     res.json({ success: true });
   } catch (error) {
+    console.log(`\n❌ ANSWER SUBMISSION FAILED:`, error);
     const errorResponse: ErrorResponse = {
       error: "SUBMIT_FAILED",
       message: "Failed to submit answer",
