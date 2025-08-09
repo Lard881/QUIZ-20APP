@@ -392,17 +392,26 @@ export const submitAnswer: RequestHandler = (req, res) => {
 
 // Submit entire quiz with auto-scoring
 export const submitQuiz: RequestHandler = (req, res) => {
+  console.log(`\n🎯 QUIZ SUBMISSION RECEIVED`);
+  console.log(`Timestamp: ${new Date().toISOString()}`);
+  console.log(`Request body:`, req.body);
+
   try {
     const { sessionId } = req.body;
 
+    console.log(`\n🔍 FINDING PARTICIPANT FOR SESSION: ${sessionId}`);
     const participant = participants.find((p) => p.sessionId === sessionId);
     if (!participant) {
+      console.log(`❌ PARTICIPANT NOT FOUND FOR SESSION: ${sessionId}`);
       const errorResponse: ErrorResponse = {
         error: "PARTICIPANT_NOT_FOUND",
         message: "Participant not found",
       };
       return res.status(404).json(errorResponse);
     }
+
+    console.log(`✅ FOUND PARTICIPANT: ${participant.name} (ID: ${participant.id})`);
+    console.log(`Current answers: ${participant.answers?.length || 0}`);
 
     const session = quizSessions.find((s) => s.id === participant.sessionId);
     if (!session) {
@@ -422,12 +431,22 @@ export const submitQuiz: RequestHandler = (req, res) => {
       return res.status(404).json(errorResponse);
     }
 
-    // Calculate final score with comprehensive answer comparison
+    console.log(`\n📊 STARTING IMMEDIATE SCORE CALCULATION FOR: ${participant.name}`);
+    console.log(`Quiz questions: ${quiz.questions.length}`);
+    console.log(`Participant answers: ${participant.answers?.length || 0}`);
+
+    // IMMEDIATE COMPREHENSIVE SCORE CALCULATION
     let totalScore = 0;
     let questionsAnswered = 0;
     let questionsCorrect = 0;
+    const scoreDetails = [];
 
-    quiz.questions.forEach((question) => {
+    quiz.questions.forEach((question, qIndex) => {
+      console.log(`\n--- SCORING Question ${qIndex + 1} (ID: ${question.id}) ---`);
+      console.log(`Question: "${question.question}"`);
+      console.log(`Correct Answer: ${question.correctAnswer} (Type: ${question.type})`);
+      console.log(`Points Available: ${question.points}`);
+
       const studentAnswer = participant.answers.find(
         (a) => a.questionId === question.id,
       );
@@ -435,17 +454,22 @@ export const submitQuiz: RequestHandler = (req, res) => {
       if (
         studentAnswer &&
         studentAnswer.answer !== undefined &&
-        studentAnswer.answer !== null
+        studentAnswer.answer !== null &&
+        studentAnswer.answer !== ''
       ) {
         questionsAnswered++;
+        const studentResponse = studentAnswer.answer;
+        console.log(`Student Answer: ${studentResponse}`);
+
         let isCorrect = false;
+        let pointsEarned = 0;
 
         if (
           question.type === "multiple-choice" ||
           question.type === "true-false"
         ) {
           // Handle both string and number answers for compatibility
-          let studentAns = studentAnswer.answer;
+          let studentAns = studentResponse;
           let correctAns = question.correctAnswer;
 
           // Convert to numbers if possible for comparison
@@ -457,25 +481,50 @@ export const submitQuiz: RequestHandler = (req, res) => {
           }
 
           isCorrect = studentAns === correctAns;
+          console.log(`Comparison: ${studentAns} === ${correctAns} = ${isCorrect}`);
         } else if (question.type === "short-answer") {
           // For short answer, check if there's a meaningful answer
-          const answerText = studentAnswer.answer.toString().trim();
+          const answerText = studentResponse.toString().trim();
           isCorrect = answerText.length > 0;
+          console.log(`Short answer check: "${answerText}" length > 0 = ${isCorrect}`);
         }
 
         if (isCorrect) {
-          totalScore += question.points;
+          pointsEarned = question.points;
+          totalScore += pointsEarned;
           questionsCorrect++;
+          console.log(`✅ CORRECT! Earned ${pointsEarned} points`);
+        } else {
+          console.log(`❌ INCORRECT! Earned 0 points`);
         }
+
+        scoreDetails.push({
+          questionId: question.id,
+          question: question.question,
+          studentAnswer: studentResponse,
+          correctAnswer: question.correctAnswer,
+          isCorrect,
+          pointsEarned
+        });
+      } else {
+        console.log(`❌ NO VALID ANSWER PROVIDED`);
+        scoreDetails.push({
+          questionId: question.id,
+          question: question.question,
+          studentAnswer: null,
+          correctAnswer: question.correctAnswer,
+          isCorrect: false,
+          pointsEarned: 0
+        });
       }
     });
 
-    // Mark quiz as submitted with timestamp and score
-    // Allow resubmission - update timestamp and score each time
-    participant.submittedAt = new Date().toISOString();
+    // IMMEDIATE SCORE FINALIZATION AND STORAGE
+    const submissionTime = new Date().toISOString();
+    participant.submittedAt = submissionTime;
     participant.score = totalScore;
 
-    // Store additional scoring metadata
+    // Calculate comprehensive scoring metadata
     const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
     const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
     let grade = 'F';
@@ -483,19 +532,36 @@ export const submitQuiz: RequestHandler = (req, res) => {
     else if (percentage >= 50) grade = 'B';
     else if (percentage >= 30) grade = 'C';
 
-    // Add metadata to participant object for easy access
-    participant.percentage = Math.round(percentage * 10) / 10;
+    // SAVE ALL SCORING DATA TO PARTICIPANT RECORD
+    participant.percentage = Math.round(percentage * 100) / 100;
     participant.grade = grade;
     participant.questionsCorrect = questionsCorrect;
     participant.questionsAnswered = questionsAnswered;
+    participant.scoreDetails = scoreDetails;
+    participant.calculatedAt = submissionTime;
 
-    console.log(`Participant ${participant.name} submitted: ${totalScore}/${totalPossiblePoints} points (${percentage.toFixed(1)}%) - Grade: ${grade}`);
+    console.log(`\n🎯 FINAL SCORE CALCULATION COMPLETE FOR: ${participant.name}`);
+    console.log(`Score: ${totalScore}/${totalPossiblePoints} points`);
+    console.log(`Percentage: ${percentage.toFixed(2)}%`);
+    console.log(`Grade: ${grade}`);
+    console.log(`Questions Answered: ${questionsAnswered}`);
+    console.log(`Questions Correct: ${questionsCorrect}`);
+    console.log(`Pass Status: ${grade !== 'F' ? 'PASSED' : 'FAILED'}`);
+    console.log(`Submission Time: ${submissionTime}`);
+
+    console.log(`\n✅ PARTICIPANT DATA SAVED TO SERVER`);
+    console.log(`Total participants with scores: ${participants.filter(p => p.score !== undefined).length}`);
 
     res.json({
       success: true,
       score: totalScore,
+      totalPossible: totalPossiblePoints,
+      percentage: participant.percentage,
+      grade: participant.grade,
+      questionsCorrect: questionsCorrect,
+      questionsAnswered: questionsAnswered,
       submittedAt: participant.submittedAt,
-      message: "Quiz submitted successfully. Score calculated automatically.",
+      message: `Quiz submitted successfully! Score: ${totalScore}/${totalPossiblePoints} (${grade})`,
     });
   } catch (error) {
     const errorResponse: ErrorResponse = {
