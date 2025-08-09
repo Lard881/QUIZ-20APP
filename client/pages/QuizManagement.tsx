@@ -1391,7 +1391,14 @@ export default function QuizManagement() {
                                       className="border-b hover:bg-muted/20"
                                     >
                                       <td className="p-3 font-medium">
-                                        <span>{participant.name}</span>
+                                        <div>
+                                          <span>{participant.name}</span>
+                                          {participant.attemptNumber && participant.attemptNumber > 1 && (
+                                            <span className="text-xs text-muted-foreground ml-2">
+                                              (Attempt #{participant.attemptNumber})
+                                            </span>
+                                          )}
+                                        </div>
                                       </td>
                                       <td className="p-3">
                                         <span className="font-medium">
