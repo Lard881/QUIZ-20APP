@@ -382,11 +382,28 @@ export const submitAnswer: RequestHandler = (req, res) => {
       }
     }
 
+    // SAVE PARTICIPANT DATA IMMEDIATELY after each answer
+    console.log(`\n💾 SAVING PARTICIPANT DATA TO SERVER...`);
+    const participantIndex = participants.findIndex(p => p.id === participant.id);
+    if (participantIndex >= 0) {
+      participants[participantIndex] = participant;
+      console.log(`✅ PARTICIPANT DATA UPDATED IN SERVER STORAGE`);
+    } else {
+      console.log(`⚠️ WARNING: Participant not found in main array, adding...`);
+      participants.push(participant);
+    }
+
     console.log(`\n✅ ANSWER SUBMISSION SUCCESSFUL for ${participant.name}`);
     console.log(`Total answers now: ${participant.answers.length}`);
+    console.log(`Participant stored at index: ${participantIndex}`);
     console.log(`Responding with success: true\n`);
 
-    res.json({ success: true });
+    res.json({
+      success: true,
+      answersCount: participant.answers.length,
+      participantId: participant.id,
+      saved: true
+    });
   } catch (error) {
     console.log(`\n❌ ANSWER SUBMISSION FAILED:`, error);
     const errorResponse: ErrorResponse = {
