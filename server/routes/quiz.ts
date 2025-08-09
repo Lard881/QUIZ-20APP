@@ -502,6 +502,26 @@ export const getQuizResults: RequestHandler = (req, res) => {
       console.log(`🆔 ID: ${participant.id}`);
       console.log(`📝 Answers array length:`, participant.answers?.length || 0);
       console.log(`📊 Raw answers:`, participant.answers);
+      console.log(`🔍 Participant submitted status:`, participant.submittedAt || 'No submission timestamp');
+      console.log(`💾 Participant session ID:`, participant.sessionId);
+
+      // CRITICAL DEBUG: Check if this is Sam and examine their data
+      if (participantName.toLowerCase().includes('sam')) {
+        console.log(`\\n🚨 DEBUGGING SAM'S DATA 🚨`);
+        console.log(`Sam's full participant object:`, JSON.stringify(participant, null, 2));
+        console.log(`Sam's answers in detail:`, participant.answers?.map(a => ({
+          questionId: a.questionId,
+          answer: a.answer,
+          timestamp: a.timeStamp,
+          type: typeof a.answer
+        })));
+        console.log(`Quiz questions for comparison:`, quiz.questions.map(q => ({
+          id: q.id,
+          question: q.question.substring(0, 50),
+          correctAnswer: q.correctAnswer,
+          type: q.type
+        })));
+      }
 
       let totalScore = 0;
       let questionsAnswered = 0;
