@@ -477,16 +477,19 @@ export const getQuizResults: RequestHandler = (req, res) => {
       console.log("Processing ALL participants with fresh score calculations...");
     }
 
-    // SCALABLE scoring system - handles MANY participants with multiple attempts
-    console.log(`Processing ${allParticipants.length} participant records (including multiple attempts)...`);
+    // COMPREHENSIVE scoring system - processes EVERY participant individually
+    console.log(`\n🎯 STARTING SCORE CALCULATION FOR ${allParticipants.length} PARTICIPANTS`);
+    console.log(`📚 Quiz: "${quiz.title}" | Questions: ${quiz.questions.length}`);
 
     const participantsWithScores = allParticipants.map((participant, index) => {
       const participantName = participant.name || `Participant ${index + 1}`;
       const attemptNumber = participant.attemptNumber || 1;
 
-      console.log(`\n=== Calculating Score for ${participantName} (Attempt #${attemptNumber}) ===`);
-      console.log(`Participant ID: ${participant.id}`);
-      console.log(`Answers provided:`, participant.answers?.length || 0);
+      console.log(`\n🧮 === PROCESSING PARTICIPANT ${index + 1}/${allParticipants.length} ===`);
+      console.log(`👤 Name: ${participantName} (Attempt #${attemptNumber})`);
+      console.log(`🆔 ID: ${participant.id}`);
+      console.log(`📝 Answers array length:`, participant.answers?.length || 0);
+      console.log(`📊 Raw answers:`, participant.answers);
 
       let totalScore = 0;
       let questionsAnswered = 0;
