@@ -1228,38 +1228,7 @@ export default function QuizManagement() {
                                   grade,
                                 };
                               })
-                              .sort((a, b) => {
-                                // Sort by percentage (highest first), then by submission time
-                                if (b.percentage !== a.percentage) {
-                                  return b.percentage - a.percentage;
-                                }
-                                // If same percentage, prioritize submitted over in-progress
-                                if (
-                                  a.participant.submittedAt &&
-                                  !b.participant.submittedAt
-                                )
-                                  return -1;
-                                if (
-                                  !a.participant.submittedAt &&
-                                  b.participant.submittedAt
-                                )
-                                  return 1;
-                                // If both submitted or both in-progress, sort by submission time
-                                if (
-                                  a.participant.submittedAt &&
-                                  b.participant.submittedAt
-                                ) {
-                                  return (
-                                    new Date(
-                                      a.participant.submittedAt,
-                                    ).getTime() -
-                                    new Date(
-                                      b.participant.submittedAt,
-                                    ).getTime()
-                                  );
-                                }
-                                return 0;
-                              })
+                              // Display students without ranking
                               .map(
                                 (
                                   {
