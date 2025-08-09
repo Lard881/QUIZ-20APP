@@ -323,11 +323,22 @@ export const submitAnswer: RequestHandler = (req, res) => {
 
     console.log(`\n📋 SEARCHING FOR PARTICIPANT WITH SESSION: ${sessionId}`);
     console.log(`Total participants in system: ${participants.length}`);
-    participants.forEach((p, index) => {
-      console.log(
-        `Participant ${index + 1}: ${p.name} (Session: ${p.sessionId}) - Answers: ${p.answers?.length || 0}`,
-      );
-    });
+
+    // OPTIMIZED SEARCH for massive scale (400k+ participants)
+    const searchStart = Date.now();
+    const matchingParticipants = participants.filter(p => p.sessionId === sessionId);
+    const searchTime = Date.now() - searchStart;
+
+    console.log(`🔍 Session search completed in ${searchTime}ms - Found ${matchingParticipants.length} matches`);
+
+    // Only log details for small numbers to avoid console overflow
+    if (matchingParticipants.length <= 10) {
+      matchingParticipants.forEach((p, index) => {
+        console.log(`Match ${index + 1}: ${p.name} (ID: ${p.id}) - Answers: ${p.answers?.length || 0}`);
+      });
+    } else {
+      console.log(`📊 Large participant count detected - showing summary only`);
+    }
 
     let participant = participants.find((p) => p.sessionId === sessionId);
 
