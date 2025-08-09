@@ -475,15 +475,9 @@ export default function QuizManagement() {
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(studentUrl)}`;
   };
 
-  // COMPREHENSIVE Score Calculator - Processes EVERY student individually
+  // NEW COMPREHENSIVE SCORING SYSTEM - Works for EVERY student
   const calculateStudentPerformance = (participant: QuizParticipant) => {
-    console.log(`\n🧮 CALCULATING SCORE FOR: ${participant.name || 'Unknown Student'}`);
-    console.log(`📝 Participant ID: ${participant.id}`);
-    console.log(`📊 Answers array:`, participant.answers);
-
-    // Robust validation for any participant
     if (!quiz || !participant) {
-      console.log(`❌ Missing quiz or participant data`);
       return {
         score: 0,
         percentage: 0,
@@ -496,181 +490,99 @@ export default function QuizManagement() {
       };
     }
 
-    const totalQuestions = quiz.questions.length;
-    let correctCount = 0;
+    console.log(`\n🧮 NEW SCORING for: ${participant.name}`);
+    console.log(`📝 Answers:`, participant.answers);
+
+    let score = 0;
     let questionsAnswered = 0;
+    let questionsCorrect = 0;
+    const totalQuestions = quiz.questions.length;
     const details: any[] = [];
 
-    // Handle ANY participant - whether they answered or not
-    const hasAnswers = participant.answers && Array.isArray(participant.answers) && participant.answers.length > 0;
+    // Process EVERY question for EVERY participant
+    quiz.questions.forEach((question, index) => {
+      console.log(`\n📋 Q${index + 1}: "${question.question}"`);
+      console.log(`✅ Correct: ${question.correctAnswer}`);
 
-    if (!hasAnswers) {
-      console.log(`Participant ${participant.name || 'Unknown'} has no answers - assigning 0 score`);
-
-      // Create details for each question showing they didn't answer
-      quiz.questions.forEach((question) => {
-        details.push({
-          questionId: question.id,
-          question: question.question,
-          studentAnswer: null,
-          correctAnswer: question.correctAnswer,
-          isCorrect: false,
-          answered: false
-        });
-      });
-
-      const submissionTime = participant.submittedAt
-        ? new Date(participant.submittedAt).toLocaleString()
-        : participant.answers?.length > 0 ? 'Completed (no timestamp)' : 'Not Started';
-
-      return {
-        score: 0,
-        percentage: 0,
-        grade: 'F',
-        submissionTime,
-        questionsAnswered: 0,
-        questionsCorrect: 0,
-        details,
-        totalQuestions
-      };
-    }
-
-    // Create correct answers map for easier comparison
-    const correctAnswers: Record<string, any> = {};
-    quiz.questions.forEach(question => {
-      correctAnswers[question.id] = question.correctAnswer;
-    });
-
-    // COMPREHENSIVE ANSWER PROCESSING - Every student gets thorough analysis
-    console.log(`🔍 Processing ${quiz.questions.length} questions for ${participant.name}:`);
-
-    quiz.questions.forEach((question, qIndex) => {
-      console.log(`\n📋 Question ${qIndex + 1} (ID: ${question.id})`);
-      console.log(`❓ Question: "${question.question}"`);
-      console.log(`✅ Correct Answer: ${correctAnswers[question.id]} (Type: ${question.type})`);
-
-      const studentAnswer = participant.answers.find(
-        (a) => a.questionId === question.id,
+      // Find participant's answer
+      const participantAnswer = participant.answers.find(
+        answer => answer.questionId === question.id
       );
 
       let isCorrect = false;
       let studentResponse = null;
-      let pointsEarned = 0;
 
-      if (
-        studentAnswer &&
-        studentAnswer.answer !== undefined &&
-        studentAnswer.answer !== null
-      ) {
+      if (participantAnswer && participantAnswer.answer !== undefined && participantAnswer.answer !== null) {
         questionsAnswered++;
-        studentResponse = studentAnswer.answer;
-        console.log(`📝 Student Answer: ${studentResponse}`);
+        studentResponse = participantAnswer.answer;
+        console.log(`📝 Student: ${studentResponse}`);
 
-        // RIGOROUS COMPARISON LOGIC for EVERY answer type
-        if (question.type === "multiple-choice" || question.type === "true-false") {
-          // Normalize for ABSOLUTE precision
-          let normalizedStudentAns = studentAnswer.answer;
-          let normalizedCorrectAns = correctAnswers[question.id];
+        // Compare answers
+        if (question.type === 'multiple-choice' || question.type === 'true-false') {
+          let studentAns = participantAnswer.answer;
+          let correctAns = question.correctAnswer;
 
-          // Convert strings to numbers when possible (handles all edge cases)
-          if (typeof normalizedStudentAns === "string") {
-            const numVal = Number(normalizedStudentAns);
-            if (!isNaN(numVal)) {
-              normalizedStudentAns = numVal;
-            }
+          // Convert to numbers if they're strings
+          if (typeof studentAns === 'string' && !isNaN(Number(studentAns))) {
+            studentAns = Number(studentAns);
           }
-          if (typeof normalizedCorrectAns === "string") {
-            const numVal = Number(normalizedCorrectAns);
-            if (!isNaN(numVal)) {
-              normalizedCorrectAns = numVal;
-            }
+          if (typeof correctAns === 'string' && !isNaN(Number(correctAns))) {
+            correctAns = Number(correctAns);
           }
 
-          // ABSOLUTE EXACT MATCH
-          isCorrect = normalizedStudentAns === normalizedCorrectAns;
-          if (isCorrect) {
-            correctCount++;
-            pointsEarned = question.points;
-            console.log(`✅ CORRECT! ${normalizedStudentAns} === ${normalizedCorrectAns} | +${pointsEarned} points`);
-          } else {
-            console.log(`❌ INCORRECT! ${normalizedStudentAns} !== ${normalizedCorrectAns} | 0 points`);
-          }
-        } else if (question.type === "short-answer") {
-          // Comprehensive short answer validation
-          const answerText = studentAnswer.answer.toString().trim();
-          if (answerText.length > 0) {
-            correctCount++;
-            isCorrect = true;
-            pointsEarned = question.points;
-            console.log(`✅ SHORT ANSWER: "${answerText}" | +${pointsEarned} points`);
-          } else {
-            console.log(`❌ NO ANSWER PROVIDED | 0 points`);
-          }
+          isCorrect = studentAns === correctAns;
+          console.log(`🔍 ${studentAns} === ${correctAns} = ${isCorrect}`);
+        }
+
+        if (question.type === 'short-answer') {
+          const answerText = participantAnswer.answer.toString().trim();
+          isCorrect = answerText.length > 0;
+        }
+
+        if (isCorrect) {
+          score++;
+          questionsCorrect++;
+          console.log(`✅ CORRECT! +1 point`);
+        } else {
+          console.log(`❌ WRONG! 0 points`);
         }
       } else {
-        console.log(`❌ NO RESPONSE | 0 points`);
+        console.log(`❌ NO ANSWER`);
       }
 
       details.push({
         questionId: question.id,
         question: question.question,
         studentAnswer: studentResponse,
-        correctAnswer: correctAnswers[question.id],
+        correctAnswer: question.correctAnswer,
         isCorrect,
-        pointsEarned,
         answered: studentResponse !== null
       });
     });
 
-    // FINAL CALCULATION AND GRADING for EVERY student
-    const score = correctCount;
+    // Calculate percentage and grade
     const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
 
-    console.log(`\n🎯 FINAL RESULTS for ${participant.name || 'Participant'}:`);
-    console.log(`📊 Questions answered: ${questionsAnswered}/${totalQuestions}`);
-    console.log(`✅ Correct answers: ${correctCount}`);
-    console.log(`🏆 Final Score: ${score}/${totalQuestions} questions`);
-    console.log(`📈 Percentage: ${percentage.toFixed(2)}%`);
+    let grade = 'F';
+    if (percentage >= 80) grade = 'A';
+    else if (percentage >= 50) grade = 'B';
+    else if (percentage >= 30) grade = 'C';
 
-    // GRADE ASSIGNMENT - Works for EVERY participant
-    let grade = 'F'; // Default fail grade
-    if (percentage >= 80) {
-      grade = 'A'; // Excellent: 80-100%
-    } else if (percentage >= 50) {
-      grade = 'B'; // Good: 50-79%
-    } else if (percentage >= 30) {
-      grade = 'C'; // Satisfactory: 30-49%
-    }
-    // F grade: 0-29% (default)
-
-    const passStatus = grade !== 'F' ? 'PASSED ✅' : 'FAILED ❌';
-    console.log(`🎓 Final Grade: ${grade} (${passStatus})`);
-
-    // DETAILED BREAKDOWN - Show every question result
-    const totalPointsEarned = details.reduce((sum, d) => sum + (d.pointsEarned || 0), 0);
-    console.log(`💯 Total Points: ${totalPointsEarned}/${totalQuestions} possible`);
-
-    console.log(`\n📋 QUESTION BREAKDOWN for ${participant.name}:`);
-    details.forEach((detail, idx) => {
-      const status = detail.isCorrect ? '✅ CORRECT' : '❌ WRONG';
-      const points = detail.pointsEarned || 0;
-      console.log(`   Q${idx + 1}: ${status} | ${points}/1 points | Answer: ${detail.studentAnswer || 'None'}`);
-    });
-
-    console.log(`\n🏁 PROCESSING COMPLETE for ${participant.name}`);
-
-    // Use actual submission time if available
     const submissionTime = participant.submittedAt
       ? new Date(participant.submittedAt).toLocaleString()
       : participant.answers?.length > 0 ? 'Completed (no timestamp)' : 'Not Started';
 
+    console.log(`\n🎯 RESULT for ${participant.name}:`);
+    console.log(`📊 Score: ${score}/${totalQuestions} (${percentage.toFixed(2)}%)`);
+    console.log(`🎓 Grade: ${grade}`);
+
     return {
       score,
-      percentage: Math.round(percentage * 100) / 100, // Round to 2 decimal places as in algorithm
+      percentage: Math.round(percentage * 100) / 100,
       grade,
       submissionTime,
       questionsAnswered,
-      questionsCorrect: correctCount,
+      questionsCorrect,
       details,
       totalQuestions
     };
