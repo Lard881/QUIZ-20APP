@@ -572,11 +572,14 @@ export const getQuizResults: RequestHandler = (req, res) => {
       sessions.some((s) => s.id === p.sessionId),
     );
 
-    // Calculate scores properly for all participants
+    // Calculate scores properly for all participants - ensure everyone gets a score
     const participantsWithScores = allParticipants.map((p) => {
       let totalScore = 0;
       let questionsAnswered = 0;
       let questionsCorrect = 0;
+      const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
+
+      console.log(`Calculating score for participant: ${p.name}, answers:`, p.answers);
 
       // Calculate actual score based on correct answers for each participant
       quiz.questions.forEach((question) => {
@@ -584,13 +587,16 @@ export const getQuizResults: RequestHandler = (req, res) => {
           (a) => a.questionId === question.id,
         );
 
+        // Track all questions, even unanswered ones
+        let isCorrect = false;
+        let pointsEarned = 0;
+
         if (
           studentAnswer &&
           studentAnswer.answer !== undefined &&
           studentAnswer.answer !== null
         ) {
           questionsAnswered++;
-          let isCorrect = false;
 
           if (
             question.type === "multiple-choice" ||
@@ -600,15 +606,22 @@ export const getQuizResults: RequestHandler = (req, res) => {
             let studentAns = studentAnswer.answer;
             let correctAns = question.correctAnswer;
 
-            // Convert to numbers if possible for comparison
-            if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
-              studentAns = Number(studentAns);
+            // Normalize answers for comparison
+            if (typeof studentAns === "string") {
+              const numericAns = Number(studentAns);
+              if (!isNaN(numericAns)) {
+                studentAns = numericAns;
+              }
             }
-            if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
-              correctAns = Number(correctAns);
+            if (typeof correctAns === "string") {
+              const numericAns = Number(correctAns);
+              if (!isNaN(numericAns)) {
+                correctAns = numericAns;
+              }
             }
 
             isCorrect = studentAns === correctAns;
+            console.log(`Question ${question.id}: student=${studentAns}, correct=${correctAns}, isCorrect=${isCorrect}`);
           } else if (question.type === "short-answer") {
             // For short answer, check if there's a meaningful answer
             const answerText = studentAnswer.answer.toString().trim();
@@ -616,11 +629,21 @@ export const getQuizResults: RequestHandler = (req, res) => {
           }
 
           if (isCorrect) {
-            totalScore += question.points;
+            pointsEarned = question.points;
+            totalScore += pointsEarned;
             questionsCorrect++;
           }
         }
       });
+
+      // Calculate percentage and grade
+      const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
+      let grade = 'F';
+      if (percentage >= 80) grade = 'A';
+      else if (percentage >= 50) grade = 'B';
+      else if (percentage >= 30) grade = 'C';
+
+      console.log(`Final score for ${p.name}: ${totalScore}/${totalPossiblePoints} (${percentage.toFixed(1)}%) - Grade: ${grade}`);
 
       // Return participant with calculated score and additional metrics
       return {
@@ -628,6 +651,9 @@ export const getQuizResults: RequestHandler = (req, res) => {
         score: totalScore,
         questionsAnswered,
         questionsCorrect,
+        totalPossiblePoints,
+        percentage: Math.round(percentage * 10) / 10, // Round to 1 decimal
+        grade,
         calculatedAt: new Date().toISOString(),
       };
     });
