@@ -1292,7 +1292,7 @@ export default function QuizManagement() {
                                           {score} / {totalPossible}
                                         </span>
                                         <div className="text-xs text-muted-foreground">
-                                          {performance.questionsCorrect} correct out of {performance.questionsAnswered} answered
+                                          {performance.questionsCorrect || 0} correct out of {performance.questionsAnswered || 0} answered
                                         </div>
                                       </td>
                                       <td className="p-3">
