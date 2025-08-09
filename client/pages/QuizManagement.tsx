@@ -428,100 +428,126 @@ export default function QuizManagement() {
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(studentUrl)}`;
   };
 
-  // Analytics helper functions
-  const calculateStudentScore = (
-    participant: QuizParticipant,
-  ): {
-    score: number;
-    details: any[];
-    questionsAnswered: number;
-    questionsCorrect: number;
-  } => {
-    if (!quiz)
+  // Analytics helper functions - Enhanced Score Calculator based on provided algorithm
+  const calculateStudentPerformance = (participant: QuizParticipant) => {
+    if (!quiz) {
       return {
         score: 0,
-        details: [],
+        percentage: 0,
+        grade: 'F',
+        submissionTime: 'N/A',
         questionsAnswered: 0,
         questionsCorrect: 0,
+        details: []
       };
+    }
 
-    let totalScore = 0;
+    let correctCount = 0;
     let questionsAnswered = 0;
-    let questionsCorrect = 0;
     const details: any[] = [];
 
-    // Ensure every participant gets proper score calculation
+    // Create correct answers map for easier comparison
+    const correctAnswers: Record<string, any> = {};
+    quiz.questions.forEach(question => {
+      correctAnswers[question.id] = question.correctAnswer;
+    });
+
+    // Compare student answers with correct answers (following provided algorithm)
     quiz.questions.forEach((question) => {
       const studentAnswer = participant.answers.find(
         (a) => a.questionId === question.id,
       );
-      let isCorrect = false;
-      let pointsEarned = 0;
 
-      // Check if student answered this question
+      let isCorrect = false;
+      let studentResponse = null;
+
       if (
         studentAnswer &&
         studentAnswer.answer !== undefined &&
         studentAnswer.answer !== null
       ) {
         questionsAnswered++;
+        studentResponse = studentAnswer.answer;
 
-        if (
-          question.type === "multiple-choice" ||
-          question.type === "true-false"
-        ) {
-          // Normalize answers for proper comparison
-          let studentAns = studentAnswer.answer;
-          let correctAns = question.correctAnswer;
+        // Compare answers following the algorithm logic
+        if (question.type === "multiple-choice" || question.type === "true-false") {
+          // Normalize for comparison
+          let normalizedStudentAns = studentAnswer.answer;
+          let normalizedCorrectAns = correctAnswers[question.id];
 
-          // Convert string numbers to actual numbers for comparison
-          if (typeof studentAns === "string") {
-            const numericAns = Number(studentAns);
-            if (!isNaN(numericAns)) {
-              studentAns = numericAns;
-            }
+          // Convert string numbers to numbers for accurate comparison
+          if (typeof normalizedStudentAns === "string" && !isNaN(Number(normalizedStudentAns))) {
+            normalizedStudentAns = Number(normalizedStudentAns);
           }
-          if (typeof correctAns === "string") {
-            const numericAns = Number(correctAns);
-            if (!isNaN(numericAns)) {
-              correctAns = numericAns;
-            }
+          if (typeof normalizedCorrectAns === "string" && !isNaN(Number(normalizedCorrectAns))) {
+            normalizedCorrectAns = Number(normalizedCorrectAns);
           }
 
-          isCorrect = studentAns === correctAns;
-          pointsEarned = isCorrect ? question.points : 0;
+          // Direct comparison as per algorithm
+          if (normalizedStudentAns === normalizedCorrectAns) {
+            correctCount++;
+            isCorrect = true;
+          }
         } else if (question.type === "short-answer") {
-          // For short answer, check if there's a meaningful answer
+          // For short answer, check if there's a meaningful response
           const answerText = studentAnswer.answer.toString().trim();
-          isCorrect = answerText.length > 0;
-          pointsEarned = isCorrect ? question.points : 0;
-        }
-
-        if (isCorrect) {
-          questionsCorrect++;
+          if (answerText.length > 0) {
+            correctCount++;
+            isCorrect = true;
+          }
         }
       }
-      // Note: Unanswered questions contribute 0 points (already initialized)
 
-      totalScore += pointsEarned;
       details.push({
         questionId: question.id,
         question: question.question,
-        studentAnswer: studentAnswer?.answer,
-        correctAnswer: question.correctAnswer,
-        options: question.options,
-        type: question.type,
+        studentAnswer: studentResponse,
+        correctAnswer: correctAnswers[question.id],
         isCorrect,
-        pointsEarned,
-        maxPoints: question.points,
-        answered:
-          studentAnswer &&
-          studentAnswer.answer !== undefined &&
-          studentAnswer.answer !== null,
+        answered: studentResponse !== null
       });
     });
 
-    return { score: totalScore, details, questionsAnswered, questionsCorrect };
+    const totalQuestions = quiz.questions.length;
+    const score = correctCount;
+    const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
+
+    // Assign grade following the exact algorithm provided
+    let grade = 'F';
+    if (percentage >= 80) {
+      grade = 'A';
+    } else if (percentage >= 50) {
+      grade = 'B';
+    } else if (percentage >= 30) {
+      grade = 'C';
+    }
+
+    // Use actual submission time if available, otherwise current time
+    const submissionTime = participant.submittedAt
+      ? new Date(participant.submittedAt).toLocaleString()
+      : 'In Progress';
+
+    return {
+      score,
+      percentage: Math.round(percentage * 100) / 100, // Round to 2 decimal places as in algorithm
+      grade,
+      submissionTime,
+      questionsAnswered,
+      questionsCorrect: correctCount,
+      details,
+      totalQuestions
+    };
+  };
+
+  // Legacy function for compatibility
+  const calculateStudentScore = (participant: QuizParticipant) => {
+    const performance = calculateStudentPerformance(participant);
+    return {
+      score: performance.score,
+      details: performance.details,
+      questionsAnswered: performance.questionsAnswered,
+      questionsCorrect: performance.questionsCorrect
+    };
   };
 
   const getStudentScoreOnly = (participant: QuizParticipant): number => {
