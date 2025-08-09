@@ -94,7 +94,7 @@ export const createQuiz: RequestHandler = (req, res) => {
       isActive: true, // Start as active by default
       allowRetries: quizData.allowRetries || false,
       randomizeQuestions: quizData.randomizeQuestions || false,
-      maxAttempts: quizData.maxAttempts || 1,
+      maxAttempts: quizData.maxAttempts || 3,
       durationValue,
       durationUnit,
       expiresAt: expiresAt.toISOString(),
