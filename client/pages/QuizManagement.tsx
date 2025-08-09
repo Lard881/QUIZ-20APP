@@ -1304,21 +1304,35 @@ export default function QuizManagement() {
                             </tr>
                           </thead>
                           <tbody>
-                            {participants
+                            {(participants || [])
                               .map((participant) => {
-                                // Use the new score calculation algorithm
-                                const performance = calculateStudentPerformance(participant);
-                                const totalPossible = performance.totalQuestions || getTotalPossiblePoints();
+                                try {
+                                  // Universal score calculation for ANY participant
+                                  const performance = calculateStudentPerformance(participant);
+                                  const totalPossible = performance.totalQuestions || getTotalPossiblePoints();
 
-                                return {
-                                  participant,
-                                  performance,
-                                  score: performance.score,
-                                  totalPossible,
-                                  percentage: performance.percentage,
-                                  grade: performance.grade,
-                                  submissionTime: performance.submissionTime,
-                                };
+                                  return {
+                                    participant,
+                                    performance,
+                                    score: performance.score,
+                                    totalPossible,
+                                    percentage: performance.percentage,
+                                    grade: performance.grade,
+                                    submissionTime: performance.submissionTime,
+                                  };
+                                } catch (error) {
+                                  console.error(`Error processing participant ${participant?.name || 'Unknown'}:`, error);
+                                  // Return default values for any participant that fails processing
+                                  return {
+                                    participant,
+                                    performance: { score: 0, percentage: 0, grade: 'F', submissionTime: 'Error', questionsCorrect: 0, questionsAnswered: 0 },
+                                    score: 0,
+                                    totalPossible: getTotalPossiblePoints(),
+                                    percentage: 0,
+                                    grade: 'F',
+                                    submissionTime: 'Processing Error',
+                                  };
+                                }
                               })
                               // Display students without ranking
                               .map(
