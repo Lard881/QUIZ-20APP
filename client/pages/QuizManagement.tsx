@@ -1235,11 +1235,12 @@ export default function QuizManagement() {
                                 (
                                   {
                                     participant,
-                                    scoreData,
+                                    performance,
                                     score,
                                     totalPossible,
                                     percentage,
                                     grade,
+                                    submissionTime,
                                   },
                                   index,
                                 ) => {
@@ -1252,13 +1253,18 @@ export default function QuizManagement() {
                                         <span>{participant.name}</span>
                                       </td>
                                       <td className="p-3">
-                                        {score} / {totalPossible}
+                                        <span className="font-medium">
+                                          {score} / {totalPossible}
+                                        </span>
+                                        <div className="text-xs text-muted-foreground">
+                                          {performance.questionsCorrect} correct out of {performance.questionsAnswered} answered
+                                        </div>
                                       </td>
                                       <td className="p-3">
                                         <span
                                           className={`font-medium ${getScoreColor(percentage)}`}
                                         >
-                                          {percentage.toFixed(1)}%
+                                          {percentage.toFixed(2)}%
                                         </span>
                                       </td>
                                       <td className="p-3">
@@ -1270,11 +1276,7 @@ export default function QuizManagement() {
                                         </Badge>
                                       </td>
                                       <td className="p-3 text-sm text-muted-foreground">
-                                        {participant.submittedAt
-                                          ? new Date(
-                                              participant.submittedAt,
-                                            ).toLocaleString()
-                                          : "In Progress"}
+                                        {submissionTime}
                                       </td>
                                     </tr>
                                   );
