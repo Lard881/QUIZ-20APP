@@ -57,6 +57,7 @@ export function createServer() {
   app.get("/api/quiz/:quizId/results", getQuizResults);
   app.post("/api/quiz/:quizId/results", getQuizResults); // POST for force recalculation
   app.patch("/api/quiz/:quizId/status", updateQuizStatus);
+  app.get("/api/quiz/:quizId/debug", debugParticipants); // Debug endpoint
 
   return app;
 }
