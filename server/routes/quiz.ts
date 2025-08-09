@@ -960,6 +960,46 @@ export const checkQuiz: RequestHandler = (req, res) => {
   }
 };
 
+// Debug endpoint to check participant data
+export const debugParticipants: RequestHandler = (req, res) => {
+  try {
+    const { quizId } = req.params;
+
+    console.log(`\n🔍 DEBUG PARTICIPANTS REQUEST FOR QUIZ: ${quizId}`);
+
+    const quiz = quizzes.find(q => q.id === quizId);
+    const sessions = quizSessions.filter(s => s.quizId === quizId);
+    const allParticipants = participants.filter(p =>
+      sessions.some(s => s.id === p.sessionId)
+    );
+
+    console.log(`📊 COMPLETE PARTICIPANT DEBUG:`, {
+      quiz: quiz ? quiz.title : 'Not found',
+      totalSessions: sessions.length,
+      totalParticipants: allParticipants.length,
+      participants: allParticipants.map(p => ({
+        id: p.id,
+        name: p.name,
+        sessionId: p.sessionId,
+        answersCount: p.answers?.length || 0,
+        answers: p.answers,
+        submittedAt: p.submittedAt,
+        attemptNumber: p.attemptNumber
+      }))
+    });
+
+    res.json({
+      quiz: quiz?.title || 'Unknown',
+      participants: allParticipants,
+      sessions: sessions,
+      totalParticipants: allParticipants.length
+    });
+  } catch (error) {
+    console.error('Debug participants error:', error);
+    res.status(500).json({ error: 'Debug failed' });
+  }
+};
+
 // Get active quizzes (for student access page)
 export const getActiveQuizzes: RequestHandler = (req, res) => {
   try {
