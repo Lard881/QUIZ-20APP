@@ -428,7 +428,7 @@ export default function QuizManagement() {
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(studentUrl)}`;
   };
 
-  // Analytics helper functions - Enhanced Score Calculator based on provided algorithm
+  // Analytics helper functions - Enhanced Score Calculator with proper 0 handling
   const calculateStudentPerformance = (participant: QuizParticipant) => {
     if (!quiz) {
       return {
@@ -438,13 +438,47 @@ export default function QuizManagement() {
         submissionTime: 'N/A',
         questionsAnswered: 0,
         questionsCorrect: 0,
-        details: []
+        details: [],
+        totalQuestions: 0
       };
     }
 
+    const totalQuestions = quiz.questions.length;
     let correctCount = 0;
     let questionsAnswered = 0;
     const details: any[] = [];
+
+    // If student didn't answer any questions, give them 0 score immediately
+    if (!participant.answers || participant.answers.length === 0) {
+      console.log(`Frontend: Student ${participant.name} has no answers - giving 0 score`);
+
+      // Create details for each question showing they didn't answer
+      quiz.questions.forEach((question) => {
+        details.push({
+          questionId: question.id,
+          question: question.question,
+          studentAnswer: null,
+          correctAnswer: question.correctAnswer,
+          isCorrect: false,
+          answered: false
+        });
+      });
+
+      const submissionTime = participant.submittedAt
+        ? new Date(participant.submittedAt).toLocaleString()
+        : 'Not Submitted';
+
+      return {
+        score: 0,
+        percentage: 0,
+        grade: 'F',
+        submissionTime,
+        questionsAnswered: 0,
+        questionsCorrect: 0,
+        details,
+        totalQuestions
+      };
+    }
 
     // Create correct answers map for easier comparison
     const correctAnswers: Record<string, any> = {};
