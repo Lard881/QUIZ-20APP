@@ -477,10 +477,15 @@ export const getQuizResults: RequestHandler = (req, res) => {
       console.log("Processing ALL participants with fresh score calculations...");
     }
 
-    // Universal scoring system - works for ANY participant who takes the quiz
+    // SCALABLE scoring system - handles MANY participants with multiple attempts
+    console.log(`Processing ${allParticipants.length} participant records (including multiple attempts)...`);
+
     const participantsWithScores = allParticipants.map((participant, index) => {
       const participantName = participant.name || `Participant ${index + 1}`;
-      console.log(`\n=== Calculating Score for ${participantName} ===`);
+      const attemptNumber = participant.attemptNumber || 1;
+
+      console.log(`\n=== Calculating Score for ${participantName} (Attempt #${attemptNumber}) ===`);
+      console.log(`Participant ID: ${participant.id}`);
       console.log(`Answers provided:`, participant.answers?.length || 0);
 
       let totalScore = 0;
@@ -488,7 +493,7 @@ export const getQuizResults: RequestHandler = (req, res) => {
       let questionsCorrect = 0;
       const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
 
-      // Handle ANY participant - whether they have answers or not
+      // Handle ANY participant with ANY number of attempts
       const hasAnswers = participant.answers && Array.isArray(participant.answers) && participant.answers.length > 0;
 
       if (hasAnswers) {
