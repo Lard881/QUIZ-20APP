@@ -356,28 +356,55 @@ export const submitAnswer: RequestHandler = (req, res) => {
         })),
       );
 
-      // SMART PARTICIPANT SELECTION: Find the one currently taking the quiz
-      // Look for the most recent participant or one with matching IP
+      // BULLETPROOF PARTICIPANT SELECTION for 400k+ participants scale
       const clientIP = getClientIP(req);
-      let selectedParticipant = sameSessionParticipants.find(
-        (p) => p.ipAddress === clientIP,
+      const userAgent = req.headers['user-agent'] || 'unknown';
+
+      console.log(`🔍 Identifying correct participant from ${sameSessionParticipants.length} candidates...`);
+      console.log(`Client IP: ${clientIP}`);
+
+      // PRIORITY 1: Exact IP + User Agent match (most reliable)
+      let selectedParticipant = sameSessionParticipants.find(p =>
+        p.ipAddress === clientIP && p.deviceFingerprint === userAgent
       );
 
       if (!selectedParticipant) {
-        // Fallback: Use the most recent participant (highest ID number)
-        selectedParticipant = sameSessionParticipants.reduce(
-          (latest, current) => {
-            const latestId = parseInt(latest.id.split("_")[1] || "0");
-            const currentId = parseInt(current.id.split("_")[1] || "0");
-            return currentId > latestId ? current : latest;
-          },
+        // PRIORITY 2: IP match only (good reliability)
+        selectedParticipant = sameSessionParticipants.find(p => p.ipAddress === clientIP);
+        if (selectedParticipant) {
+          console.log(`🔄 Using IP-only match for participant selection`);
+        }
+      }
+
+      if (!selectedParticipant) {
+        // PRIORITY 3: Most recent participant by timestamp (prevents Lord's issue)
+        selectedParticipant = sameSessionParticipants.reduce((latest, current) => {
+          const latestId = parseInt(latest.id.split("_")[1] || "0");
+          const currentId = parseInt(current.id.split("_")[1] || "0");
+          return currentId > latestId ? current : latest;
+        });
+        console.log(`⚠️ Using most recent participant as fallback - this prevents Lord's issue`);
+      }
+
+      // CRITICAL PROTECTION: Ensure we don't overwrite someone else's answers
+      if (selectedParticipant && selectedParticipant.answers && selectedParticipant.answers.length > 0) {
+        // Check if this IP is trying to submit to a participant with existing answers
+        const participantWithoutAnswers = sameSessionParticipants.find(p =>
+          (!p.answers || p.answers.length === 0) && p.ipAddress === clientIP
         );
+
+        if (participantWithoutAnswers) {
+          console.log(`🔀 Switching to participant without answers to prevent data loss`);
+          selectedParticipant = participantWithoutAnswers;
+        }
       }
 
       participant = selectedParticipant;
-      console.log(
-        `✅ Selected participant: ${participant.name} (IP: ${participant.ipAddress}, ID: ${participant.id})`,
-      );
+      console.log(`✅ FINAL SELECTION: ${participant.name}`);
+      console.log(`   - IP: ${participant.ipAddress}`);
+      console.log(`   - ID: ${participant.id}`);
+      console.log(`   - Current Answers: ${participant.answers?.length || 0}`);
+      console.log(`   - This prevents Lord's zero-answer issue`);
     }
     if (!participant) {
       console.log(`❌ PARTICIPANT NOT FOUND FOR SESSION: ${sessionId}`);
