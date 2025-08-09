@@ -550,6 +550,11 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
     console.log(`${forceRecalculate ? 'Force recalculating' : 'Getting'} scores for ${allParticipants.length} participants in quiz: ${quiz.title}`);
 
+    if (forceRecalculate) {
+      console.log("=== FORCE RECALCULATION MODE ===");
+      console.log("Processing ALL participants with fresh score calculations...");
+    }
+
     // Calculate scores from REAL participant answers only (no demo data)
     const participantsWithScores = allParticipants.map((participant, index) => {
       console.log(`\n=== Calculating Score for ${participant.name} ===`);
