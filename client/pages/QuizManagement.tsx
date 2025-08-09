@@ -629,32 +629,24 @@ export default function QuizManagement() {
       headers.join(","),
       ...participants
         .map((participant) => {
-          const scoreData = calculateStudentScore(participant);
-          const score = scoreData.score;
-          const totalPoints = getTotalPossiblePoints();
-          const percentage = totalPoints > 0 ? (score / totalPoints) * 100 : 0;
-          const grade = getGrade(percentage);
-
+          const performance = calculateStudentPerformance(participant);
           return {
             participant,
-            scoreData,
-            score,
-            totalPoints,
-            percentage,
-            grade,
+            performance,
+            score: performance.score,
+            totalPoints: performance.totalQuestions,
+            percentage: performance.percentage,
+            grade: performance.grade,
+            submissionTime: performance.submissionTime
           };
         })
         .map(
-          ({ participant, score, totalPoints, percentage, grade }, index) => {
-            const submissionTime = participant.submittedAt
-              ? new Date(participant.submittedAt).toLocaleString()
-              : "In Progress";
-
+          ({ participant, score, totalPoints, percentage, grade, submissionTime }) => {
             return [
               `"${participant.name}"`,
               score,
               totalPoints,
-              `${percentage.toFixed(1)}%`,
+              `${percentage.toFixed(2)}%`,
               grade,
               `"${submissionTime}"`,
             ].join(",");
