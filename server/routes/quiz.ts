@@ -327,15 +327,28 @@ export const submitAnswer: RequestHandler = (req, res) => {
 
     let participant = participants.find((p) => p.sessionId === sessionId);
 
-    // Also check if there are multiple participants with same session (debugging)
+    // CRITICAL: Handle multiple participants with same session (like Lord's case)
     const sameSessionParticipants = participants.filter((p) => p.sessionId === sessionId);
     if (sameSessionParticipants.length > 1) {
-      console.log(`⚠️ WARNING: Found ${sameSessionParticipants.length} participants with same session ID:`,
+      console.log(`🚨 CRITICAL: Found ${sameSessionParticipants.length} participants with same session ID:`,
         sameSessionParticipants.map(p => ({name: p.name, id: p.id, answersCount: p.answers?.length || 0})));
-      // Use the one with most answers
-      participant = sameSessionParticipants.reduce((latest, current) => {
-        return (current.answers?.length || 0) >= (latest.answers?.length || 0) ? current : latest;
-      });
+
+      // SMART PARTICIPANT SELECTION: Find the one currently taking the quiz
+      // Look for the most recent participant or one with matching IP
+      const clientIP = getClientIP(req);
+      let selectedParticipant = sameSessionParticipants.find(p => p.ipAddress === clientIP);
+
+      if (!selectedParticipant) {
+        // Fallback: Use the most recent participant (highest ID number)
+        selectedParticipant = sameSessionParticipants.reduce((latest, current) => {
+          const latestId = parseInt(latest.id.split('_')[1] || '0');
+          const currentId = parseInt(current.id.split('_')[1] || '0');
+          return currentId > latestId ? current : latest;
+        });
+      }
+
+      participant = selectedParticipant;
+      console.log(`✅ Selected participant: ${participant.name} (IP: ${participant.ipAddress}, ID: ${participant.id})`);
     }
     if (!participant) {
       console.log(`❌ PARTICIPANT NOT FOUND FOR SESSION: ${sessionId}`);
@@ -726,13 +739,13 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
     // COMPREHENSIVE scoring system - processes EVERY participant individually
     console.log(`\n🎯 STARTING SCORE CALCULATION FOR ${allParticipants.length} PARTICIPANTS`);
-    console.log(`📚 Quiz: "${quiz.title}" | Questions: ${quiz.questions.length}`);
+    console.log(`��� Quiz: "${quiz.title}" | Questions: ${quiz.questions.length}`);
 
     const participantsWithScores = allParticipants.map((participant, index) => {
       const participantName = participant.name || `Participant ${index + 1}`;
       const attemptNumber = participant.attemptNumber || 1;
 
-      console.log(`\n🧮 === PROCESSING PARTICIPANT ${index + 1}/${allParticipants.length} ===`);
+      console.log(`\n�� === PROCESSING PARTICIPANT ${index + 1}/${allParticipants.length} ===`);
       console.log(`�� Name: ${participantName} (Attempt #${attemptNumber})`);
       console.log(`🆔 ID: ${participant.id}`);
       console.log(`📝 Answers array length:`, participant.answers?.length || 0);
