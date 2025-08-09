@@ -193,12 +193,12 @@ export default function QuizTaking() {
 
   const saveAnswer = async (questionId: string, answer: string | number) => {
     if (!sessionId) {
-      console.error('❌ No sessionId available for answer submission');
+      console.error("❌ No sessionId available for answer submission");
       return;
     }
 
     // Skip empty answers
-    if (answer === undefined || answer === null || answer === '') {
+    if (answer === undefined || answer === null || answer === "") {
       console.log(`⚠️ Skipping empty answer for question ${questionId}`);
       return;
     }
@@ -215,7 +215,9 @@ export default function QuizTaking() {
 
     try {
       lastSaveRef.current = now;
-      console.log(`📤 SUBMITTING ANSWER: Q${questionId} = ${answer} (SessionID: ${sessionId})`);
+      console.log(
+        `📤 SUBMITTING ANSWER: Q${questionId} = ${answer} (SessionID: ${sessionId})`,
+      );
 
       const answerData: SubmitAnswerRequest = {
         sessionId,
@@ -227,14 +229,16 @@ export default function QuizTaking() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json",
         },
         body: JSON.stringify(answerData),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`❌ Answer submission failed: ${response.status} ${response.statusText}`);
+        console.error(
+          `❌ Answer submission failed: ${response.status} ${response.statusText}`,
+        );
         console.error(`Response body:`, errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
@@ -246,18 +250,20 @@ export default function QuizTaking() {
       if (result.success) {
         toast({
           title: "Answer Saved",
-          description: `Question ${questionId.split('_').pop()} answer recorded`,
+          description: `Question ${questionId.split("_").pop()} answer recorded`,
           duration: 1000,
         });
       }
-
     } catch (error) {
-      console.error(`❌ CRITICAL: Failed to save answer for question ${questionId}:`, error);
+      console.error(
+        `❌ CRITICAL: Failed to save answer for question ${questionId}:`,
+        error,
+      );
 
       // Show error to user
       toast({
         title: "Answer Save Failed",
-        description: `Failed to save answer for question ${questionId.split('_').pop()}. Please try again.`,
+        description: `Failed to save answer for question ${questionId.split("_").pop()}. Please try again.`,
         variant: "destructive",
         duration: 3000,
       });
@@ -283,12 +289,20 @@ export default function QuizTaking() {
     try {
       // Force save all answers before final submission
       if (quiz && sessionId) {
-        console.log(`💾 Force saving all ${Object.keys(answers).length} answers before submission...`);
+        console.log(
+          `💾 Force saving all ${Object.keys(answers).length} answers before submission...`,
+        );
 
         const savePromises = [];
         for (const question of quiz.questions) {
-          if (answers[question.id] !== undefined && answers[question.id] !== null && answers[question.id] !== '') {
-            console.log(`💾 Force saving Q${question.id} = ${answers[question.id]}`);
+          if (
+            answers[question.id] !== undefined &&
+            answers[question.id] !== null &&
+            answers[question.id] !== ""
+          ) {
+            console.log(
+              `💾 Force saving Q${question.id} = ${answers[question.id]}`,
+            );
             // Force immediate save by resetting debounce timer
             lastSaveRef.current = 0;
             savePromises.push(saveAnswer(question.id, answers[question.id]));
@@ -300,7 +314,7 @@ export default function QuizTaking() {
         console.log(`✅ All answers force-saved before submission`);
 
         // Additional delay to ensure backend processes all saves
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
       // Submit quiz for auto-scoring with comprehensive error handling
@@ -309,14 +323,16 @@ export default function QuizTaking() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json",
         },
         body: JSON.stringify({ sessionId }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`❌ Quiz submission failed: ${response.status} ${response.statusText}`);
+        console.error(
+          `❌ Quiz submission failed: ${response.status} ${response.statusText}`,
+        );
         console.error(`Response body:`, errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
@@ -327,7 +343,7 @@ export default function QuizTaking() {
       setQuizCompleted(true);
       toast({
         title: "Quiz Submitted Successfully!",
-        description: `Your score: ${data.score || 0}/${data.totalPossible || 0} points (${data.grade || 'N/A'}). Results calculated automatically.`,
+        description: `Your score: ${data.score || 0}/${data.totalPossible || 0} points (${data.grade || "N/A"}). Results calculated automatically.`,
       });
 
       // Redirect after a delay
@@ -338,7 +354,7 @@ export default function QuizTaking() {
       console.error(`❌ CRITICAL: Quiz submission failed:`, error);
       toast({
         title: "Submission Error",
-        description: `Failed to submit quiz: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
+        description: `Failed to submit quiz: ${error instanceof Error ? error.message : "Unknown error"}. Please try again.`,
         variant: "destructive",
       });
     } finally {

@@ -86,11 +86,16 @@ export default function QuizManagement() {
         console.error("Error in initial quiz data fetch:", error);
         toast({
           title: "Error Loading Quiz",
-          description: error.message || "Failed to load quiz data. The quiz may not exist.",
+          description:
+            error.message ||
+            "Failed to load quiz data. The quiz may not exist.",
           variant: "destructive",
         });
         // Navigate back to dashboard if quiz not found
-        if (error.message?.includes("404") || error.message?.includes("not found")) {
+        if (
+          error.message?.includes("404") ||
+          error.message?.includes("not found")
+        ) {
           setTimeout(() => navigate("/dashboard"), 2000);
         }
       })
@@ -156,14 +161,16 @@ export default function QuizManagement() {
           headers: {
             "Content-Type": "application/json",
             "Cache-Control": "no-cache",
-            "Pragma": "no-cache",
+            Pragma: "no-cache",
           },
           // Add timeout and error handling
           signal: AbortSignal.timeout(10000), // 10 second timeout
         });
       } catch (fetchError) {
         console.error("Network fetch error:", fetchError);
-        throw new Error(`Network error: Unable to connect to server. Please check your connection.`);
+        throw new Error(
+          `Network error: Unable to connect to server. Please check your connection.`,
+        );
       }
 
       if (quizResponse.ok) {
@@ -200,14 +207,16 @@ export default function QuizManagement() {
             headers: {
               "Content-Type": "application/json",
               "Cache-Control": "no-cache",
-              "Pragma": "no-cache",
+              Pragma: "no-cache",
             },
             signal: AbortSignal.timeout(10000), // 10 second timeout
           });
         } catch (resultsError) {
           console.error("Results fetch error:", resultsError);
           // Continue without results rather than failing completely
-          console.warn("Unable to fetch results, continuing without participant data");
+          console.warn(
+            "Unable to fetch results, continuing without participant data",
+          );
           return;
         }
 
@@ -288,11 +297,11 @@ export default function QuizManagement() {
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "no-cache",
-          "Pragma": "no-cache",
+          Pragma: "no-cache",
         },
         body: JSON.stringify({
           forceRecalculate: true,
-          recalculateAll: true // Flag to ensure ALL participants are processed
+          recalculateAll: true, // Flag to ensure ALL participants are processed
         }),
       });
 
@@ -304,12 +313,16 @@ export default function QuizManagement() {
         setParticipants(updatedParticipants);
 
         // Calculate statistics for the toast message
-        const passedCount = updatedParticipants.filter(p => {
+        const passedCount = updatedParticipants.filter((p) => {
           const performance = calculateStudentPerformance(p);
-          return performance.grade === "A" || performance.grade === "B" || performance.grade === "C";
+          return (
+            performance.grade === "A" ||
+            performance.grade === "B" ||
+            performance.grade === "C"
+          );
         }).length;
 
-        const failedCount = updatedParticipants.filter(p => {
+        const failedCount = updatedParticipants.filter((p) => {
           const performance = calculateStudentPerformance(p);
           return performance.grade === "F";
         }).length;
@@ -321,13 +334,16 @@ export default function QuizManagement() {
           description: `Updated ${updatedParticipants.length} participants | Avg: ${avgScore.toFixed(1)}% | Passed: ${passedCount} | Failed: ${failedCount}`,
         });
 
-        console.log(`Recalculation complete: ${updatedParticipants.length} participants processed`);
+        console.log(
+          `Recalculation complete: ${updatedParticipants.length} participants processed`,
+        );
       } else {
         // Fallback to regular refresh if POST endpoint doesn't exist
         await handleRefresh();
         toast({
           title: "Scores Updated",
-          description: "Refreshed participant data and recalculated scores using fallback method",
+          description:
+            "Refreshed participant data and recalculated scores using fallback method",
         });
       }
     } catch (error) {
@@ -481,12 +497,12 @@ export default function QuizManagement() {
       return {
         score: 0,
         percentage: 0,
-        grade: 'F',
-        submissionTime: 'N/A',
+        grade: "F",
+        submissionTime: "N/A",
         questionsAnswered: 0,
         questionsCorrect: 0,
         details: [],
-        totalQuestions: 0
+        totalQuestions: 0,
       };
     }
 
@@ -506,27 +522,34 @@ export default function QuizManagement() {
 
       // Find participant's answer
       const participantAnswer = participant.answers.find(
-        answer => answer.questionId === question.id
+        (answer) => answer.questionId === question.id,
       );
 
       let isCorrect = false;
       let studentResponse = null;
 
-      if (participantAnswer && participantAnswer.answer !== undefined && participantAnswer.answer !== null) {
+      if (
+        participantAnswer &&
+        participantAnswer.answer !== undefined &&
+        participantAnswer.answer !== null
+      ) {
         questionsAnswered++;
         studentResponse = participantAnswer.answer;
         console.log(`📝 Student: ${studentResponse}`);
 
         // Compare answers
-        if (question.type === 'multiple-choice' || question.type === 'true-false') {
+        if (
+          question.type === "multiple-choice" ||
+          question.type === "true-false"
+        ) {
           let studentAns = participantAnswer.answer;
           let correctAns = question.correctAnswer;
 
           // Convert to numbers if they're strings
-          if (typeof studentAns === 'string' && !isNaN(Number(studentAns))) {
+          if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
             studentAns = Number(studentAns);
           }
-          if (typeof correctAns === 'string' && !isNaN(Number(correctAns))) {
+          if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
             correctAns = Number(correctAns);
           }
 
@@ -534,7 +557,7 @@ export default function QuizManagement() {
           console.log(`🔍 ${studentAns} === ${correctAns} = ${isCorrect}`);
         }
 
-        if (question.type === 'short-answer') {
+        if (question.type === "short-answer") {
           const answerText = participantAnswer.answer.toString().trim();
           isCorrect = answerText.length > 0;
         }
@@ -556,20 +579,20 @@ export default function QuizManagement() {
         studentAnswer: studentResponse,
         correctAnswer: question.correctAnswer,
         isCorrect,
-        answered: studentResponse !== null
+        answered: studentResponse !== null,
       });
     });
 
     // Calculate percentage and grade
     const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
 
-    let grade = 'F';
-    if (percentage >= 80) grade = 'A';
-    else if (percentage >= 50) grade = 'B';
-    else if (percentage >= 30) grade = 'C';
+    let grade = "F";
+    if (percentage >= 80) grade = "A";
+    else if (percentage >= 50) grade = "B";
+    else if (percentage >= 30) grade = "C";
 
     // FIXED: Proper submission time detection for ALL students who have answered questions
-    let submissionTime = 'Not Started';
+    let submissionTime = "Not Started";
 
     if (participant.submittedAt) {
       // Has official submission timestamp
@@ -584,14 +607,17 @@ export default function QuizManagement() {
       }, null);
 
       if (lastAnswer && lastAnswer.timeStamp) {
-        submissionTime = new Date(lastAnswer.timeStamp).toLocaleString() + ' (Auto-detected)';
+        submissionTime =
+          new Date(lastAnswer.timeStamp).toLocaleString() + " (Auto-detected)";
       } else {
-        submissionTime = 'Submitted (Time unknown)';
+        submissionTime = "Submitted (Time unknown)";
       }
     }
 
     console.log(`\n🎯 RESULT for ${participant.name}:`);
-    console.log(`📊 Score: ${score}/${totalQuestions} (${percentage.toFixed(2)}%)`);
+    console.log(
+      `📊 Score: ${score}/${totalQuestions} (${percentage.toFixed(2)}%)`,
+    );
     console.log(`🎓 Grade: ${grade}`);
 
     return {
@@ -602,7 +628,7 @@ export default function QuizManagement() {
       questionsAnswered,
       questionsCorrect,
       details,
-      totalQuestions
+      totalQuestions,
     };
   };
 
@@ -613,7 +639,7 @@ export default function QuizManagement() {
       score: performance.score,
       details: performance.details,
       questionsAnswered: performance.questionsAnswered,
-      questionsCorrect: performance.questionsCorrect
+      questionsCorrect: performance.questionsCorrect,
     };
   };
 
@@ -633,7 +659,9 @@ export default function QuizManagement() {
     if (!participants || participants.length === 0) return 0;
 
     // EFFICIENT batch calculation for MANY participants (including multiple attempts)
-    console.log(`Calculating average for ${participants.length} participant records...`);
+    console.log(
+      `Calculating average for ${participants.length} participant records...`,
+    );
 
     let totalPercentage = 0;
     let validParticipants = 0;
@@ -643,18 +671,28 @@ export default function QuizManagement() {
     participants.forEach((participant, index) => {
       try {
         const performance = calculateStudentPerformance(participant);
-        if (performance && typeof performance.percentage === 'number' && !isNaN(performance.percentage)) {
+        if (
+          performance &&
+          typeof performance.percentage === "number" &&
+          !isNaN(performance.percentage)
+        ) {
           totalPercentage += performance.percentage;
           validParticipants++;
         }
       } catch (error) {
         processingErrors++;
-        console.warn(`Error calculating performance for participant ${index + 1} (${participant.name}):`, error);
+        console.warn(
+          `Error calculating performance for participant ${index + 1} (${participant.name}):`,
+          error,
+        );
       }
     });
 
-    const average = validParticipants > 0 ? totalPercentage / validParticipants : 0;
-    console.log(`Average calculation: ${totalPercentage.toFixed(1)}% ÷ ${validParticipants} = ${average.toFixed(2)}%`);
+    const average =
+      validParticipants > 0 ? totalPercentage / validParticipants : 0;
+    console.log(
+      `Average calculation: ${totalPercentage.toFixed(1)}% ÷ ${validParticipants} = ${average.toFixed(2)}%`,
+    );
 
     if (processingErrors > 0) {
       console.warn(`${processingErrors} participants had processing errors`);
@@ -725,11 +763,18 @@ export default function QuizManagement() {
             totalPoints: performance.totalQuestions,
             percentage: performance.percentage,
             grade: performance.grade,
-            submissionTime: performance.submissionTime
+            submissionTime: performance.submissionTime,
           };
         })
         .map(
-          ({ participant, score, totalPoints, percentage, grade, submissionTime }) => {
+          ({
+            participant,
+            score,
+            totalPoints,
+            percentage,
+            grade,
+            submissionTime,
+          }) => {
             return [
               `"${participant.name}"`,
               score,
@@ -1223,26 +1268,34 @@ export default function QuizManagement() {
                       </div>
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-quiz-success">
-                          {
-                            (() => {
-                              if (!participants || participants.length === 0) return 0;
+                          {(() => {
+                            if (!participants || participants.length === 0)
+                              return 0;
 
-                              let passedCount = 0;
-                              participants.forEach((participant) => {
-                                try {
-                                  const performance = calculateStudentPerformance(participant);
-                                  // A, B, C grades are pass; F is fail - works for ANY participant
-                                  if (performance && (performance.grade === "A" || performance.grade === "B" || performance.grade === "C")) {
-                                    passedCount++;
-                                  }
-                                } catch (error) {
-                                  console.warn(`Error calculating pass status for participant ${participant.name}:`, error);
+                            let passedCount = 0;
+                            participants.forEach((participant) => {
+                              try {
+                                const performance =
+                                  calculateStudentPerformance(participant);
+                                // A, B, C grades are pass; F is fail - works for ANY participant
+                                if (
+                                  performance &&
+                                  (performance.grade === "A" ||
+                                    performance.grade === "B" ||
+                                    performance.grade === "C")
+                                ) {
+                                  passedCount++;
                                 }
-                              });
+                              } catch (error) {
+                                console.warn(
+                                  `Error calculating pass status for participant ${participant.name}:`,
+                                  error,
+                                );
+                              }
+                            });
 
-                              return passedCount;
-                            })()
-                          }
+                            return passedCount;
+                          })()}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Passed
@@ -1250,26 +1303,29 @@ export default function QuizManagement() {
                       </div>
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-destructive">
-                          {
-                            (() => {
-                              if (!participants || participants.length === 0) return 0;
+                          {(() => {
+                            if (!participants || participants.length === 0)
+                              return 0;
 
-                              let failedCount = 0;
-                              participants.forEach((participant) => {
-                                try {
-                                  const performance = calculateStudentPerformance(participant);
-                                  // Only F grade is fail - works for ANY participant
-                                  if (performance && performance.grade === "F") {
-                                    failedCount++;
-                                  }
-                                } catch (error) {
-                                  console.warn(`Error calculating fail status for participant ${participant.name}:`, error);
+                            let failedCount = 0;
+                            participants.forEach((participant) => {
+                              try {
+                                const performance =
+                                  calculateStudentPerformance(participant);
+                                // Only F grade is fail - works for ANY participant
+                                if (performance && performance.grade === "F") {
+                                  failedCount++;
                                 }
-                              });
+                              } catch (error) {
+                                console.warn(
+                                  `Error calculating fail status for participant ${participant.name}:`,
+                                  error,
+                                );
+                              }
+                            });
 
-                              return failedCount;
-                            })()
-                          }
+                            return failedCount;
+                          })()}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Failed
@@ -1306,22 +1362,34 @@ export default function QuizManagement() {
                           <tbody>
                             {(participants || [])
                               .map((participant, participantIndex) => {
-                                console.log(`\n=== PROCESSING PARTICIPANT ${participantIndex + 1}: ${participant.name} ===`);
-                                console.log(`Participant ID: ${participant.id}`);
-                                console.log(`Participant answers:`, participant.answers);
+                                console.log(
+                                  `\n=== PROCESSING PARTICIPANT ${participantIndex + 1}: ${participant.name} ===`,
+                                );
+                                console.log(
+                                  `Participant ID: ${participant.id}`,
+                                );
+                                console.log(
+                                  `Participant answers:`,
+                                  participant.answers,
+                                );
 
                                 try {
                                   // FORCE calculation for EVERY single participant individually
-                                  const performance = calculateStudentPerformance(participant);
-                                  const totalPossible = performance.totalQuestions || getTotalPossiblePoints();
+                                  const performance =
+                                    calculateStudentPerformance(participant);
+                                  const totalPossible =
+                                    performance.totalQuestions ||
+                                    getTotalPossiblePoints();
 
                                   console.log(`Performance calculated:`, {
                                     name: participant.name,
                                     score: performance.score,
                                     percentage: performance.percentage,
                                     grade: performance.grade,
-                                    questionsAnswered: performance.questionsAnswered,
-                                    questionsCorrect: performance.questionsCorrect
+                                    questionsAnswered:
+                                      performance.questionsAnswered,
+                                    questionsCorrect:
+                                      performance.questionsCorrect,
                                   });
 
                                   return {
@@ -1334,8 +1402,14 @@ export default function QuizManagement() {
                                     submissionTime: performance.submissionTime,
                                   };
                                 } catch (error) {
-                                  console.error(`FAILED to process participant ${participantIndex + 1} (${participant?.name || 'Unknown'}):`, error);
-                                  console.error(`Participant data:`, participant);
+                                  console.error(
+                                    `FAILED to process participant ${participantIndex + 1} (${participant?.name || "Unknown"}):`,
+                                    error,
+                                  );
+                                  console.error(
+                                    `Participant data:`,
+                                    participant,
+                                  );
 
                                   // Force manual calculation as fallback for ANY participant
                                   let fallbackScore = 0;
@@ -1343,11 +1417,20 @@ export default function QuizManagement() {
                                   let fallbackCorrect = 0;
 
                                   if (participant.answers && quiz?.questions) {
-                                    quiz.questions.forEach(question => {
-                                      const answer = participant.answers.find(a => a.questionId === question.id);
-                                      if (answer && answer.answer !== undefined && answer.answer !== null) {
+                                    quiz.questions.forEach((question) => {
+                                      const answer = participant.answers.find(
+                                        (a) => a.questionId === question.id,
+                                      );
+                                      if (
+                                        answer &&
+                                        answer.answer !== undefined &&
+                                        answer.answer !== null
+                                      ) {
                                         fallbackAnswered++;
-                                        if (answer.answer === question.correctAnswer) {
+                                        if (
+                                          answer.answer ===
+                                          question.correctAnswer
+                                        ) {
                                           fallbackCorrect++;
                                           fallbackScore += question.points;
                                         }
@@ -1355,34 +1438,64 @@ export default function QuizManagement() {
                                     });
                                   }
 
-                                  const fallbackPercentage = quiz?.questions.length > 0 ? (fallbackCorrect / quiz.questions.length) * 100 : 0;
-                                  let fallbackGrade = 'F';
-                                  if (fallbackPercentage >= 80) fallbackGrade = 'A';
-                                  else if (fallbackPercentage >= 50) fallbackGrade = 'B';
-                                  else if (fallbackPercentage >= 30) fallbackGrade = 'C';
+                                  const fallbackPercentage =
+                                    quiz?.questions.length > 0
+                                      ? (fallbackCorrect /
+                                          quiz.questions.length) *
+                                        100
+                                      : 0;
+                                  let fallbackGrade = "F";
+                                  if (fallbackPercentage >= 80)
+                                    fallbackGrade = "A";
+                                  else if (fallbackPercentage >= 50)
+                                    fallbackGrade = "B";
+                                  else if (fallbackPercentage >= 30)
+                                    fallbackGrade = "C";
 
-                                  console.log(`Fallback calculation for ${participant.name}:`, {
-                                    score: fallbackScore,
-                                    percentage: fallbackPercentage,
-                                    grade: fallbackGrade
-                                  });
+                                  console.log(
+                                    `Fallback calculation for ${participant.name}:`,
+                                    {
+                                      score: fallbackScore,
+                                      percentage: fallbackPercentage,
+                                      grade: fallbackGrade,
+                                    },
+                                  );
 
                                   // Calculate proper submission time for fallback
-                                  let fallbackSubmissionTime = 'Not Started';
+                                  let fallbackSubmissionTime = "Not Started";
                                   if (participant.submittedAt) {
-                                    fallbackSubmissionTime = new Date(participant.submittedAt).toLocaleString();
-                                  } else if (participant.answers && participant.answers.length > 0) {
-                                    const lastAnswer = participant.answers.reduce((latest, current) => {
-                                      if (!latest) return current;
-                                      const latestTime = new Date(latest.timeStamp || 0);
-                                      const currentTime = new Date(current.timeStamp || 0);
-                                      return currentTime > latestTime ? current : latest;
-                                    }, null);
+                                    fallbackSubmissionTime = new Date(
+                                      participant.submittedAt,
+                                    ).toLocaleString();
+                                  } else if (
+                                    participant.answers &&
+                                    participant.answers.length > 0
+                                  ) {
+                                    const lastAnswer =
+                                      participant.answers.reduce(
+                                        (latest, current) => {
+                                          if (!latest) return current;
+                                          const latestTime = new Date(
+                                            latest.timeStamp || 0,
+                                          );
+                                          const currentTime = new Date(
+                                            current.timeStamp || 0,
+                                          );
+                                          return currentTime > latestTime
+                                            ? current
+                                            : latest;
+                                        },
+                                        null,
+                                      );
 
                                     if (lastAnswer && lastAnswer.timeStamp) {
-                                      fallbackSubmissionTime = new Date(lastAnswer.timeStamp).toLocaleString() + ' (Auto-detected)';
+                                      fallbackSubmissionTime =
+                                        new Date(
+                                          lastAnswer.timeStamp,
+                                        ).toLocaleString() + " (Auto-detected)";
                                     } else {
-                                      fallbackSubmissionTime = 'Submitted (Time unknown)';
+                                      fallbackSubmissionTime =
+                                        "Submitted (Time unknown)";
                                     }
                                   }
 
@@ -1394,7 +1507,7 @@ export default function QuizManagement() {
                                       grade: fallbackGrade,
                                       submissionTime: fallbackSubmissionTime,
                                       questionsCorrect: fallbackCorrect,
-                                      questionsAnswered: fallbackAnswered
+                                      questionsAnswered: fallbackAnswered,
                                     },
                                     score: fallbackScore,
                                     totalPossible: getTotalPossiblePoints(),
@@ -1426,11 +1539,13 @@ export default function QuizManagement() {
                                       <td className="p-3 font-medium">
                                         <div>
                                           <span>{participant.name}</span>
-                                          {participant.attemptNumber && participant.attemptNumber > 1 && (
-                                            <span className="text-xs text-muted-foreground ml-2">
-                                              (Attempt #{participant.attemptNumber})
-                                            </span>
-                                          )}
+                                          {participant.attemptNumber &&
+                                            participant.attemptNumber > 1 && (
+                                              <span className="text-xs text-muted-foreground ml-2">
+                                                (Attempt #
+                                                {participant.attemptNumber})
+                                              </span>
+                                            )}
                                         </div>
                                       </td>
                                       <td className="p-3">
@@ -1438,7 +1553,10 @@ export default function QuizManagement() {
                                           {score} / {totalPossible}
                                         </span>
                                         <div className="text-xs text-muted-foreground">
-                                          {performance.questionsCorrect || 0} correct out of {performance.questionsAnswered || 0} answered
+                                          {performance.questionsCorrect || 0}{" "}
+                                          correct out of{" "}
+                                          {performance.questionsAnswered || 0}{" "}
+                                          answered
                                         </div>
                                       </td>
                                       <td className="p-3">

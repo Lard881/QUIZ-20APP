@@ -232,7 +232,9 @@ export const joinQuiz: RequestHandler = (req, res) => {
     participants.push(participant);
     session.participants.push(participant);
 
-    console.log(`✅ PARTICIPANT ADDED TO SYSTEM. Total participants: ${participants.length}`);
+    console.log(
+      `✅ PARTICIPANT ADDED TO SYSTEM. Total participants: ${participants.length}`,
+    );
 
     const response: JoinQuizResponse = {
       sessionId: session.id,
@@ -322,37 +324,55 @@ export const submitAnswer: RequestHandler = (req, res) => {
     console.log(`\n📋 SEARCHING FOR PARTICIPANT WITH SESSION: ${sessionId}`);
     console.log(`Total participants in system: ${participants.length}`);
     participants.forEach((p, index) => {
-      console.log(`Participant ${index + 1}: ${p.name} (Session: ${p.sessionId}) - Answers: ${p.answers?.length || 0}`);
+      console.log(
+        `Participant ${index + 1}: ${p.name} (Session: ${p.sessionId}) - Answers: ${p.answers?.length || 0}`,
+      );
     });
 
     let participant = participants.find((p) => p.sessionId === sessionId);
 
     // CRITICAL: Handle multiple participants with same session (like Lord's case)
-    const sameSessionParticipants = participants.filter((p) => p.sessionId === sessionId);
+    const sameSessionParticipants = participants.filter(
+      (p) => p.sessionId === sessionId,
+    );
     if (sameSessionParticipants.length > 1) {
-      console.log(`🚨 CRITICAL: Found ${sameSessionParticipants.length} participants with same session ID:`,
-        sameSessionParticipants.map(p => ({name: p.name, id: p.id, answersCount: p.answers?.length || 0})));
+      console.log(
+        `🚨 CRITICAL: Found ${sameSessionParticipants.length} participants with same session ID:`,
+        sameSessionParticipants.map((p) => ({
+          name: p.name,
+          id: p.id,
+          answersCount: p.answers?.length || 0,
+        })),
+      );
 
       // SMART PARTICIPANT SELECTION: Find the one currently taking the quiz
       // Look for the most recent participant or one with matching IP
       const clientIP = getClientIP(req);
-      let selectedParticipant = sameSessionParticipants.find(p => p.ipAddress === clientIP);
+      let selectedParticipant = sameSessionParticipants.find(
+        (p) => p.ipAddress === clientIP,
+      );
 
       if (!selectedParticipant) {
         // Fallback: Use the most recent participant (highest ID number)
-        selectedParticipant = sameSessionParticipants.reduce((latest, current) => {
-          const latestId = parseInt(latest.id.split('_')[1] || '0');
-          const currentId = parseInt(current.id.split('_')[1] || '0');
-          return currentId > latestId ? current : latest;
-        });
+        selectedParticipant = sameSessionParticipants.reduce(
+          (latest, current) => {
+            const latestId = parseInt(latest.id.split("_")[1] || "0");
+            const currentId = parseInt(current.id.split("_")[1] || "0");
+            return currentId > latestId ? current : latest;
+          },
+        );
       }
 
       participant = selectedParticipant;
-      console.log(`✅ Selected participant: ${participant.name} (IP: ${participant.ipAddress}, ID: ${participant.id})`);
+      console.log(
+        `✅ Selected participant: ${participant.name} (IP: ${participant.ipAddress}, ID: ${participant.id})`,
+      );
     }
     if (!participant) {
       console.log(`❌ PARTICIPANT NOT FOUND FOR SESSION: ${sessionId}`);
-      console.log(`📋 Available sessions: ${participants.map(p => `${p.name}:${p.sessionId}`).join(', ')}`);
+      console.log(
+        `📋 Available sessions: ${participants.map((p) => `${p.name}:${p.sessionId}`).join(", ")}`,
+      );
       const errorResponse: ErrorResponse = {
         error: "PARTICIPANT_NOT_FOUND",
         message: `Participant not found for session ${sessionId}. Total participants: ${participants.length}`,
@@ -360,7 +380,9 @@ export const submitAnswer: RequestHandler = (req, res) => {
       return res.status(404).json(errorResponse);
     }
 
-    console.log(`✅ FOUND PARTICIPANT: ${participant.name} (ID: ${participant.id})`);
+    console.log(
+      `✅ FOUND PARTICIPANT: ${participant.name} (ID: ${participant.id})`,
+    );
     console.log(`Current answers count: ${participant.answers?.length || 0}`);
 
     // Update or add answer with guaranteed timestamp
@@ -380,23 +402,33 @@ export const submitAnswer: RequestHandler = (req, res) => {
     console.log(`Existing answer index: ${existingAnswerIndex}`);
 
     if (existingAnswerIndex >= 0) {
-      console.log(`🔄 UPDATING existing answer at index ${existingAnswerIndex}`);
+      console.log(
+        `🔄 UPDATING existing answer at index ${existingAnswerIndex}`,
+      );
       participant.answers[existingAnswerIndex] = answerData;
     } else {
       console.log(`➕ ADDING new answer to array`);
       participant.answers.push(answerData);
     }
 
-    console.log(`✅ ANSWER SAVED! New answers count: ${participant.answers.length}`);
+    console.log(
+      `✅ ANSWER SAVED! New answers count: ${participant.answers.length}`,
+    );
     console.log(`Updated answers array:`, participant.answers);
 
     // AUTO-SUBMISSION: Check if this was the last question and auto-mark as submitted
     const session = quizSessions.find((s) => s.id === sessionId);
     if (session) {
       const quiz = quizzes.find((q) => q.id === session.quizId);
-      if (quiz && participant.answers.length >= quiz.questions.length && !participant.submittedAt) {
+      if (
+        quiz &&
+        participant.answers.length >= quiz.questions.length &&
+        !participant.submittedAt
+      ) {
         participant.submittedAt = answerData.timeStamp;
-        console.log(`Auto-submitted quiz for ${participant.name} - answered all ${quiz.questions.length} questions`);
+        console.log(
+          `Auto-submitted quiz for ${participant.name} - answered all ${quiz.questions.length} questions`,
+        );
       }
     }
 
@@ -406,34 +438,55 @@ export const submitAnswer: RequestHandler = (req, res) => {
     console.log(`Session: ${participant.sessionId}`);
     console.log(`Answers before save:`, participant.answers?.length || 0);
 
-    const participantIndex = participants.findIndex(p => p.id === participant.id);
+    const participantIndex = participants.findIndex(
+      (p) => p.id === participant.id,
+    );
     if (participantIndex >= 0) {
       // Update existing participant
       participants[participantIndex] = { ...participant }; // Deep copy to prevent reference issues
       console.log(`✅ PARTICIPANT DATA UPDATED AT INDEX: ${participantIndex}`);
 
       // VERIFICATION: Double-check the save worked
-      const verifyParticipant = participants.find(p => p.id === participant.id);
-      if (verifyParticipant && verifyParticipant.answers?.length === participant.answers?.length) {
-        console.log(`✅ SAVE VERIFICATION PASSED: ${verifyParticipant.answers?.length} answers confirmed`);
+      const verifyParticipant = participants.find(
+        (p) => p.id === participant.id,
+      );
+      if (
+        verifyParticipant &&
+        verifyParticipant.answers?.length === participant.answers?.length
+      ) {
+        console.log(
+          `✅ SAVE VERIFICATION PASSED: ${verifyParticipant.answers?.length} answers confirmed`,
+        );
       } else {
         console.log(`❌ SAVE VERIFICATION FAILED! Re-attempting save...`);
-        participants[participantIndex] = JSON.parse(JSON.stringify(participant)); // Force deep copy
+        participants[participantIndex] = JSON.parse(
+          JSON.stringify(participant),
+        ); // Force deep copy
       }
     } else {
-      console.log(`⚠️ WARNING: Participant not found in main array, adding as new entry...`);
+      console.log(
+        `⚠️ WARNING: Participant not found in main array, adding as new entry...`,
+      );
       participants.push({ ...participant });
       console.log(`✅ NEW PARTICIPANT ADDED TO SYSTEM`);
     }
 
     // FINAL VERIFICATION: Ensure participant exists with correct data
-    const finalCheck = participants.find(p => p.id === participant.id);
-    console.log(`🔍 FINAL CHECK: ${finalCheck?.name} has ${finalCheck?.answers?.length || 0} answers stored`);
+    const finalCheck = participants.find((p) => p.id === participant.id);
+    console.log(
+      `🔍 FINAL CHECK: ${finalCheck?.name} has ${finalCheck?.answers?.length || 0} answers stored`,
+    );
 
-    if (!finalCheck || (finalCheck.answers?.length || 0) !== (participant.answers?.length || 0)) {
+    if (
+      !finalCheck ||
+      (finalCheck.answers?.length || 0) !== (participant.answers?.length || 0)
+    ) {
       console.log(`🚨 CRITICAL ERROR: Participant data not saved correctly!`);
       // Force save as backup
-      const backupIndex = participants.findIndex(p => p.sessionId === participant.sessionId && p.name === participant.name);
+      const backupIndex = participants.findIndex(
+        (p) =>
+          p.sessionId === participant.sessionId && p.name === participant.name,
+      );
       if (backupIndex >= 0) {
         participants[backupIndex] = JSON.parse(JSON.stringify(participant));
         console.log(`✅ BACKUP SAVE COMPLETED`);
@@ -449,7 +502,7 @@ export const submitAnswer: RequestHandler = (req, res) => {
       success: true,
       answersCount: participant.answers.length,
       participantId: participant.id,
-      saved: true
+      saved: true,
     });
   } catch (error) {
     console.log(`\n❌ ANSWER SUBMISSION FAILED:`, error);
@@ -493,7 +546,9 @@ export const submitQuiz: RequestHandler = (req, res) => {
       return res.status(404).json(errorResponse);
     }
 
-    console.log(`✅ FOUND PARTICIPANT: ${participant.name} (ID: ${participant.id})`);
+    console.log(
+      `✅ FOUND PARTICIPANT: ${participant.name} (ID: ${participant.id})`,
+    );
     console.log(`Current answers: ${participant.answers?.length || 0}`);
 
     // Ensure participant has answers array
@@ -523,7 +578,9 @@ export const submitQuiz: RequestHandler = (req, res) => {
       return res.status(404).json(errorResponse);
     }
 
-    console.log(`\n📊 STARTING IMMEDIATE SCORE CALCULATION FOR: ${participant.name}`);
+    console.log(
+      `\n📊 STARTING IMMEDIATE SCORE CALCULATION FOR: ${participant.name}`,
+    );
     console.log(`Quiz questions: ${quiz.questions.length}`);
     console.log(`Participant answers: ${participant.answers?.length || 0}`);
 
@@ -534,9 +591,13 @@ export const submitQuiz: RequestHandler = (req, res) => {
     const scoreDetails = [];
 
     quiz.questions.forEach((question, qIndex) => {
-      console.log(`\n--- SCORING Question ${qIndex + 1} (ID: ${question.id}) ---`);
+      console.log(
+        `\n--- SCORING Question ${qIndex + 1} (ID: ${question.id}) ---`,
+      );
       console.log(`Question: "${question.question}"`);
-      console.log(`Correct Answer: ${question.correctAnswer} (Type: ${question.type})`);
+      console.log(
+        `Correct Answer: ${question.correctAnswer} (Type: ${question.type})`,
+      );
       console.log(`Points Available: ${question.points}`);
 
       const studentAnswer = participant.answers.find(
@@ -547,7 +608,7 @@ export const submitQuiz: RequestHandler = (req, res) => {
         studentAnswer &&
         studentAnswer.answer !== undefined &&
         studentAnswer.answer !== null &&
-        studentAnswer.answer !== ''
+        studentAnswer.answer !== ""
       ) {
         questionsAnswered++;
         const studentResponse = studentAnswer.answer;
@@ -573,12 +634,16 @@ export const submitQuiz: RequestHandler = (req, res) => {
           }
 
           isCorrect = studentAns === correctAns;
-          console.log(`Comparison: ${studentAns} === ${correctAns} = ${isCorrect}`);
+          console.log(
+            `Comparison: ${studentAns} === ${correctAns} = ${isCorrect}`,
+          );
         } else if (question.type === "short-answer") {
           // For short answer, check if there's a meaningful answer
           const answerText = studentResponse.toString().trim();
           isCorrect = answerText.length > 0;
-          console.log(`Short answer check: "${answerText}" length > 0 = ${isCorrect}`);
+          console.log(
+            `Short answer check: "${answerText}" length > 0 = ${isCorrect}`,
+          );
         }
 
         if (isCorrect) {
@@ -596,7 +661,7 @@ export const submitQuiz: RequestHandler = (req, res) => {
           studentAnswer: studentResponse,
           correctAnswer: question.correctAnswer,
           isCorrect,
-          pointsEarned
+          pointsEarned,
         });
       } else {
         console.log(`❌ NO VALID ANSWER PROVIDED`);
@@ -606,7 +671,7 @@ export const submitQuiz: RequestHandler = (req, res) => {
           studentAnswer: null,
           correctAnswer: question.correctAnswer,
           isCorrect: false,
-          pointsEarned: 0
+          pointsEarned: 0,
         });
       }
     });
@@ -617,12 +682,16 @@ export const submitQuiz: RequestHandler = (req, res) => {
     participant.score = totalScore;
 
     // Calculate comprehensive scoring metadata
-    const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
-    const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
-    let grade = 'F';
-    if (percentage >= 80) grade = 'A';
-    else if (percentage >= 50) grade = 'B';
-    else if (percentage >= 30) grade = 'C';
+    const totalPossiblePoints = quiz.questions.reduce(
+      (sum, q) => sum + q.points,
+      0,
+    );
+    const percentage =
+      totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
+    let grade = "F";
+    if (percentage >= 80) grade = "A";
+    else if (percentage >= 50) grade = "B";
+    else if (percentage >= 30) grade = "C";
 
     // SAVE ALL SCORING DATA TO PARTICIPANT RECORD
     participant.percentage = Math.round(percentage * 100) / 100;
@@ -632,43 +701,55 @@ export const submitQuiz: RequestHandler = (req, res) => {
     participant.scoreDetails = scoreDetails;
     participant.calculatedAt = submissionTime;
 
-    console.log(`\n🎯 FINAL SCORE CALCULATION COMPLETE FOR: ${participant.name}`);
+    console.log(
+      `\n🎯 FINAL SCORE CALCULATION COMPLETE FOR: ${participant.name}`,
+    );
     console.log(`Score: ${totalScore}/${totalPossiblePoints} points`);
     console.log(`Percentage: ${percentage.toFixed(2)}%`);
     console.log(`Grade: ${grade}`);
     console.log(`Questions Answered: ${questionsAnswered}`);
     console.log(`Questions Correct: ${questionsCorrect}`);
-    console.log(`Pass Status: ${grade !== 'F' ? 'PASSED' : 'FAILED'}`);
+    console.log(`Pass Status: ${grade !== "F" ? "PASSED" : "FAILED"}`);
     console.log(`Submission Time: ${submissionTime}`);
 
     // FORCE SAVE TO SERVER WITH VERIFICATION
     console.log(`\n💾 FORCE SAVING PARTICIPANT SCORE DATA...`);
-    const participantIndex = participants.findIndex(p => p.id === participant.id);
+    const participantIndex = participants.findIndex(
+      (p) => p.id === participant.id,
+    );
     if (participantIndex >= 0) {
       participants[participantIndex] = { ...participant };
-      console.log(`✅ PARTICIPANT SCORE DATA SAVED AT INDEX: ${participantIndex}`);
+      console.log(
+        `✅ PARTICIPANT SCORE DATA SAVED AT INDEX: ${participantIndex}`,
+      );
     } else {
       participants.push({ ...participant });
       console.log(`⚠️ PARTICIPANT ADDED TO MAIN ARRAY WITH SCORES`);
     }
 
     // VERIFICATION: Check that scores are actually saved
-    const savedParticipant = participants.find(p => p.id === participant.id);
+    const savedParticipant = participants.find((p) => p.id === participant.id);
     if (savedParticipant && savedParticipant.score === totalScore) {
-      console.log(`✅ SCORE VERIFICATION PASSED: ${totalScore} points saved correctly`);
+      console.log(
+        `✅ SCORE VERIFICATION PASSED: ${totalScore} points saved correctly`,
+      );
     } else {
-      console.log(`❌ SCORE VERIFICATION FAILED! Expected: ${totalScore}, Found: ${savedParticipant?.score}`);
+      console.log(
+        `❌ SCORE VERIFICATION FAILED! Expected: ${totalScore}, Found: ${savedParticipant?.score}`,
+      );
     }
 
     console.log(`\n✅ PARTICIPANT DATA SAVED TO SERVER`);
-    console.log(`Total participants with scores: ${participants.filter(p => p.score !== undefined).length}`);
+    console.log(
+      `Total participants with scores: ${participants.filter((p) => p.score !== undefined).length}`,
+    );
     console.log(`Saved participant details:`, {
       id: participant.id,
       name: participant.name,
       score: participant.score,
       percentage: participant.percentage,
       grade: participant.grade,
-      submittedAt: participant.submittedAt
+      submittedAt: participant.submittedAt,
     });
 
     // Clear timeout since we're responding successfully
@@ -703,7 +784,7 @@ export const submitQuiz: RequestHandler = (req, res) => {
     if (!res.headersSent) {
       const errorResponse: ErrorResponse = {
         error: "SUBMIT_QUIZ_FAILED",
-        message: `Failed to submit quiz: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to submit quiz: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
       res.status(500).json(errorResponse);
     } else {
@@ -716,7 +797,8 @@ export const submitQuiz: RequestHandler = (req, res) => {
 export const getQuizResults: RequestHandler = (req, res) => {
   try {
     const { quizId } = req.params;
-    const forceRecalculate = req.method === 'POST' || req.body?.forceRecalculate;
+    const forceRecalculate =
+      req.method === "POST" || req.body?.forceRecalculate;
 
     const quiz = quizzes.find((q) => q.id === quizId);
     if (!quiz) {
@@ -732,95 +814,146 @@ export const getQuizResults: RequestHandler = (req, res) => {
       sessions.some((s) => s.id === p.sessionId),
     );
 
-    console.log(`${forceRecalculate ? 'Force recalculating' : 'Getting'} scores for ${allParticipants.length} participants in quiz: ${quiz.title}`);
+    console.log(
+      `${forceRecalculate ? "Force recalculating" : "Getting"} scores for ${allParticipants.length} participants in quiz: ${quiz.title}`,
+    );
 
     // COMPREHENSIVE DEBUGGING: Check for missing Sam data
     console.log(`\\n🔍 SEARCHING FOR ALL SAM RECORDS...`);
-    const allSamRecords = participants.filter(p => p.name.toLowerCase().includes('sam'));
-    console.log(`Found ${allSamRecords.length} Sam participant records:`, allSamRecords.map(p => ({
-      id: p.id,
-      name: p.name,
-      sessionId: p.sessionId,
-      answersCount: p.answers?.length || 0,
-      attemptNumber: p.attemptNumber,
-      submittedAt: p.submittedAt
-    })));
+    const allSamRecords = participants.filter((p) =>
+      p.name.toLowerCase().includes("sam"),
+    );
+    console.log(
+      `Found ${allSamRecords.length} Sam participant records:`,
+      allSamRecords.map((p) => ({
+        id: p.id,
+        name: p.name,
+        sessionId: p.sessionId,
+        answersCount: p.answers?.length || 0,
+        attemptNumber: p.attemptNumber,
+        submittedAt: p.submittedAt,
+      })),
+    );
 
-    console.log(`\\n📋 ALL PARTICIPANTS IN SYSTEM:`, participants.map(p => ({
-      id: p.id,
-      name: p.name,
-      sessionId: p.sessionId,
-      answersCount: p.answers?.length || 0,
-      attemptNumber: p.attemptNumber || 1
-    })));
+    console.log(
+      `\\n📋 ALL PARTICIPANTS IN SYSTEM:`,
+      participants.map((p) => ({
+        id: p.id,
+        name: p.name,
+        sessionId: p.sessionId,
+        answersCount: p.answers?.length || 0,
+        attemptNumber: p.attemptNumber || 1,
+      })),
+    );
 
-    console.log(`\\n🎭 ALL SESSIONS:`, quizSessions.map(s => ({
-      id: s.id,
-      quizId: s.quizId,
-      participantCount: s.participants?.length || 0,
-      isActive: s.isActive
-    })));
+    console.log(
+      `\\n🎭 ALL SESSIONS:`,
+      quizSessions.map((s) => ({
+        id: s.id,
+        quizId: s.quizId,
+        participantCount: s.participants?.length || 0,
+        isActive: s.isActive,
+      })),
+    );
 
     if (forceRecalculate) {
       console.log("=== FORCE RECALCULATION MODE ===");
-      console.log("Processing ALL participants with fresh score calculations...");
+      console.log(
+        "Processing ALL participants with fresh score calculations...",
+      );
     }
 
     // COMPREHENSIVE scoring system - processes EVERY participant individually
-    console.log(`\n🎯 STARTING SCORE CALCULATION FOR ${allParticipants.length} PARTICIPANTS`);
-    console.log(`📚 Quiz: "${quiz.title}" | Questions: ${quiz.questions.length}`);
+    console.log(
+      `\n🎯 STARTING SCORE CALCULATION FOR ${allParticipants.length} PARTICIPANTS`,
+    );
+    console.log(
+      `📚 Quiz: "${quiz.title}" | Questions: ${quiz.questions.length}`,
+    );
 
     const participantsWithScores = allParticipants.map((participant, index) => {
       const participantName = participant.name || `Participant ${index + 1}`;
       const attemptNumber = participant.attemptNumber || 1;
 
-      console.log(`\n�� === PROCESSING PARTICIPANT ${index + 1}/${allParticipants.length} ===`);
+      console.log(
+        `\n�� === PROCESSING PARTICIPANT ${index + 1}/${allParticipants.length} ===`,
+      );
       console.log(`�� Name: ${participantName} (Attempt #${attemptNumber})`);
       console.log(`🆔 ID: ${participant.id}`);
       console.log(`📝 Answers array length:`, participant.answers?.length || 0);
       console.log(`📊 Raw answers:`, participant.answers);
-      console.log(`🔍 Participant submitted status:`, participant.submittedAt || 'No submission timestamp');
+      console.log(
+        `🔍 Participant submitted status:`,
+        participant.submittedAt || "No submission timestamp",
+      );
       console.log(`💾 Participant session ID:`, participant.sessionId);
 
       // CRITICAL DEBUG: Check if this is Sam and examine their data
-      if (participantName.toLowerCase().includes('sam')) {
+      if (participantName.toLowerCase().includes("sam")) {
         console.log(`\\n🚨 DEBUGGING SAM'S DATA 🚨`);
-        console.log(`Sam's full participant object:`, JSON.stringify(participant, null, 2));
-        console.log(`Sam's answers in detail:`, participant.answers?.map(a => ({
-          questionId: a.questionId,
-          answer: a.answer,
-          timestamp: a.timeStamp,
-          type: typeof a.answer
-        })));
-        console.log(`Quiz questions for comparison:`, quiz.questions.map(q => ({
-          id: q.id,
-          question: q.question.substring(0, 50),
-          correctAnswer: q.correctAnswer,
-          type: q.type
-        })));
+        console.log(
+          `Sam's full participant object:`,
+          JSON.stringify(participant, null, 2),
+        );
+        console.log(
+          `Sam's answers in detail:`,
+          participant.answers?.map((a) => ({
+            questionId: a.questionId,
+            answer: a.answer,
+            timestamp: a.timeStamp,
+            type: typeof a.answer,
+          })),
+        );
+        console.log(
+          `Quiz questions for comparison:`,
+          quiz.questions.map((q) => ({
+            id: q.id,
+            question: q.question.substring(0, 50),
+            correctAnswer: q.correctAnswer,
+            type: q.type,
+          })),
+        );
       }
 
       let totalScore = 0;
       let questionsAnswered = 0;
       let questionsCorrect = 0;
-      const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
+      const totalPossiblePoints = quiz.questions.reduce(
+        (sum, q) => sum + q.points,
+        0,
+      );
 
       // Handle ANY participant with ANY number of attempts
-      const hasAnswers = participant.answers && Array.isArray(participant.answers) && participant.answers.length > 0;
+      const hasAnswers =
+        participant.answers &&
+        Array.isArray(participant.answers) &&
+        participant.answers.length > 0;
 
       if (hasAnswers) {
         // ROBUST ANSWER COMPARISON: Compare each student answer with correct answer
-        console.log(`Processing ${quiz.questions.length} questions for ${participantName}:`);
+        console.log(
+          `Processing ${quiz.questions.length} questions for ${participantName}:`,
+        );
 
         quiz.questions.forEach((question, qIndex) => {
           console.log(`\n--- Question ${qIndex + 1} (ID: ${question.id}) ---`);
           console.log(`Question: "${question.question}"`);
-          console.log(`Correct Answer: ${question.correctAnswer} (Type: ${question.type})`);
+          console.log(
+            `Correct Answer: ${question.correctAnswer} (Type: ${question.type})`,
+          );
           console.log(`Points Available: ${question.points}`);
-          console.log(`Available student answers for ${participantName}:`, participant.answers.map(a => ({id: a.questionId, answer: a.answer})));
+          console.log(
+            `Available student answers for ${participantName}:`,
+            participant.answers.map((a) => ({
+              id: a.questionId,
+              answer: a.answer,
+            })),
+          );
 
           // ROBUST ANSWER MATCHING: Try multiple matching strategies
-          let studentAnswer = participant.answers.find(a => a.questionId === question.id);
+          let studentAnswer = participant.answers.find(
+            (a) => a.questionId === question.id,
+          );
 
           // If no exact match, try alternative matching strategies
           if (!studentAnswer) {
@@ -828,46 +961,74 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
             // Try matching by question index (fallback for mismatched IDs)
             if (participant.answers[qIndex]) {
-              console.log(`🔄 Trying index-based matching for question ${qIndex + 1}`);
+              console.log(
+                `🔄 Trying index-based matching for question ${qIndex + 1}`,
+              );
               studentAnswer = participant.answers[qIndex];
             }
 
             // Try matching by partial ID (if IDs got corrupted)
             if (!studentAnswer) {
-              studentAnswer = participant.answers.find(a => a.questionId && a.questionId.toString().includes(question.id.toString().slice(-3)));
+              studentAnswer = participant.answers.find(
+                (a) =>
+                  a.questionId &&
+                  a.questionId
+                    .toString()
+                    .includes(question.id.toString().slice(-3)),
+              );
               if (studentAnswer) {
-                console.log(`🔄 Found partial ID match: ${studentAnswer.questionId}`);
+                console.log(
+                  `🔄 Found partial ID match: ${studentAnswer.questionId}`,
+                );
               }
             }
           } else {
             console.log(`✅ Found exact match for question ID: ${question.id}`);
           }
 
-          if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null && studentAnswer.answer !== '') {
+          if (
+            studentAnswer &&
+            studentAnswer.answer !== undefined &&
+            studentAnswer.answer !== null &&
+            studentAnswer.answer !== ""
+          ) {
             questionsAnswered++;
             const studentResponse = studentAnswer.answer;
-            console.log(`✅ Student Answer Found: ${studentResponse} (from answer ID: ${studentAnswer.questionId})`);
+            console.log(
+              `✅ Student Answer Found: ${studentResponse} (from answer ID: ${studentAnswer.questionId})`,
+            );
 
             // PRECISE ANSWER COMPARISON for ANY question type
             let isCorrect = false;
             let pointsEarned = 0;
 
-            if (question.type === "multiple-choice" || question.type === "true-false") {
+            if (
+              question.type === "multiple-choice" ||
+              question.type === "true-false"
+            ) {
               // Normalize both answers for exact comparison
               let studentAns = studentResponse;
               let correctAns = question.correctAnswer;
 
               // Handle string/number conversion carefully
-              if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
+              if (
+                typeof studentAns === "string" &&
+                !isNaN(Number(studentAns))
+              ) {
                 studentAns = Number(studentAns);
               }
-              if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
+              if (
+                typeof correctAns === "string" &&
+                !isNaN(Number(correctAns))
+              ) {
                 correctAns = Number(correctAns);
               }
 
               // EXACT MATCH COMPARISON
               isCorrect = studentAns === correctAns;
-              console.log(`Comparison: ${studentAns} === ${correctAns} = ${isCorrect}`);
+              console.log(
+                `Comparison: ${studentAns} === ${correctAns} = ${isCorrect}`,
+              );
 
               if (isCorrect) {
                 pointsEarned = question.points;
@@ -877,7 +1038,6 @@ export const getQuizResults: RequestHandler = (req, res) => {
               } else {
                 console.log(`✗ INCORRECT! Earned 0 points`);
               }
-
             } else if (question.type === "short-answer") {
               // Handle short answer questions with basic validation
               const answerText = studentResponse.toString().trim();
@@ -887,7 +1047,9 @@ export const getQuizResults: RequestHandler = (req, res) => {
                 pointsEarned = question.points;
                 totalScore += pointsEarned;
                 questionsCorrect++;
-                console.log(`✓ SHORT ANSWER PROVIDED! Earned ${pointsEarned} points`);
+                console.log(
+                  `✓ SHORT ANSWER PROVIDED! Earned ${pointsEarned} points`,
+                );
               } else {
                 console.log(`✗ NO ANSWER PROVIDED! Earned 0 points`);
               }
@@ -895,17 +1057,24 @@ export const getQuizResults: RequestHandler = (req, res) => {
           } else {
             console.log(`❌ Student Answer: [NO VALID ANSWER FOUND]`);
             if (studentAnswer) {
-              console.log(`Found answer object but value is invalid:`, studentAnswer);
+              console.log(
+                `Found answer object but value is invalid:`,
+                studentAnswer,
+              );
             }
             console.log(`✗ UNANSWERED! Earned 0 points`);
           }
         });
       } else {
-        console.log(`${participantName} provided NO VALID ANSWERS - Checking for any data...`);
+        console.log(
+          `${participantName} provided NO VALID ANSWERS - Checking for any data...`,
+        );
 
         // FALLBACK: Even if no answers array, check if participant has any stored data
         if (participant.score !== undefined) {
-          console.log(`Found existing score for ${participantName}: ${participant.score}`);
+          console.log(
+            `Found existing score for ${participantName}: ${participant.score}`,
+          );
           totalScore = participant.score;
         }
         if (participant.questionsCorrect !== undefined) {
@@ -919,24 +1088,27 @@ export const getQuizResults: RequestHandler = (req, res) => {
       }
 
       // CALCULATE FINAL PERCENTAGE AND ASSIGN GRADE
-      let percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
+      let percentage =
+        totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
 
       // GRADE ASSIGNMENT BASED ON PERCENTAGE (works for ANY participant)
-      let grade = 'F'; // Default fail grade
+      let grade = "F"; // Default fail grade
       if (percentage >= 80) {
-        grade = 'A'; // Excellent: 80-100%
+        grade = "A"; // Excellent: 80-100%
       } else if (percentage >= 50) {
-        grade = 'B'; // Good: 50-79%
+        grade = "B"; // Good: 50-79%
       } else if (percentage >= 30) {
-        grade = 'C'; // Satisfactory: 30-49%
+        grade = "C"; // Satisfactory: 30-49%
       }
       // F grade: 0-29% (already set as default)
 
-      console.log(`\n=== FINAL RESULTS for ${participantName} (Attempt #${attemptNumber}) ===`);
+      console.log(
+        `\n=== FINAL RESULTS for ${participantName} (Attempt #${attemptNumber}) ===`,
+      );
       console.log(`Total Score: ${totalScore}/${totalPossiblePoints} points`);
       console.log(`Percentage: ${percentage.toFixed(2)}%`);
       console.log(`Grade: ${grade}`);
-      console.log(`Pass Status: ${grade !== 'F' ? 'PASSED' : 'FAILED'}`);
+      console.log(`Pass Status: ${grade !== "F" ? "PASSED" : "FAILED"}`);
 
       // AUTO-MARK SUBMISSION: If student has answers but no submission timestamp, auto-mark as submitted
       if (hasAnswers && !participant.submittedAt && questionsAnswered > 0) {
@@ -949,7 +1121,9 @@ export const getQuizResults: RequestHandler = (req, res) => {
         }, null);
 
         participant.submittedAt = lastAnswerTime || new Date().toISOString();
-        console.log(`Auto-marked ${participantName} as submitted at: ${participant.submittedAt}`);
+        console.log(
+          `Auto-marked ${participantName} as submitted at: ${participant.submittedAt}`,
+        );
       }
 
       // PRESERVE EXISTING SCORES: Only update if no score exists or force recalculation
@@ -961,9 +1135,13 @@ export const getQuizResults: RequestHandler = (req, res) => {
         participant.questionsAnswered = questionsAnswered;
         participant.calculatedAt = new Date().toISOString();
 
-        console.log(`🔄 UPDATING participant scores: ${participant.name} = ${totalScore} points`);
+        console.log(
+          `🔄 UPDATING participant scores: ${participant.name} = ${totalScore} points`,
+        );
       } else {
-        console.log(`✅ PRESERVING existing scores: ${participant.name} = ${participant.score} points`);
+        console.log(
+          `✅ PRESERVING existing scores: ${participant.name} = ${participant.score} points`,
+        );
         // Use existing scores
         totalScore = participant.score;
         questionsCorrect = participant.questionsCorrect || questionsCorrect;
@@ -973,7 +1151,9 @@ export const getQuizResults: RequestHandler = (req, res) => {
       }
 
       // FORCE SAVE TO PARTICIPANTS ARRAY
-      const participantIndex = participants.findIndex(p => p.id === participant.id);
+      const participantIndex = participants.findIndex(
+        (p) => p.id === participant.id,
+      );
       if (participantIndex >= 0) {
         participants[participantIndex] = { ...participant };
       }
@@ -993,16 +1173,21 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
     // BATCH PROCESSING SUMMARY for many participants
     const totalParticipants = participantsWithScores.length;
-    const passedCount = participantsWithScores.filter(p => p.grade !== 'F').length;
-    const failedCount = participantsWithScores.filter(p => p.grade === 'F').length;
-    const avgScore = participantsWithScores.reduce((sum, p) => sum + (p.percentage || 0), 0) / (totalParticipants || 1);
+    const passedCount = participantsWithScores.filter(
+      (p) => p.grade !== "F",
+    ).length;
+    const failedCount = participantsWithScores.filter(
+      (p) => p.grade === "F",
+    ).length;
+    const avgScore =
+      participantsWithScores.reduce((sum, p) => sum + (p.percentage || 0), 0) /
+      (totalParticipants || 1);
 
     console.log(`\n=== BATCH PROCESSING SUMMARY ===`);
     console.log(`Total Records Processed: ${totalParticipants}`);
     console.log(`Passed: ${passedCount} | Failed: ${failedCount}`);
     console.log(`Average Score: ${avgScore.toFixed(2)}%`);
     console.log(`Processing Time: ${Date.now() - Date.now()} ms`);
-
 
     const averageScore =
       participantsWithScores.length > 0
@@ -1201,36 +1386,36 @@ export const debugParticipants: RequestHandler = (req, res) => {
 
     console.log(`\n🔍 DEBUG PARTICIPANTS REQUEST FOR QUIZ: ${quizId}`);
 
-    const quiz = quizzes.find(q => q.id === quizId);
-    const sessions = quizSessions.filter(s => s.quizId === quizId);
-    const allParticipants = participants.filter(p =>
-      sessions.some(s => s.id === p.sessionId)
+    const quiz = quizzes.find((q) => q.id === quizId);
+    const sessions = quizSessions.filter((s) => s.quizId === quizId);
+    const allParticipants = participants.filter((p) =>
+      sessions.some((s) => s.id === p.sessionId),
     );
 
     console.log(`📊 COMPLETE PARTICIPANT DEBUG:`, {
-      quiz: quiz ? quiz.title : 'Not found',
+      quiz: quiz ? quiz.title : "Not found",
       totalSessions: sessions.length,
       totalParticipants: allParticipants.length,
-      participants: allParticipants.map(p => ({
+      participants: allParticipants.map((p) => ({
         id: p.id,
         name: p.name,
         sessionId: p.sessionId,
         answersCount: p.answers?.length || 0,
         answers: p.answers,
         submittedAt: p.submittedAt,
-        attemptNumber: p.attemptNumber
-      }))
+        attemptNumber: p.attemptNumber,
+      })),
     });
 
     res.json({
-      quiz: quiz?.title || 'Unknown',
+      quiz: quiz?.title || "Unknown",
       participants: allParticipants,
       sessions: sessions,
-      totalParticipants: allParticipants.length
+      totalParticipants: allParticipants.length,
     });
   } catch (error) {
-    console.error('Debug participants error:', error);
-    res.status(500).json({ error: 'Debug failed' });
+    console.error("Debug participants error:", error);
+    res.status(500).json({ error: "Debug failed" });
   }
 };
 
