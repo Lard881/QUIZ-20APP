@@ -1187,13 +1187,9 @@ export default function QuizManagement() {
                         <div className="text-2xl font-bold text-quiz-success">
                           {
                             participants.filter((p) => {
-                              const scoreData = calculateStudentScore(p);
-                              const totalPossible = getTotalPossiblePoints();
-                              const percentage =
-                                totalPossible > 0
-                                  ? (scoreData.score / totalPossible) * 100
-                                  : 0;
-                              return getGrade(percentage) !== "F";
+                              const performance = calculateStudentPerformance(p);
+                              // A, B, C grades are pass; F is fail
+                              return performance.grade === "A" || performance.grade === "B" || performance.grade === "C";
                             }).length
                           }
                         </div>
