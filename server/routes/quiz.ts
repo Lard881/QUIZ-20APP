@@ -299,14 +299,30 @@ export const submitAnswer: RequestHandler = (req, res) => {
   try {
     const { sessionId, questionId, answer } = req.body as SubmitAnswerRequest;
 
+    console.log(`\n🔥 ANSWER SUBMISSION RECEIVED:`);
+    console.log(`SessionId: ${sessionId}`);
+    console.log(`QuestionId: ${questionId}`);
+    console.log(`Answer: ${answer}`);
+    console.log(`Request body:`, req.body);
+
+    console.log(`\n📋 SEARCHING FOR PARTICIPANT WITH SESSION: ${sessionId}`);
+    console.log(`Total participants in system: ${participants.length}`);
+    participants.forEach((p, index) => {
+      console.log(`Participant ${index + 1}: ${p.name} (Session: ${p.sessionId})`);
+    });
+
     const participant = participants.find((p) => p.sessionId === sessionId);
     if (!participant) {
+      console.log(`❌ PARTICIPANT NOT FOUND FOR SESSION: ${sessionId}`);
       const errorResponse: ErrorResponse = {
         error: "PARTICIPANT_NOT_FOUND",
         message: "Participant not found",
       };
       return res.status(404).json(errorResponse);
     }
+
+    console.log(`✅ FOUND PARTICIPANT: ${participant.name} (ID: ${participant.id})`);
+    console.log(`Current answers count: ${participant.answers?.length || 0}`);
 
     // Update or add answer with guaranteed timestamp
     const existingAnswerIndex = participant.answers.findIndex(
@@ -318,13 +334,22 @@ export const submitAnswer: RequestHandler = (req, res) => {
       timeStamp: new Date().toISOString(), // Always ensure timestamp
     };
 
-    console.log(`Answer submitted by ${participant.name}: Q${questionId} = ${answer} at ${answerData.timeStamp}`);
+    console.log(`\n💾 SAVING ANSWER FOR ${participant.name}:`);
+    console.log(`Question ID: ${questionId}`);
+    console.log(`Answer: ${answer}`);
+    console.log(`Timestamp: ${answerData.timeStamp}`);
+    console.log(`Existing answer index: ${existingAnswerIndex}`);
 
     if (existingAnswerIndex >= 0) {
+      console.log(`🔄 UPDATING existing answer at index ${existingAnswerIndex}`);
       participant.answers[existingAnswerIndex] = answerData;
     } else {
+      console.log(`➕ ADDING new answer to array`);
       participant.answers.push(answerData);
     }
+
+    console.log(`✅ ANSWER SAVED! New answers count: ${participant.answers.length}`);
+    console.log(`Updated answers array:`, participant.answers);
 
     // AUTO-SUBMISSION: Check if this was the last question and auto-mark as submitted
     const session = quizSessions.find((s) => s.id === sessionId);
