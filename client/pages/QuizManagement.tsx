@@ -565,10 +565,10 @@ export default function QuizManagement() {
 
     console.log(`- Final Grade: ${grade}`);
 
-    // Use actual submission time if available, otherwise current time
+    // Use actual submission time if available
     const submissionTime = participant.submittedAt
       ? new Date(participant.submittedAt).toLocaleString()
-      : 'In Progress';
+      : participant.answers?.length > 0 ? 'Completed (no timestamp)' : 'Not Started';
 
     return {
       score,
