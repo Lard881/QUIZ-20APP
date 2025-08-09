@@ -593,7 +593,7 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
     // Process all participants - no demo answers, give 0 score to those who didn't answer
 
-    // Fetch and process student responses for comprehensive score calculation
+    // Process student responses and calculate proper scores for each participant
     const participantsWithScores = allParticipants.map((participant, index) => {
       console.log(`\n=== Processing Participant ${index + 1}: ${participant.name} ===`);
       console.log(`Participant ID: ${participant.id}, Session: ${participant.sessionId}`);
@@ -604,6 +604,56 @@ export const getQuizResults: RequestHandler = (req, res) => {
       let questionsCorrect = 0;
       const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
       const scoreDetails: any[] = [];
+
+      // If student didn't answer any questions, give them 0 score
+      if (!participant.answers || participant.answers.length === 0) {
+        console.log(`Student ${participant.name} did not answer any questions - Score: 0`);
+
+        // Create score details for each question showing they didn't answer
+        quiz.questions.forEach((question) => {
+          scoreDetails.push({
+            questionId: question.id,
+            question: question.question,
+            correctAnswer: question.correctAnswer,
+            studentAnswer: null,
+            isCorrect: false,
+            pointsEarned: 0,
+            maxPoints: question.points,
+            answered: false
+          });
+        });
+
+        // Calculate final results - 0% and F grade
+        const percentage = 0;
+        const grade = 'F';
+
+        console.log(`\n=== Final Results for ${participant.name} ===`);
+        console.log(`Total Score: ${totalScore}/${totalPossiblePoints} points (No answers submitted)`);
+        console.log(`Percentage: ${percentage.toFixed(1)}%`);
+        console.log(`Grade: ${grade}`);
+
+        // Update participant record if forced recalculation
+        if (forceRecalculate) {
+          participant.score = totalScore;
+          participant.percentage = percentage;
+          participant.grade = grade;
+          participant.questionsCorrect = questionsCorrect;
+          participant.questionsAnswered = questionsAnswered;
+          participant.calculatedAt = new Date().toISOString();
+        }
+
+        return {
+          ...participant,
+          score: totalScore,
+          questionsAnswered,
+          questionsCorrect,
+          totalPossiblePoints,
+          percentage,
+          grade,
+          scoreDetails,
+          calculatedAt: new Date().toISOString(),
+        };
+      }
 
       // Process each question for this participant
       quiz.questions.forEach((question, qIndex) => {
