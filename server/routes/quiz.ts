@@ -425,6 +425,18 @@ export const submitQuiz: RequestHandler = (req, res) => {
   console.log(`Timestamp: ${new Date().toISOString()}`);
   console.log(`Request body:`, req.body);
 
+  // Set a timeout to prevent hanging
+  const timeoutId = setTimeout(() => {
+    console.log(`❌ QUIZ SUBMISSION TIMEOUT - Force responding with error`);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        error: "SUBMISSION_TIMEOUT",
+        message: "Quiz submission timed out. Please try again.",
+      });
+    }
+  }, 30000); // 30 second timeout
+
   try {
     const { sessionId } = req.body;
 
