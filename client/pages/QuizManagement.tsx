@@ -190,15 +190,26 @@ export default function QuizManagement() {
         throw new Error(errorMessage);
       }
 
-      // Fetch quiz results/participants with fresh data
+      // Fetch quiz results/participants with robust error handling
       try {
-        const resultsResponse = await fetch(`/api/quiz/${quizId}/results`, {
-          cache: "no-cache", // Force fresh data
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
-        });
+        let resultsResponse;
+        try {
+          resultsResponse = await fetch(`/api/quiz/${quizId}/results`, {
+            method: "GET",
+            cache: "no-cache",
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
+              "Pragma": "no-cache",
+            },
+            signal: AbortSignal.timeout(10000), // 10 second timeout
+          });
+        } catch (resultsError) {
+          console.error("Results fetch error:", resultsError);
+          // Continue without results rather than failing completely
+          console.warn("Unable to fetch results, continuing without participant data");
+          return;
+        }
 
         if (resultsResponse.ok) {
           const resultsData = await resultsResponse.json();
