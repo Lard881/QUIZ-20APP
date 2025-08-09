@@ -877,7 +877,7 @@ export const submitQuiz: RequestHandler = (req, res) => {
         bestAttemptNumber: participant.bestAttemptNumber,
         improvementPoints: participant.improvementPoints,
         message: participant.totalAttempts > 1
-          ? `Attempt #${currentAttempt.attemptNumber} completed! Best score: ${participant.score}/${totalPossiblePoints} (${participant.grade}) from Attempt #${participant.bestAttemptNumber}`
+          ? `Attempt #${attemptNumber} completed! Best score: ${participant.score}/${totalPossiblePoints} (${participant.grade}) from Attempt #${participant.bestAttemptNumber}`
           : `Quiz submitted successfully! Score: ${participant.score}/${totalPossiblePoints} (${participant.grade}) - SAVED TO SERVER`,
       });
     } else {
