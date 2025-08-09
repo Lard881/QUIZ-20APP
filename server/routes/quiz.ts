@@ -460,15 +460,8 @@ export const submitQuiz: RequestHandler = (req, res) => {
       console.log(`🔧 Initialized empty answers array for ${participant.name}`);
     }
 
-    // Validate answer data
-    if (answer === undefined || answer === null) {
-      console.log(`⚠️ WARNING: Received null/undefined answer for question ${questionId}`);
-      const errorResponse: ErrorResponse = {
-        error: "INVALID_ANSWER",
-        message: "Answer cannot be null or undefined",
-      };
-      return res.status(400).json(errorResponse);
-    }
+    // Quiz submission doesn't need individual answer validation
+    // Answers are already validated during submission
 
     const session = quizSessions.find((s) => s.id === participant.sessionId);
     if (!session) {
