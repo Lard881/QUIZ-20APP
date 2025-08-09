@@ -866,13 +866,31 @@ export const getQuizResults: RequestHandler = (req, res) => {
         console.log(`Auto-marked ${participantName} as submitted at: ${participant.submittedAt}`);
       }
 
-      // UPDATE PARTICIPANT RECORD with calculated results (handles multiple attempts)
-      participant.score = totalScore;
-      participant.percentage = Math.round(percentage * 100) / 100;
-      participant.grade = grade;
-      participant.questionsCorrect = questionsCorrect;
-      participant.questionsAnswered = questionsAnswered;
-      participant.calculatedAt = new Date().toISOString();
+      // PRESERVE EXISTING SCORES: Only update if no score exists or force recalculation
+      if (!participant.score || forceRecalculate) {
+        participant.score = totalScore;
+        participant.percentage = Math.round(percentage * 100) / 100;
+        participant.grade = grade;
+        participant.questionsCorrect = questionsCorrect;
+        participant.questionsAnswered = questionsAnswered;
+        participant.calculatedAt = new Date().toISOString();
+
+        console.log(`🔄 UPDATING participant scores: ${participant.name} = ${totalScore} points`);
+      } else {
+        console.log(`✅ PRESERVING existing scores: ${participant.name} = ${participant.score} points`);
+        // Use existing scores
+        totalScore = participant.score;
+        questionsCorrect = participant.questionsCorrect || questionsCorrect;
+        questionsAnswered = participant.questionsAnswered || questionsAnswered;
+        percentage = participant.percentage || percentage;
+        grade = participant.grade || grade;
+      }
+
+      // FORCE SAVE TO PARTICIPANTS ARRAY
+      const participantIndex = participants.findIndex(p => p.id === participant.id);
+      if (participantIndex >= 0) {
+        participants[participantIndex] = { ...participant };
+      }
 
       return {
         ...participant,
