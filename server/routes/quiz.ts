@@ -639,21 +639,35 @@ export const getQuizResults: RequestHandler = (req, res) => {
         console.log(`${participantName} provided NO ANSWERS - Final Score: 0`);
       }
 
-      // Calculate percentage and grade based on ACTUAL performance
+      // CALCULATE FINAL PERCENTAGE AND ASSIGN GRADE
       const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
-      let grade = 'F';
-      if (percentage >= 80) grade = 'A';
-      else if (percentage >= 50) grade = 'B';
-      else if (percentage >= 30) grade = 'C';
 
-      console.log(`Final: ${totalScore}/${totalPossiblePoints} (${percentage.toFixed(1)}%) - Grade: ${grade}`);
+      // GRADE ASSIGNMENT BASED ON PERCENTAGE (works for ANY participant)
+      let grade = 'F'; // Default fail grade
+      if (percentage >= 80) {
+        grade = 'A'; // Excellent: 80-100%
+      } else if (percentage >= 50) {
+        grade = 'B'; // Good: 50-79%
+      } else if (percentage >= 30) {
+        grade = 'C'; // Satisfactory: 30-49%
+      }
+      // F grade: 0-29% (already set as default)
 
-      // Update participant record with calculated scores
+      console.log(`\n=== FINAL RESULTS for ${participantName} ===`);
+      console.log(`Total Score: ${totalScore}/${totalPossiblePoints} points`);
+      console.log(`Percentage: ${percentage.toFixed(2)}%`);
+      console.log(`Grade: ${grade}`);
+      console.log(`Questions Answered: ${questionsAnswered}/${quiz.questions.length}`);
+      console.log(`Questions Correct: ${questionsCorrect}/${quiz.questions.length}`);
+      console.log(`Pass Status: ${grade !== 'F' ? 'PASSED' : 'FAILED'}`);
+
+      // UPDATE PARTICIPANT RECORD with calculated results
       participant.score = totalScore;
       participant.percentage = Math.round(percentage * 100) / 100;
       participant.grade = grade;
       participant.questionsCorrect = questionsCorrect;
       participant.questionsAnswered = questionsAnswered;
+      participant.calculatedAt = new Date().toISOString();
 
       return {
         ...participant,
