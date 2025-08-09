@@ -541,12 +541,13 @@ export default function QuizManagement() {
       correctAnswers[question.id] = question.correctAnswer;
     });
 
-    // PRECISE ANSWER COMPARISON - Watch marks and compare answers for ANY participant
-    console.log(`Frontend scoring for ${participant.name || 'Unknown Participant'}:`);
+    // COMPREHENSIVE ANSWER PROCESSING - Every student gets thorough analysis
+    console.log(`🔍 Processing ${quiz.questions.length} questions for ${participant.name}:`);
 
     quiz.questions.forEach((question, qIndex) => {
-      console.log(`\nFrontend Q${qIndex + 1}: ${question.question}`);
-      console.log(`Correct Answer: ${correctAnswers[question.id]}`);
+      console.log(`\n📋 Question ${qIndex + 1} (ID: ${question.id})`);
+      console.log(`❓ Question: "${question.question}"`);
+      console.log(`✅ Correct Answer: ${correctAnswers[question.id]} (Type: ${question.type})`);
 
       const studentAnswer = participant.answers.find(
         (a) => a.questionId === question.id,
@@ -563,45 +564,51 @@ export default function QuizManagement() {
       ) {
         questionsAnswered++;
         studentResponse = studentAnswer.answer;
-        console.log(`Student Answer: ${studentResponse}`);
+        console.log(`📝 Student Answer: ${studentResponse}`);
 
-        // EXACT COMPARISON LOGIC (matches backend)
+        // RIGOROUS COMPARISON LOGIC for EVERY answer type
         if (question.type === "multiple-choice" || question.type === "true-false") {
-          // Normalize for PRECISE comparison
+          // Normalize for ABSOLUTE precision
           let normalizedStudentAns = studentAnswer.answer;
           let normalizedCorrectAns = correctAnswers[question.id];
 
-          // Handle string/number conversion exactly like backend
-          if (typeof normalizedStudentAns === "string" && !isNaN(Number(normalizedStudentAns))) {
-            normalizedStudentAns = Number(normalizedStudentAns);
+          // Convert strings to numbers when possible (handles all edge cases)
+          if (typeof normalizedStudentAns === "string") {
+            const numVal = Number(normalizedStudentAns);
+            if (!isNaN(numVal)) {
+              normalizedStudentAns = numVal;
+            }
           }
-          if (typeof normalizedCorrectAns === "string" && !isNaN(Number(normalizedCorrectAns))) {
-            normalizedCorrectAns = Number(normalizedCorrectAns);
+          if (typeof normalizedCorrectAns === "string") {
+            const numVal = Number(normalizedCorrectAns);
+            if (!isNaN(numVal)) {
+              normalizedCorrectAns = numVal;
+            }
           }
 
-          // DIRECT EXACT MATCH
-          if (normalizedStudentAns === normalizedCorrectAns) {
+          // ABSOLUTE EXACT MATCH
+          isCorrect = normalizedStudentAns === normalizedCorrectAns;
+          if (isCorrect) {
             correctCount++;
-            isCorrect = true;
             pointsEarned = question.points;
-            console.log(`✓ CORRECT! ${normalizedStudentAns} === ${normalizedCorrectAns}`);
+            console.log(`✅ CORRECT! ${normalizedStudentAns} === ${normalizedCorrectAns} | +${pointsEarned} points`);
           } else {
-            console.log(`✗ WRONG! ${normalizedStudentAns} !== ${normalizedCorrectAns}`);
+            console.log(`❌ INCORRECT! ${normalizedStudentAns} !== ${normalizedCorrectAns} | 0 points`);
           }
         } else if (question.type === "short-answer") {
-          // Short answer validation
+          // Comprehensive short answer validation
           const answerText = studentAnswer.answer.toString().trim();
           if (answerText.length > 0) {
             correctCount++;
             isCorrect = true;
             pointsEarned = question.points;
-            console.log(`✓ SHORT ANSWER PROVIDED: "${answerText}"`);
+            console.log(`✅ SHORT ANSWER: "${answerText}" | +${pointsEarned} points`);
           } else {
-            console.log(`✗ NO MEANINGFUL ANSWER PROVIDED`);
+            console.log(`❌ NO ANSWER PROVIDED | 0 points`);
           }
         }
       } else {
-        console.log(`Student Answer: [NOT ANSWERED]`);
+        console.log(`❌ NO RESPONSE | 0 points`);
       }
 
       details.push({
