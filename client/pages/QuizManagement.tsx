@@ -475,10 +475,15 @@ export default function QuizManagement() {
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(studentUrl)}`;
   };
 
-  // Universal Score Calculator - Works for ANY participant dynamically
+  // COMPREHENSIVE Score Calculator - Processes EVERY student individually
   const calculateStudentPerformance = (participant: QuizParticipant) => {
+    console.log(`\n🧮 CALCULATING SCORE FOR: ${participant.name || 'Unknown Student'}`);
+    console.log(`📝 Participant ID: ${participant.id}`);
+    console.log(`📊 Answers array:`, participant.answers);
+
     // Robust validation for any participant
     if (!quiz || !participant) {
+      console.log(`❌ Missing quiz or participant data`);
       return {
         score: 0,
         percentage: 0,
