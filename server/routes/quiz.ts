@@ -15,88 +15,10 @@ import {
 } from "@shared/api";
 
 // In-memory storage (replace with database in production)
-let quizzes: Quiz[] = [
-  {
-    id: "1",
-    title: "JavaScript Fundamentals",
-    description:
-      "Test your knowledge of basic JavaScript concepts including variables, functions, and control structures.",
-    instructorId: "instructor1",
-    timeLimit: 30,
-    questions: [
-      {
-        id: "q1",
-        question:
-          "What is the correct way to declare a variable in JavaScript?",
-        type: "multiple-choice",
-        options: [
-          "var x = 5;",
-          "variable x = 5;",
-          "v x = 5;",
-          "declare x = 5;",
-        ],
-        correctAnswer: 0,
-        points: 1,
-      },
-      {
-        id: "q2",
-        question: "JavaScript is a compiled language.",
-        type: "true-false",
-        options: ["True", "False"],
-        correctAnswer: 1,
-        points: 1,
-      },
-    ],
-    roomCode: "JS2024",
-    isActive: true,
-    allowRetries: false,
-    randomizeQuestions: false,
-    maxAttempts: 1,
-    durationValue: 30,
-    durationUnit: "days",
-    expiresAt: "2024-02-15T10:00:00Z",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-15T10:00:00Z",
-  },
-  {
-    id: "2",
-    title: "React Components Quiz",
-    description:
-      "Advanced quiz covering React hooks, state management, and component lifecycle.",
-    instructorId: "instructor1",
-    timeLimit: 45,
-    questions: [
-      {
-        id: "q3",
-        question: "Which hook is used for side effects in React?",
-        type: "multiple-choice",
-        options: ["useState", "useEffect", "useContext", "useReducer"],
-        correctAnswer: 1,
-        points: 2,
-      },
-    ],
-    roomCode: "REACT45",
-    isActive: true,
-    allowRetries: true,
-    randomizeQuestions: true,
-    maxAttempts: 3,
-    durationValue: 180,
-    durationUnit: "minutes",
-    expiresAt: "2024-01-16T17:30:00Z",
-    createdAt: "2024-01-16T14:30:00Z",
-    updatedAt: "2024-01-16T14:30:00Z",
-  },
-];
+// CLEAN SYSTEM - No demo data, ready for real quizzes
+let quizzes: Quiz[] = [];
 
-let quizSessions: QuizSession[] = [
-  {
-    id: "test-session-1",
-    quizId: "1", // JavaScript Fundamentals quiz
-    isActive: true,
-    startedAt: new Date(Date.now() - 3600000).toISOString(), // Started 1 hour ago
-    participantCount: 3,
-  }
-];
+let quizSessions: QuizSession[] = [];
 
 let participants: QuizParticipant[] = [];
 
