@@ -63,7 +63,7 @@ export default function QuizManagement() {
   // Quiz settings state
   const [allowRetries, setAllowRetries] = useState(false);
   const [randomizeQuestions, setRandomizeQuestions] = useState(false);
-  const [maxAttempts, setMaxAttempts] = useState(1);
+  const [maxAttempts, setMaxAttempts] = useState(3);
   const [durationValue, setDurationValue] = useState(30);
   const [durationUnit, setDurationUnit] = useState<"minutes" | "days">("days");
 
