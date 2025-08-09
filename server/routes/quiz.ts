@@ -305,6 +305,11 @@ export const startQuiz: RequestHandler = (req, res) => {
 
 // Submit answer
 export const submitAnswer: RequestHandler = (req, res) => {
+  console.log(`\n🔥🔥���� NEW ANSWER SUBMISSION ATTEMPT 🔥🔥🔥`);
+  console.log(`Timestamp: ${new Date().toISOString()}`);
+  console.log(`Request headers:`, req.headers);
+  console.log(`Request IP:`, req.ip || req.connection.remoteAddress);
+
   try {
     const { sessionId, questionId, answer } = req.body as SubmitAnswerRequest;
 
