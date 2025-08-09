@@ -607,15 +607,14 @@ export default function QuizManagement() {
 
   const calculateAverageScore = (): number => {
     if (participants.length === 0) return 0;
-    const totalPossible = getTotalPossiblePoints();
-    if (totalPossible === 0) return 0;
 
-    const averagePoints =
-      participants.reduce((sum, participant) => {
-        return sum + getStudentScoreOnly(participant);
-      }, 0) / participants.length;
+    // Calculate average based on individual participant percentages (not points)
+    const totalPercentage = participants.reduce((sum, participant) => {
+      const performance = calculateStudentPerformance(participant);
+      return sum + performance.percentage;
+    }, 0);
 
-    return (averagePoints / totalPossible) * 100;
+    return totalPercentage / participants.length;
   };
 
   const getGrade = (percentage: number): string => {
