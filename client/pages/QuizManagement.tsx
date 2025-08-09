@@ -252,35 +252,60 @@ export default function QuizManagement() {
     await fetchQuizData(true);
   };
 
-  // Force recalculate scores for all participants
+  // Force recalculate scores for ALL participants efficiently
   const forceRecalculateScores = async () => {
     if (!quiz || !quizId) return;
 
     setRefreshing(true);
+    console.log("Starting score recalculation for all participants...");
+
     try {
-      // Force a fresh fetch of results which will recalculate all scores
+      // Force comprehensive recalculation for all participants
       const response = await fetch(`/api/quiz/${quizId}/results`, {
-        method: "POST", // Use POST to trigger recalculation
+        method: "POST", // Use POST to trigger full recalculation
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "no-cache",
+          "Pragma": "no-cache",
         },
-        body: JSON.stringify({ forceRecalculate: true }),
+        body: JSON.stringify({
+          forceRecalculate: true,
+          recalculateAll: true // Flag to ensure ALL participants are processed
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setParticipants(data.participants || []);
+        const updatedParticipants = data.participants || [];
+
+        // Update state with recalculated participants
+        setParticipants(updatedParticipants);
+
+        // Calculate statistics for the toast message
+        const passedCount = updatedParticipants.filter(p => {
+          const performance = calculateStudentPerformance(p);
+          return performance.grade === "A" || performance.grade === "B" || performance.grade === "C";
+        }).length;
+
+        const failedCount = updatedParticipants.filter(p => {
+          const performance = calculateStudentPerformance(p);
+          return performance.grade === "F";
+        }).length;
+
+        const avgScore = calculateAverageScore();
+
         toast({
-          title: "Scores Recalculated",
-          description: `Successfully recalculated scores for ${data.participants?.length || 0} participants`,
+          title: "Scores Recalculated Successfully",
+          description: `Updated ${updatedParticipants.length} participants | Avg: ${avgScore.toFixed(1)}% | Passed: ${passedCount} | Failed: ${failedCount}`,
         });
+
+        console.log(`Recalculation complete: ${updatedParticipants.length} participants processed`);
       } else {
         // Fallback to regular refresh if POST endpoint doesn't exist
         await handleRefresh();
         toast({
           title: "Scores Updated",
-          description: "Refreshed participant data and recalculated scores",
+          description: "Refreshed participant data and recalculated scores using fallback method",
         });
       }
     } catch (error) {
