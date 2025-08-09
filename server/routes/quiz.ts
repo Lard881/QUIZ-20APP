@@ -569,38 +569,46 @@ export const getQuizResults: RequestHandler = (req, res) => {
       // Handle ANY participant - whether they have answers or not
       const hasAnswers = participant.answers && Array.isArray(participant.answers) && participant.answers.length > 0;
 
-      // Process each question and compare with participant's actual answers
-      quiz.questions.forEach((question) => {
-        const studentAnswer = participant.answers.find(a => a.questionId === question.id);
+      if (hasAnswers) {
+        // Process answers for participants who actually answered
+        quiz.questions.forEach((question) => {
+          const studentAnswer = participant.answers.find(a => a.questionId === question.id);
 
-        if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
-          questionsAnswered++;
+          if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
+            questionsAnswered++;
 
-          // Compare student answer with correct answer
-          let isCorrect = false;
-          if (question.type === "multiple-choice" || question.type === "true-false") {
-            // Normalize both answers for comparison
-            let studentAns = studentAnswer.answer;
-            let correctAns = question.correctAnswer;
+            // Universal answer comparison logic for ANY question type
+            let isCorrect = false;
+            if (question.type === "multiple-choice" || question.type === "true-false") {
+              // Normalize both answers for comparison
+              let studentAns = studentAnswer.answer;
+              let correctAns = question.correctAnswer;
 
-            // Convert string numbers to numbers if needed
-            if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
-              studentAns = Number(studentAns);
+              // Convert string numbers to numbers if needed
+              if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
+                studentAns = Number(studentAns);
+              }
+              if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
+                correctAns = Number(correctAns);
+              }
+
+              isCorrect = studentAns === correctAns;
+              console.log(`Q${question.id}: ${studentAns} === ${correctAns} = ${isCorrect}`);
+            } else if (question.type === "short-answer") {
+              // Handle short answer questions
+              const answerText = studentAnswer.answer.toString().trim();
+              isCorrect = answerText.length > 0; // Basic validation - can be enhanced
             }
-            if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
-              correctAns = Number(correctAns);
+
+            if (isCorrect) {
+              totalScore += question.points;
+              questionsCorrect++;
             }
-
-            isCorrect = studentAns === correctAns;
-            console.log(`Q${question.id}: ${studentAns} === ${correctAns} = ${isCorrect}`);
           }
-
-          if (isCorrect) {
-            totalScore += question.points;
-            questionsCorrect++;
-          }
-        }
-      });
+        });
+      } else {
+        console.log(`${participantName} has no answers - assigning 0 score`);
+      }
 
       // Calculate percentage and grade based on ACTUAL performance
       const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
