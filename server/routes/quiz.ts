@@ -570,21 +570,32 @@ export const getQuizResults: RequestHandler = (req, res) => {
       const hasAnswers = participant.answers && Array.isArray(participant.answers) && participant.answers.length > 0;
 
       if (hasAnswers) {
-        // Process answers for participants who actually answered
-        quiz.questions.forEach((question) => {
+        // ROBUST ANSWER COMPARISON: Compare each student answer with correct answer
+        console.log(`Processing ${quiz.questions.length} questions for ${participantName}:`);
+
+        quiz.questions.forEach((question, qIndex) => {
+          console.log(`\n--- Question ${qIndex + 1} (ID: ${question.id}) ---`);
+          console.log(`Question: "${question.question}"`);
+          console.log(`Correct Answer: ${question.correctAnswer} (Type: ${question.type})`);
+          console.log(`Points Available: ${question.points}`);
+
           const studentAnswer = participant.answers.find(a => a.questionId === question.id);
 
           if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
             questionsAnswered++;
+            const studentResponse = studentAnswer.answer;
+            console.log(`Student Answer: ${studentResponse}`);
 
-            // Universal answer comparison logic for ANY question type
+            // PRECISE ANSWER COMPARISON for ANY question type
             let isCorrect = false;
+            let pointsEarned = 0;
+
             if (question.type === "multiple-choice" || question.type === "true-false") {
-              // Normalize both answers for comparison
-              let studentAns = studentAnswer.answer;
+              // Normalize both answers for exact comparison
+              let studentAns = studentResponse;
               let correctAns = question.correctAnswer;
 
-              // Convert string numbers to numbers if needed
+              // Handle string/number conversion carefully
               if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
                 studentAns = Number(studentAns);
               }
@@ -592,22 +603,40 @@ export const getQuizResults: RequestHandler = (req, res) => {
                 correctAns = Number(correctAns);
               }
 
+              // EXACT MATCH COMPARISON
               isCorrect = studentAns === correctAns;
-              console.log(`Q${question.id}: ${studentAns} === ${correctAns} = ${isCorrect}`);
-            } else if (question.type === "short-answer") {
-              // Handle short answer questions
-              const answerText = studentAnswer.answer.toString().trim();
-              isCorrect = answerText.length > 0; // Basic validation - can be enhanced
-            }
+              console.log(`Comparison: ${studentAns} === ${correctAns} = ${isCorrect}`);
 
-            if (isCorrect) {
-              totalScore += question.points;
-              questionsCorrect++;
+              if (isCorrect) {
+                pointsEarned = question.points;
+                totalScore += pointsEarned;
+                questionsCorrect++;
+                console.log(`✓ CORRECT! Earned ${pointsEarned} points`);
+              } else {
+                console.log(`✗ INCORRECT! Earned 0 points`);
+              }
+
+            } else if (question.type === "short-answer") {
+              // Handle short answer questions with basic validation
+              const answerText = studentResponse.toString().trim();
+              isCorrect = answerText.length > 0;
+
+              if (isCorrect) {
+                pointsEarned = question.points;
+                totalScore += pointsEarned;
+                questionsCorrect++;
+                console.log(`✓ SHORT ANSWER PROVIDED! Earned ${pointsEarned} points`);
+              } else {
+                console.log(`✗ NO ANSWER PROVIDED! Earned 0 points`);
+              }
             }
+          } else {
+            console.log(`Student Answer: [NO ANSWER]`);
+            console.log(`✗ UNANSWERED! Earned 0 points`);
           }
         });
       } else {
-        console.log(`${participantName} has no answers - assigning 0 score`);
+        console.log(`${participantName} provided NO ANSWERS - Final Score: 0`);
       }
 
       // Calculate percentage and grade based on ACTUAL performance
