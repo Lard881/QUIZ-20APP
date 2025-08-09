@@ -325,19 +325,24 @@ export const submitAnswer: RequestHandler = (req, res) => {
       console.log(`Participant ${index + 1}: ${p.name} (Session: ${p.sessionId}) - Answers: ${p.answers?.length || 0}`);
     });
 
-    const participant = participants.find((p) => p.sessionId === sessionId);
+    let participant = participants.find((p) => p.sessionId === sessionId);
 
     // Also check if there are multiple participants with same session (debugging)
     const sameSessionParticipants = participants.filter((p) => p.sessionId === sessionId);
     if (sameSessionParticipants.length > 1) {
       console.log(`⚠️ WARNING: Found ${sameSessionParticipants.length} participants with same session ID:`,
         sameSessionParticipants.map(p => ({name: p.name, id: p.id, answersCount: p.answers?.length || 0})));
+      // Use the one with most answers
+      participant = sameSessionParticipants.reduce((latest, current) => {
+        return (current.answers?.length || 0) >= (latest.answers?.length || 0) ? current : latest;
+      });
     }
     if (!participant) {
       console.log(`❌ PARTICIPANT NOT FOUND FOR SESSION: ${sessionId}`);
+      console.log(`📋 Available sessions: ${participants.map(p => `${p.name}:${p.sessionId}`).join(', ')}`);
       const errorResponse: ErrorResponse = {
         error: "PARTICIPANT_NOT_FOUND",
-        message: "Participant not found",
+        message: `Participant not found for session ${sessionId}. Total participants: ${participants.length}`,
       };
       return res.status(404).json(errorResponse);
     }
