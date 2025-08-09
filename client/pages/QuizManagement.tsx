@@ -1375,13 +1375,32 @@ export default function QuizManagement() {
                                     grade: fallbackGrade
                                   });
 
+                                  // Calculate proper submission time for fallback
+                                  let fallbackSubmissionTime = 'Not Started';
+                                  if (participant.submittedAt) {
+                                    fallbackSubmissionTime = new Date(participant.submittedAt).toLocaleString();
+                                  } else if (participant.answers && participant.answers.length > 0) {
+                                    const lastAnswer = participant.answers.reduce((latest, current) => {
+                                      if (!latest) return current;
+                                      const latestTime = new Date(latest.timeStamp || 0);
+                                      const currentTime = new Date(current.timeStamp || 0);
+                                      return currentTime > latestTime ? current : latest;
+                                    }, null);
+
+                                    if (lastAnswer && lastAnswer.timeStamp) {
+                                      fallbackSubmissionTime = new Date(lastAnswer.timeStamp).toLocaleString() + ' (Auto-detected)';
+                                    } else {
+                                      fallbackSubmissionTime = 'Submitted (Time unknown)';
+                                    }
+                                  }
+
                                   return {
                                     participant,
                                     performance: {
                                       score: fallbackScore,
                                       percentage: fallbackPercentage,
                                       grade: fallbackGrade,
-                                      submissionTime: participant.submittedAt ? new Date(participant.submittedAt).toLocaleString() : 'Not Started',
+                                      submissionTime: fallbackSubmissionTime,
                                       questionsCorrect: fallbackCorrect,
                                       questionsAnswered: fallbackAnswered
                                     },
@@ -1389,7 +1408,7 @@ export default function QuizManagement() {
                                     totalPossible: getTotalPossiblePoints(),
                                     percentage: fallbackPercentage,
                                     grade: fallbackGrade,
-                                    submissionTime: participant.submittedAt ? new Date(participant.submittedAt).toLocaleString() : 'Processing Error',
+                                    submissionTime: fallbackSubmissionTime,
                                   };
                                 }
                               })
