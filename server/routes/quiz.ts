@@ -591,24 +591,32 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
     console.log(`${forceRecalculate ? 'Force recalculating' : 'Getting'} scores for ${allParticipants.length} participants in quiz: ${quiz.title}`);
 
-    // Calculate scores properly for all participants - ensure everyone gets a score
-    const participantsWithScores = allParticipants.map((p) => {
+    // Fetch and process student responses for comprehensive score calculation
+    const participantsWithScores = allParticipants.map((participant, index) => {
+      console.log(`\n=== Processing Participant ${index + 1}: ${participant.name} ===`);
+      console.log(`Participant ID: ${participant.id}, Session: ${participant.sessionId}`);
+      console.log(`Student answers:`, participant.answers);
+
       let totalScore = 0;
       let questionsAnswered = 0;
       let questionsCorrect = 0;
       const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
+      const scoreDetails: any[] = [];
 
-      console.log(`Calculating score for participant: ${p.name}, answers:`, p.answers);
+      // Process each question for this participant
+      quiz.questions.forEach((question, qIndex) => {
+        console.log(`\n--- Question ${qIndex + 1} (ID: ${question.id}) ---`);
+        console.log(`Question: ${question.question}`);
+        console.log(`Correct Answer: ${question.correctAnswer} (Type: ${question.type})`);
 
-      // Calculate actual score based on correct answers for each participant
-      quiz.questions.forEach((question) => {
-        const studentAnswer = p.answers.find(
-          (a) => a.questionId === question.id,
+        // Fetch student's response to this question
+        const studentAnswer = participant.answers.find(
+          (answer) => answer.questionId === question.id,
         );
 
-        // Track all questions, even unanswered ones
         let isCorrect = false;
         let pointsEarned = 0;
+        let studentResponse = null;
 
         if (
           studentAnswer &&
@@ -616,63 +624,101 @@ export const getQuizResults: RequestHandler = (req, res) => {
           studentAnswer.answer !== null
         ) {
           questionsAnswered++;
+          studentResponse = studentAnswer.answer;
+          console.log(`Student Answer: ${studentResponse}`);
 
+          // Calculate if answer is correct based on question type
           if (
             question.type === "multiple-choice" ||
             question.type === "true-false"
           ) {
-            // Handle both string and number answers for compatibility
-            let studentAns = studentAnswer.answer;
-            let correctAns = question.correctAnswer;
+            // Normalize both answers for accurate comparison
+            let normalizedStudentAns = studentAnswer.answer;
+            let normalizedCorrectAns = question.correctAnswer;
 
-            // Normalize answers for comparison
-            if (typeof studentAns === "string") {
-              const numericAns = Number(studentAns);
+            // Convert string numbers to actual numbers for comparison
+            if (typeof normalizedStudentAns === "string") {
+              const numericAns = Number(normalizedStudentAns);
               if (!isNaN(numericAns)) {
-                studentAns = numericAns;
+                normalizedStudentAns = numericAns;
               }
             }
-            if (typeof correctAns === "string") {
-              const numericAns = Number(correctAns);
+            if (typeof normalizedCorrectAns === "string") {
+              const numericAns = Number(normalizedCorrectAns);
               if (!isNaN(numericAns)) {
-                correctAns = numericAns;
+                normalizedCorrectAns = numericAns;
               }
             }
 
-            isCorrect = studentAns === correctAns;
-            console.log(`Question ${question.id}: student=${studentAns}, correct=${correctAns}, isCorrect=${isCorrect}`);
+            isCorrect = normalizedStudentAns === normalizedCorrectAns;
+            console.log(`Comparison: ${normalizedStudentAns} === ${normalizedCorrectAns} = ${isCorrect}`);
           } else if (question.type === "short-answer") {
             // For short answer, check if there's a meaningful answer
             const answerText = studentAnswer.answer.toString().trim();
             isCorrect = answerText.length > 0;
+            console.log(`Short answer non-empty: ${isCorrect}`);
           }
 
           if (isCorrect) {
             pointsEarned = question.points;
             totalScore += pointsEarned;
             questionsCorrect++;
+            console.log(`✓ Correct! Earned ${pointsEarned} points`);
+          } else {
+            console.log(`✗ Incorrect. No points earned.`);
           }
+        } else {
+          console.log(`No answer provided for this question`);
         }
+
+        // Store detailed scoring information
+        scoreDetails.push({
+          questionId: question.id,
+          question: question.question,
+          correctAnswer: question.correctAnswer,
+          studentAnswer: studentResponse,
+          isCorrect,
+          pointsEarned,
+          maxPoints: question.points,
+          answered: studentResponse !== null
+        });
       });
 
-      // Calculate percentage and grade
+      // Calculate final percentage and grade
       const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
-      let grade = 'F';
+      let grade = 'F'; // Default grade
       if (percentage >= 80) grade = 'A';
       else if (percentage >= 50) grade = 'B';
       else if (percentage >= 30) grade = 'C';
 
-      console.log(`Final score for ${p.name}: ${totalScore}/${totalPossiblePoints} (${percentage.toFixed(1)}%) - Grade: ${grade}`);
+      console.log(`\n=== Final Results for ${participant.name} ===`);
+      console.log(`Total Score: ${totalScore}/${totalPossiblePoints} points`);
+      console.log(`Percentage: ${percentage.toFixed(1)}%`);
+      console.log(`Grade: ${grade}`);
+      console.log(`Questions Answered: ${questionsAnswered}/${quiz.questions.length}`);
+      console.log(`Questions Correct: ${questionsCorrect}/${quiz.questions.length}`);
 
-      // Return participant with calculated score and additional metrics
+      // Update participant record with recalculated data if forced recalculation
+      if (forceRecalculate) {
+        participant.score = totalScore;
+        participant.percentage = Math.round(percentage * 10) / 10;
+        participant.grade = grade;
+        participant.questionsCorrect = questionsCorrect;
+        participant.questionsAnswered = questionsAnswered;
+        participant.calculatedAt = new Date().toISOString();
+        console.log(`Updated participant record for ${participant.name}`);
+      }
+
+      // Return comprehensive participant data
       return {
-        ...p,
+        ...participant,
         score: totalScore,
         questionsAnswered,
         questionsCorrect,
         totalPossiblePoints,
-        percentage: Math.round(percentage * 10) / 10, // Round to 1 decimal
+        percentage: Math.round(percentage * 10) / 10,
         grade,
+        scoreDetails,
         calculatedAt: new Date().toISOString(),
       };
     });
