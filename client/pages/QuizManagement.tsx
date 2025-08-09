@@ -622,17 +622,17 @@ export default function QuizManagement() {
       });
     });
 
-    // CALCULATE FINAL MARKS AND ASSIGN GRADE (matches backend exactly)
+    // FINAL CALCULATION AND GRADING for EVERY student
     const score = correctCount;
     const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
 
-    console.log(`\nFrontend Final Calculation for ${participant.name || 'Participant'}:`);
-    console.log(`- Questions answered: ${questionsAnswered}/${totalQuestions}`);
-    console.log(`- Correct answers: ${correctCount}`);
-    console.log(`- Score: ${score}/${totalQuestions}`);
-    console.log(`- Percentage: ${percentage.toFixed(2)}%`);
+    console.log(`\n🎯 FINAL RESULTS for ${participant.name || 'Participant'}:`);
+    console.log(`📊 Questions answered: ${questionsAnswered}/${totalQuestions}`);
+    console.log(`✅ Correct answers: ${correctCount}`);
+    console.log(`🏆 Final Score: ${score}/${totalQuestions} questions`);
+    console.log(`📈 Percentage: ${percentage.toFixed(2)}%`);
 
-    // GRADE ASSIGNMENT based on CALCULATED PERCENTAGE (exact match with backend)
+    // GRADE ASSIGNMENT - Works for EVERY participant
     let grade = 'F'; // Default fail grade
     if (percentage >= 80) {
       grade = 'A'; // Excellent: 80-100%
@@ -641,16 +641,23 @@ export default function QuizManagement() {
     } else if (percentage >= 30) {
       grade = 'C'; // Satisfactory: 30-49%
     }
-    // F grade: 0-29% (already set as default)
+    // F grade: 0-29% (default)
 
-    console.log(`- Final Grade: ${grade} (${grade !== 'F' ? 'PASSED' : 'FAILED'})`);
-    console.log(`- Total Points Earned: ${details.reduce((sum, d) => sum + (d.pointsEarned || 0), 0)}`);
-    console.log(`- Total Points Possible: ${totalQuestions}`);
+    const passStatus = grade !== 'F' ? 'PASSED ✅' : 'FAILED ❌';
+    console.log(`🎓 Final Grade: ${grade} (${passStatus})`);
 
-    // WATCH THE MARKS: Log complete scoring breakdown
+    // DETAILED BREAKDOWN - Show every question result
+    const totalPointsEarned = details.reduce((sum, d) => sum + (d.pointsEarned || 0), 0);
+    console.log(`💯 Total Points: ${totalPointsEarned}/${totalQuestions} possible`);
+
+    console.log(`\n📋 QUESTION BREAKDOWN for ${participant.name}:`);
     details.forEach((detail, idx) => {
-      console.log(`  Q${idx + 1}: ${detail.isCorrect ? '✓' : '✗'} ${detail.pointsEarned || 0}/${1} points`);
+      const status = detail.isCorrect ? '✅ CORRECT' : '❌ WRONG';
+      const points = detail.pointsEarned || 0;
+      console.log(`   Q${idx + 1}: ${status} | ${points}/1 points | Answer: ${detail.studentAnswer || 'None'}`);
     });
+
+    console.log(`\n🏁 PROCESSING COMPLETE for ${participant.name}`);
 
     // Use actual submission time if available
     const submissionTime = participant.submittedAt
