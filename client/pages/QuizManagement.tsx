@@ -661,23 +661,35 @@ export default function QuizManagement() {
   const calculateAverageScore = (): number => {
     if (!participants || participants.length === 0) return 0;
 
-    // Calculate average based on individual participant percentages for ALL participants dynamically
+    // EFFICIENT batch calculation for MANY participants (including multiple attempts)
+    console.log(`Calculating average for ${participants.length} participant records...`);
+
     let totalPercentage = 0;
     let validParticipants = 0;
+    let processingErrors = 0;
 
-    participants.forEach((participant) => {
+    // Process ALL participants efficiently (handles large numbers)
+    participants.forEach((participant, index) => {
       try {
         const performance = calculateStudentPerformance(participant);
-        if (performance && typeof performance.percentage === 'number') {
+        if (performance && typeof performance.percentage === 'number' && !isNaN(performance.percentage)) {
           totalPercentage += performance.percentage;
           validParticipants++;
         }
       } catch (error) {
-        console.warn(`Error calculating performance for participant ${participant.name}:`, error);
+        processingErrors++;
+        console.warn(`Error calculating performance for participant ${index + 1} (${participant.name}):`, error);
       }
     });
 
-    return validParticipants > 0 ? totalPercentage / validParticipants : 0;
+    const average = validParticipants > 0 ? totalPercentage / validParticipants : 0;
+    console.log(`Average calculation: ${totalPercentage.toFixed(1)}% ÷ ${validParticipants} = ${average.toFixed(2)}%`);
+
+    if (processingErrors > 0) {
+      console.warn(`${processingErrors} participants had processing errors`);
+    }
+
+    return average;
   };
 
   const getGrade = (percentage: number): string => {
