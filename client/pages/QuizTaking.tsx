@@ -175,6 +175,8 @@ export default function QuizTaking() {
   };
 
   const handleAnswerChange = (questionId: string, answer: string | number) => {
+    console.log(`🎯 Answer changed: Q${questionId} = ${answer}`);
+
     setAnswers((prev) => ({
       ...prev,
       [questionId]: answer,
@@ -182,23 +184,38 @@ export default function QuizTaking() {
 
     // Immediate save for manual changes (bypass debouncing)
     lastSaveRef.current = 0; // Reset to allow immediate save
-    saveAnswer(questionId, answer);
+
+    // Small delay to ensure state is updated before save
+    setTimeout(() => {
+      saveAnswer(questionId, answer);
+    }, 100);
   };
 
   const saveAnswer = async (questionId: string, answer: string | number) => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      console.error('❌ No sessionId available for answer submission');
+      return;
+    }
+
+    // Skip empty answers
+    if (answer === undefined || answer === null || answer === '') {
+      console.log(`⚠️ Skipping empty answer for question ${questionId}`);
+      return;
+    }
 
     // Debouncing: only save if enough time has passed since last save
     const now = Date.now();
     const timeSinceLastSave = now - lastSaveRef.current;
 
-    // Minimum 2 seconds between auto-saves, immediate for manual saves
-    if (timeSinceLastSave < 2000) {
+    // Minimum 1 second between auto-saves, immediate for manual saves
+    if (timeSinceLastSave < 1000) {
+      console.log(`⏰ Debouncing answer save for question ${questionId}`);
       return;
     }
 
     try {
       lastSaveRef.current = now;
+      console.log(`📤 SUBMITTING ANSWER: Q${questionId} = ${answer} (SessionID: ${sessionId})`);
 
       const answerData: SubmitAnswerRequest = {
         sessionId,
@@ -206,15 +223,47 @@ export default function QuizTaking() {
         answer,
       };
 
-      await fetch("/api/quiz/answer", {
+      const response = await fetch("/api/quiz/answer", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify(answerData),
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ Answer submission failed: ${response.status} ${response.statusText}`);
+        console.error(`Response body:`, errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log(`✅ Answer saved successfully:`, result);
+
+      // Show success feedback to user
+      if (result.success) {
+        toast({
+          title: "Answer Saved",
+          description: `Question ${questionId.split('_').pop()} answer recorded`,
+          duration: 1000,
+        });
+      }
+
     } catch (error) {
-      console.error("Failed to save answer:", error);
-      // Reset the save timer on error to allow retry
-      lastSaveRef.current = now - 3000;
+      console.error(`❌ CRITICAL: Failed to save answer for question ${questionId}:`, error);
+
+      // Show error to user
+      toast({
+        title: "Answer Save Failed",
+        description: `Failed to save answer for question ${questionId.split('_').pop()}. Please try again.`,
+        variant: "destructive",
+        duration: 3000,
+      });
+
+      // Reset the save timer on error to allow immediate retry
+      lastSaveRef.current = now - 2000;
     }
   };
 
@@ -229,42 +278,67 @@ export default function QuizTaking() {
 
   const submitQuiz = async () => {
     setSubmitting(true);
+    console.log(`🎯 STARTING QUIZ SUBMISSION for session: ${sessionId}`);
+
     try {
-      // Final save of all answers
+      // Force save all answers before final submission
       if (quiz && sessionId) {
+        console.log(`💾 Force saving all ${Object.keys(answers).length} answers before submission...`);
+
+        const savePromises = [];
         for (const question of quiz.questions) {
-          if (answers[question.id] !== undefined) {
-            await saveAnswer(question.id, answers[question.id]);
+          if (answers[question.id] !== undefined && answers[question.id] !== null && answers[question.id] !== '') {
+            console.log(`💾 Force saving Q${question.id} = ${answers[question.id]}`);
+            // Force immediate save by resetting debounce timer
+            lastSaveRef.current = 0;
+            savePromises.push(saveAnswer(question.id, answers[question.id]));
           }
         }
+
+        // Wait for all answers to be saved
+        await Promise.all(savePromises);
+        console.log(`✅ All answers force-saved before submission`);
+
+        // Additional delay to ensure backend processes all saves
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      // Submit quiz for auto-scoring
+      // Submit quiz for auto-scoring with comprehensive error handling
+      console.log(`📤 Submitting quiz to backend...`);
       const response = await fetch("/api/quiz/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({ sessionId }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setQuizCompleted(true);
-        toast({
-          title: "Quiz Submitted!",
-          description: `Your score: ${data.score} points. Results calculated automatically.`,
-        });
-      } else {
-        throw new Error("Failed to submit quiz");
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ Quiz submission failed: ${response.status} ${response.statusText}`);
+        console.error(`Response body:`, errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
+
+      const data = await response.json();
+      console.log(`✅ Quiz submitted successfully:`, data);
+
+      setQuizCompleted(true);
+      toast({
+        title: "Quiz Submitted Successfully!",
+        description: `Your score: ${data.score || 0}/${data.totalPossible || 0} points (${data.grade || 'N/A'}). Results calculated automatically.`,
+      });
 
       // Redirect after a delay
       setTimeout(() => {
         navigate("/student");
       }, 3000);
     } catch (error) {
+      console.error(`❌ CRITICAL: Quiz submission failed:`, error);
       toast({
         title: "Submission Error",
-        description: "Failed to submit quiz. Please try again.",
+        description: `Failed to submit quiz: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
         variant: "destructive",
       });
     } finally {
