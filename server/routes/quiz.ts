@@ -636,26 +636,44 @@ export const submitQuiz: RequestHandler = (req, res) => {
       submittedAt: participant.submittedAt
     });
 
-    res.json({
-      success: true,
-      score: totalScore,
-      totalPossible: totalPossiblePoints,
-      percentage: participant.percentage,
-      grade: participant.grade,
-      questionsCorrect: questionsCorrect,
-      questionsAnswered: questionsAnswered,
-      submittedAt: participant.submittedAt,
-      participantId: participant.id,
-      saved: true,
-      verified: savedParticipant?.score === totalScore,
-      message: `Quiz submitted successfully! Score: ${totalScore}/${totalPossiblePoints} (${grade}) - SAVED TO SERVER`,
-    });
+    // Clear timeout since we're responding successfully
+    clearTimeout(timeoutId);
+
+    console.log(`\n✅ SENDING SUCCESSFUL RESPONSE TO CLIENT`);
+
+    if (!res.headersSent) {
+      res.json({
+        success: true,
+        score: totalScore,
+        totalPossible: totalPossiblePoints,
+        percentage: participant.percentage,
+        grade: participant.grade,
+        questionsCorrect: questionsCorrect,
+        questionsAnswered: questionsAnswered,
+        submittedAt: participant.submittedAt,
+        participantId: participant.id,
+        saved: true,
+        verified: savedParticipant?.score === totalScore,
+        message: `Quiz submitted successfully! Score: ${totalScore}/${totalPossiblePoints} (${grade}) - SAVED TO SERVER`,
+      });
+    } else {
+      console.log(`⚠️ Headers already sent, response already completed`);
+    }
   } catch (error) {
-    const errorResponse: ErrorResponse = {
-      error: "SUBMIT_QUIZ_FAILED",
-      message: "Failed to submit quiz",
-    };
-    res.status(500).json(errorResponse);
+    console.log(`\n❌ QUIZ SUBMISSION FAILED:`, error);
+
+    // Clear timeout since we're responding with error
+    clearTimeout(timeoutId);
+
+    if (!res.headersSent) {
+      const errorResponse: ErrorResponse = {
+        error: "SUBMIT_QUIZ_FAILED",
+        message: `Failed to submit quiz: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+      res.status(500).json(errorResponse);
+    } else {
+      console.log(`⚠️ Headers already sent, cannot send error response`);
+    }
   }
 };
 
