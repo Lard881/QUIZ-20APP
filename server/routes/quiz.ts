@@ -538,6 +538,22 @@ export const submitQuiz: RequestHandler = (req, res) => {
     participant.submittedAt = new Date().toISOString();
     participant.score = totalScore;
 
+    // Store additional scoring metadata
+    const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
+    const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
+    let grade = 'F';
+    if (percentage >= 80) grade = 'A';
+    else if (percentage >= 50) grade = 'B';
+    else if (percentage >= 30) grade = 'C';
+
+    // Add metadata to participant object for easy access
+    participant.percentage = Math.round(percentage * 10) / 10;
+    participant.grade = grade;
+    participant.questionsCorrect = questionsCorrect;
+    participant.questionsAnswered = questionsAnswered;
+
+    console.log(`Participant ${participant.name} submitted: ${totalScore}/${totalPossiblePoints} points (${percentage.toFixed(1)}%) - Grade: ${grade}`);
+
     res.json({
       success: true,
       score: totalScore,
