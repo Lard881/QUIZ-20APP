@@ -845,17 +845,26 @@ export const submitQuiz: RequestHandler = (req, res) => {
     if (!res.headersSent) {
       res.json({
         success: true,
-        score: totalScore,
+        score: participant.score,  // Best score across attempts
         totalPossible: totalPossiblePoints,
         percentage: participant.percentage,
         grade: participant.grade,
-        questionsCorrect: questionsCorrect,
-        questionsAnswered: questionsAnswered,
+        questionsCorrect: participant.questionsCorrect,
+        questionsAnswered: participant.questionsAnswered,
         submittedAt: participant.submittedAt,
         participantId: participant.id,
         saved: true,
-        verified: savedParticipant?.score === totalScore,
-        message: `Quiz submitted successfully! Score: ${totalScore}/${totalPossiblePoints} (${grade}) - SAVED TO SERVER`,
+        verified: savedParticipant?.score === participant.score,
+        // Multi-attempt specific data
+        attemptNumber: currentAttempt.attemptNumber,
+        totalAttempts: participant.totalAttempts,
+        latestAttemptScore: participant.latestAttemptScore,
+        latestAttemptGrade: participant.latestAttemptGrade,
+        bestAttemptNumber: participant.bestAttemptNumber,
+        improvementPoints: participant.improvementPoints,
+        message: participant.totalAttempts > 1
+          ? `Attempt #${currentAttempt.attemptNumber} completed! Best score: ${participant.score}/${totalPossiblePoints} (${participant.grade}) from Attempt #${participant.bestAttemptNumber}`
+          : `Quiz submitted successfully! Score: ${participant.score}/${totalPossiblePoints} (${participant.grade}) - SAVED TO SERVER`,
       });
     } else {
       console.log(`⚠️ Headers already sent, response already completed`);
