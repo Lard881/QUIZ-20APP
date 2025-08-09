@@ -689,7 +689,7 @@ export const getQuizResults: RequestHandler = (req, res) => {
       const attemptNumber = participant.attemptNumber || 1;
 
       console.log(`\n🧮 === PROCESSING PARTICIPANT ${index + 1}/${allParticipants.length} ===`);
-      console.log(`👤 Name: ${participantName} (Attempt #${attemptNumber})`);
+      console.log(`�� Name: ${participantName} (Attempt #${attemptNumber})`);
       console.log(`🆔 ID: ${participant.id}`);
       console.log(`📝 Answers array length:`, participant.answers?.length || 0);
       console.log(`📊 Raw answers:`, participant.answers);
@@ -833,7 +833,7 @@ export const getQuizResults: RequestHandler = (req, res) => {
       }
 
       // CALCULATE FINAL PERCENTAGE AND ASSIGN GRADE
-      const percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
+      let percentage = totalPossiblePoints > 0 ? (totalScore / totalPossiblePoints) * 100 : 0;
 
       // GRADE ASSIGNMENT BASED ON PERCENTAGE (works for ANY participant)
       let grade = 'F'; // Default fail grade
