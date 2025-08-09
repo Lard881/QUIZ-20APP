@@ -514,14 +514,20 @@ export default function QuizManagement() {
       correctAnswers[question.id] = question.correctAnswer;
     });
 
-    // Compare student answers with correct answers (following provided algorithm)
-    quiz.questions.forEach((question) => {
+    // PRECISE ANSWER COMPARISON - Watch marks and compare answers for ANY participant
+    console.log(`Frontend scoring for ${participant.name || 'Unknown Participant'}:`);
+
+    quiz.questions.forEach((question, qIndex) => {
+      console.log(`\nFrontend Q${qIndex + 1}: ${question.question}`);
+      console.log(`Correct Answer: ${correctAnswers[question.id]}`);
+
       const studentAnswer = participant.answers.find(
         (a) => a.questionId === question.id,
       );
 
       let isCorrect = false;
       let studentResponse = null;
+      let pointsEarned = 0;
 
       if (
         studentAnswer &&
@@ -530,14 +536,15 @@ export default function QuizManagement() {
       ) {
         questionsAnswered++;
         studentResponse = studentAnswer.answer;
+        console.log(`Student Answer: ${studentResponse}`);
 
-        // Compare answers following the algorithm logic
+        // EXACT COMPARISON LOGIC (matches backend)
         if (question.type === "multiple-choice" || question.type === "true-false") {
-          // Normalize for comparison
+          // Normalize for PRECISE comparison
           let normalizedStudentAns = studentAnswer.answer;
           let normalizedCorrectAns = correctAnswers[question.id];
 
-          // Convert string numbers to numbers for accurate comparison
+          // Handle string/number conversion exactly like backend
           if (typeof normalizedStudentAns === "string" && !isNaN(Number(normalizedStudentAns))) {
             normalizedStudentAns = Number(normalizedStudentAns);
           }
@@ -545,19 +552,29 @@ export default function QuizManagement() {
             normalizedCorrectAns = Number(normalizedCorrectAns);
           }
 
-          // Direct comparison as per algorithm
+          // DIRECT EXACT MATCH
           if (normalizedStudentAns === normalizedCorrectAns) {
             correctCount++;
             isCorrect = true;
+            pointsEarned = question.points;
+            console.log(`✓ CORRECT! ${normalizedStudentAns} === ${normalizedCorrectAns}`);
+          } else {
+            console.log(`✗ WRONG! ${normalizedStudentAns} !== ${normalizedCorrectAns}`);
           }
         } else if (question.type === "short-answer") {
-          // For short answer, check if there's a meaningful response
+          // Short answer validation
           const answerText = studentAnswer.answer.toString().trim();
           if (answerText.length > 0) {
             correctCount++;
             isCorrect = true;
+            pointsEarned = question.points;
+            console.log(`✓ SHORT ANSWER PROVIDED: "${answerText}"`);
+          } else {
+            console.log(`✗ NO MEANINGFUL ANSWER PROVIDED`);
           }
         }
+      } else {
+        console.log(`Student Answer: [NOT ANSWERED]`);
       }
 
       details.push({
@@ -566,6 +583,7 @@ export default function QuizManagement() {
         studentAnswer: studentResponse,
         correctAnswer: correctAnswers[question.id],
         isCorrect,
+        pointsEarned,
         answered: studentResponse !== null
       });
     });
