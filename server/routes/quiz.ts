@@ -222,8 +222,17 @@ export const joinQuiz: RequestHandler = (req, res) => {
       deviceFingerprint: req.headers["user-agent"] || "unknown",
     };
 
+    console.log(`\n👥 CREATING NEW PARTICIPANT:`);
+    console.log(`Name: ${participantName}`);
+    console.log(`ID: ${participant.id}`);
+    console.log(`Session ID: ${session.id}`);
+    console.log(`Attempt Number: ${participant.attemptNumber}`);
+    console.log(`IP Address: ${clientIP}`);
+
     participants.push(participant);
     session.participants.push(participant);
+
+    console.log(`✅ PARTICIPANT ADDED TO SYSTEM. Total participants: ${participants.length}`);
 
     const response: JoinQuizResponse = {
       sessionId: session.id,
