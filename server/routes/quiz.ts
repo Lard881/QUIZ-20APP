@@ -308,15 +308,17 @@ export const submitAnswer: RequestHandler = (req, res) => {
       return res.status(404).json(errorResponse);
     }
 
-    // Update or add answer
+    // Update or add answer with guaranteed timestamp
     const existingAnswerIndex = participant.answers.findIndex(
       (a) => a.questionId === questionId,
     );
     const answerData = {
       questionId,
       answer,
-      timeStamp: new Date().toISOString(),
+      timeStamp: new Date().toISOString(), // Always ensure timestamp
     };
+
+    console.log(`Answer submitted by ${participant.name}: Q${questionId} = ${answer} at ${answerData.timeStamp}`);
 
     if (existingAnswerIndex >= 0) {
       participant.answers[existingAnswerIndex] = answerData;
