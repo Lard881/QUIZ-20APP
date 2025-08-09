@@ -631,15 +631,25 @@ export default function QuizManagement() {
   };
 
   const calculateAverageScore = (): number => {
-    if (participants.length === 0) return 0;
+    if (!participants || participants.length === 0) return 0;
 
-    // Calculate average based on individual participant percentages (not points)
-    const totalPercentage = participants.reduce((sum, participant) => {
-      const performance = calculateStudentPerformance(participant);
-      return sum + performance.percentage;
-    }, 0);
+    // Calculate average based on individual participant percentages for ALL participants dynamically
+    let totalPercentage = 0;
+    let validParticipants = 0;
 
-    return totalPercentage / participants.length;
+    participants.forEach((participant) => {
+      try {
+        const performance = calculateStudentPerformance(participant);
+        if (performance && typeof performance.percentage === 'number') {
+          totalPercentage += performance.percentage;
+          validParticipants++;
+        }
+      } catch (error) {
+        console.warn(`Error calculating performance for participant ${participant.name}:`, error);
+      }
+    });
+
+    return validParticipants > 0 ? totalPercentage / validParticipants : 0;
   };
 
   const getGrade = (percentage: number): string => {
