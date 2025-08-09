@@ -592,7 +592,6 @@ export default function QuizManagement() {
 
     // Create CSV content (which can be opened in Excel)
     const headers = [
-      "Rank",
       "Student Name",
       "Score",
       "Total Points",
@@ -619,22 +618,6 @@ export default function QuizManagement() {
             grade,
           };
         })
-        .sort((a, b) => {
-          // Same sorting logic as the table
-          if (b.percentage !== a.percentage) {
-            return b.percentage - a.percentage;
-          }
-          if (a.participant.submittedAt && !b.participant.submittedAt)
-            return -1;
-          if (!a.participant.submittedAt && b.participant.submittedAt) return 1;
-          if (a.participant.submittedAt && b.participant.submittedAt) {
-            return (
-              new Date(a.participant.submittedAt).getTime() -
-              new Date(b.participant.submittedAt).getTime()
-            );
-          }
-          return 0;
-        })
         .map(
           ({ participant, score, totalPoints, percentage, grade }, index) => {
             const submissionTime = participant.submittedAt
@@ -642,7 +625,6 @@ export default function QuizManagement() {
               : "In Progress";
 
             return [
-              index + 1, // Rank
               `"${participant.name}"`,
               score,
               totalPoints,
