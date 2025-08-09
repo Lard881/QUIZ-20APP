@@ -1342,11 +1342,24 @@ export default function QuizManagement() {
                           </thead>
                           <tbody>
                             {(participants || [])
-                              .map((participant) => {
+                              .map((participant, participantIndex) => {
+                                console.log(`\n=== PROCESSING PARTICIPANT ${participantIndex + 1}: ${participant.name} ===`);
+                                console.log(`Participant ID: ${participant.id}`);
+                                console.log(`Participant answers:`, participant.answers);
+
                                 try {
-                                  // Universal score calculation for ANY participant
+                                  // FORCE calculation for EVERY single participant individually
                                   const performance = calculateStudentPerformance(participant);
                                   const totalPossible = performance.totalQuestions || getTotalPossiblePoints();
+
+                                  console.log(`Performance calculated:`, {
+                                    name: participant.name,
+                                    score: performance.score,
+                                    percentage: performance.percentage,
+                                    grade: performance.grade,
+                                    questionsAnswered: performance.questionsAnswered,
+                                    questionsCorrect: performance.questionsCorrect
+                                  });
 
                                   return {
                                     participant,
@@ -1358,16 +1371,54 @@ export default function QuizManagement() {
                                     submissionTime: performance.submissionTime,
                                   };
                                 } catch (error) {
-                                  console.error(`Error processing participant ${participant?.name || 'Unknown'}:`, error);
-                                  // Return default values for any participant that fails processing
+                                  console.error(`FAILED to process participant ${participantIndex + 1} (${participant?.name || 'Unknown'}):`, error);
+                                  console.error(`Participant data:`, participant);
+
+                                  // Force manual calculation as fallback for ANY participant
+                                  let fallbackScore = 0;
+                                  let fallbackAnswered = 0;
+                                  let fallbackCorrect = 0;
+
+                                  if (participant.answers && quiz?.questions) {
+                                    quiz.questions.forEach(question => {
+                                      const answer = participant.answers.find(a => a.questionId === question.id);
+                                      if (answer && answer.answer !== undefined && answer.answer !== null) {
+                                        fallbackAnswered++;
+                                        if (answer.answer === question.correctAnswer) {
+                                          fallbackCorrect++;
+                                          fallbackScore += question.points;
+                                        }
+                                      }
+                                    });
+                                  }
+
+                                  const fallbackPercentage = quiz?.questions.length > 0 ? (fallbackCorrect / quiz.questions.length) * 100 : 0;
+                                  let fallbackGrade = 'F';
+                                  if (fallbackPercentage >= 80) fallbackGrade = 'A';
+                                  else if (fallbackPercentage >= 50) fallbackGrade = 'B';
+                                  else if (fallbackPercentage >= 30) fallbackGrade = 'C';
+
+                                  console.log(`Fallback calculation for ${participant.name}:`, {
+                                    score: fallbackScore,
+                                    percentage: fallbackPercentage,
+                                    grade: fallbackGrade
+                                  });
+
                                   return {
                                     participant,
-                                    performance: { score: 0, percentage: 0, grade: 'F', submissionTime: 'Error', questionsCorrect: 0, questionsAnswered: 0 },
-                                    score: 0,
+                                    performance: {
+                                      score: fallbackScore,
+                                      percentage: fallbackPercentage,
+                                      grade: fallbackGrade,
+                                      submissionTime: participant.submittedAt ? new Date(participant.submittedAt).toLocaleString() : 'Not Started',
+                                      questionsCorrect: fallbackCorrect,
+                                      questionsAnswered: fallbackAnswered
+                                    },
+                                    score: fallbackScore,
                                     totalPossible: getTotalPossiblePoints(),
-                                    percentage: 0,
-                                    grade: 'F',
-                                    submissionTime: 'Processing Error',
+                                    percentage: fallbackPercentage,
+                                    grade: fallbackGrade,
+                                    submissionTime: participant.submittedAt ? new Date(participant.submittedAt).toLocaleString() : 'Processing Error',
                                   };
                                 }
                               })
