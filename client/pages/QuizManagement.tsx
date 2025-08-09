@@ -1221,11 +1221,24 @@ export default function QuizManagement() {
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-quiz-success">
                           {
-                            participants.filter((p) => {
-                              const performance = calculateStudentPerformance(p);
-                              // A, B, C grades are pass; F is fail
-                              return performance.grade === "A" || performance.grade === "B" || performance.grade === "C";
-                            }).length
+                            (() => {
+                              if (!participants || participants.length === 0) return 0;
+
+                              let passedCount = 0;
+                              participants.forEach((participant) => {
+                                try {
+                                  const performance = calculateStudentPerformance(participant);
+                                  // A, B, C grades are pass; F is fail - works for ANY participant
+                                  if (performance && (performance.grade === "A" || performance.grade === "B" || performance.grade === "C")) {
+                                    passedCount++;
+                                  }
+                                } catch (error) {
+                                  console.warn(`Error calculating pass status for participant ${participant.name}:`, error);
+                                }
+                              });
+
+                              return passedCount;
+                            })()
                           }
                         </div>
                         <div className="text-sm text-muted-foreground">
