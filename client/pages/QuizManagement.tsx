@@ -588,28 +588,35 @@ export default function QuizManagement() {
       });
     });
 
-    // Calculate final score and percentage FIRST before grading
+    // CALCULATE FINAL MARKS AND ASSIGN GRADE (matches backend exactly)
     const score = correctCount;
     const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
 
-    console.log(`Frontend calculation for ${participant.name}:`);
+    console.log(`\nFrontend Final Calculation for ${participant.name || 'Participant'}:`);
     console.log(`- Questions answered: ${questionsAnswered}/${totalQuestions}`);
     console.log(`- Correct answers: ${correctCount}`);
     console.log(`- Score: ${score}/${totalQuestions}`);
     console.log(`- Percentage: ${percentage.toFixed(2)}%`);
 
-    // NOW assign grade based on calculated percentage (not before calculation)
-    let grade = 'F'; // Default grade
+    // GRADE ASSIGNMENT based on CALCULATED PERCENTAGE (exact match with backend)
+    let grade = 'F'; // Default fail grade
     if (percentage >= 80) {
-      grade = 'A';
+      grade = 'A'; // Excellent: 80-100%
     } else if (percentage >= 50) {
-      grade = 'B';
+      grade = 'B'; // Good: 50-79%
     } else if (percentage >= 30) {
-      grade = 'C';
+      grade = 'C'; // Satisfactory: 30-49%
     }
-    // F is for anything below 30%
+    // F grade: 0-29% (already set as default)
 
-    console.log(`- Final Grade: ${grade}`);
+    console.log(`- Final Grade: ${grade} (${grade !== 'F' ? 'PASSED' : 'FAILED'})`);
+    console.log(`- Total Points Earned: ${details.reduce((sum, d) => sum + (d.pointsEarned || 0), 0)}`);
+    console.log(`- Total Points Possible: ${totalQuestions}`);
+
+    // WATCH THE MARKS: Log complete scoring breakdown
+    details.forEach((detail, idx) => {
+      console.log(`  Q${idx + 1}: ${detail.isCorrect ? '✓' : '✗'} ${detail.pointsEarned || 0}/${1} points`);
+    });
 
     // Use actual submission time if available
     const submissionTime = participant.submittedAt
