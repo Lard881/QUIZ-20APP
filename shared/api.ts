@@ -52,6 +52,13 @@ export interface QuizParticipant {
   ipAddress: string;
   attemptNumber: number;
   deviceFingerprint?: string;
+  // Additional scoring metadata
+  percentage?: number;
+  grade?: string;
+  questionsCorrect?: number;
+  questionsAnswered?: number;
+  totalPossiblePoints?: number;
+  calculatedAt?: string;
 }
 
 export interface QuizAnswer {
