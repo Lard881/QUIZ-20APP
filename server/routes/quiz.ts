@@ -484,6 +484,33 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
     console.log(`${forceRecalculate ? 'Force recalculating' : 'Getting'} scores for ${allParticipants.length} participants in quiz: ${quiz.title}`);
 
+    // COMPREHENSIVE DEBUGGING: Check for missing Sam data
+    console.log(`\\n🔍 SEARCHING FOR ALL SAM RECORDS...`);
+    const allSamRecords = participants.filter(p => p.name.toLowerCase().includes('sam'));
+    console.log(`Found ${allSamRecords.length} Sam participant records:`, allSamRecords.map(p => ({
+      id: p.id,
+      name: p.name,
+      sessionId: p.sessionId,
+      answersCount: p.answers?.length || 0,
+      attemptNumber: p.attemptNumber,
+      submittedAt: p.submittedAt
+    })));
+
+    console.log(`\\n📋 ALL PARTICIPANTS IN SYSTEM:`, participants.map(p => ({
+      id: p.id,
+      name: p.name,
+      sessionId: p.sessionId,
+      answersCount: p.answers?.length || 0,
+      attemptNumber: p.attemptNumber || 1
+    })));
+
+    console.log(`\\n🎭 ALL SESSIONS:`, quizSessions.map(s => ({
+      id: s.id,
+      quizId: s.quizId,
+      participantCount: s.participants?.length || 0,
+      isActive: s.isActive
+    })));
+
     if (forceRecalculate) {
       console.log("=== FORCE RECALCULATION MODE ===");
       console.log("Processing ALL participants with fresh score calculations...");
