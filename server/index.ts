@@ -54,6 +54,7 @@ export function createServer() {
   app.post("/api/quiz/answer", submitAnswer);
   app.post("/api/quiz/submit", submitQuiz);
   app.get("/api/quiz/:quizId/results", getQuizResults);
+  app.post("/api/quiz/:quizId/results", getQuizResults); // POST for force recalculation
   app.patch("/api/quiz/:quizId/status", updateQuizStatus);
 
   return app;
