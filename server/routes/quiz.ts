@@ -520,13 +520,36 @@ export const getQuizResults: RequestHandler = (req, res) => {
           console.log(`Question: "${question.question}"`);
           console.log(`Correct Answer: ${question.correctAnswer} (Type: ${question.type})`);
           console.log(`Points Available: ${question.points}`);
+          console.log(`Available student answers for ${participantName}:`, participant.answers.map(a => ({id: a.questionId, answer: a.answer})));
 
-          const studentAnswer = participant.answers.find(a => a.questionId === question.id);
+          // ROBUST ANSWER MATCHING: Try multiple matching strategies
+          let studentAnswer = participant.answers.find(a => a.questionId === question.id);
 
-          if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null) {
+          // If no exact match, try alternative matching strategies
+          if (!studentAnswer) {
+            console.log(`❌ No exact match for question ID: ${question.id}`);
+
+            // Try matching by question index (fallback for mismatched IDs)
+            if (participant.answers[qIndex]) {
+              console.log(`🔄 Trying index-based matching for question ${qIndex + 1}`);
+              studentAnswer = participant.answers[qIndex];
+            }
+
+            // Try matching by partial ID (if IDs got corrupted)
+            if (!studentAnswer) {
+              studentAnswer = participant.answers.find(a => a.questionId && a.questionId.toString().includes(question.id.toString().slice(-3)));
+              if (studentAnswer) {
+                console.log(`🔄 Found partial ID match: ${studentAnswer.questionId}`);
+              }
+            }
+          } else {
+            console.log(`✅ Found exact match for question ID: ${question.id}`);
+          }
+
+          if (studentAnswer && studentAnswer.answer !== undefined && studentAnswer.answer !== null && studentAnswer.answer !== '') {
             questionsAnswered++;
             const studentResponse = studentAnswer.answer;
-            console.log(`Student Answer: ${studentResponse}`);
+            console.log(`✅ Student Answer Found: ${studentResponse} (from answer ID: ${studentAnswer.questionId})`);
 
             // PRECISE ANSWER COMPARISON for ANY question type
             let isCorrect = false;
@@ -573,7 +596,10 @@ export const getQuizResults: RequestHandler = (req, res) => {
               }
             }
           } else {
-            console.log(`Student Answer: [NO ANSWER]`);
+            console.log(`❌ Student Answer: [NO VALID ANSWER FOUND]`);
+            if (studentAnswer) {
+              console.log(`Found answer object but value is invalid:`, studentAnswer);
+            }
             console.log(`✗ UNANSWERED! Earned 0 points`);
           }
         });
