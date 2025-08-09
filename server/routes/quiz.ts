@@ -791,6 +791,9 @@ export const submitQuiz: RequestHandler = (req, res) => {
     participant.latestScore = totalScore;
     participant.latestGrade = grade;
     participant.bestAttemptNumber = bestAttemptNum;
+    participant.latestAttemptScore = totalScore;
+    participant.latestAttemptGrade = grade;
+    participant.improvementPoints = bestScore > totalScore ? 0 : totalScore - (bestScore === totalScore ? 0 : bestScore);
 
     // Memory optimization: Store only lightweight scoreDetails for best attempt
     if (bestAttemptNum === attemptNumber) {
