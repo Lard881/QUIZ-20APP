@@ -544,7 +544,7 @@ export default function QuizManagement() {
           questionsCorrect++;
           console.log(`✅ CORRECT! +1 point`);
         } else {
-          console.log(`❌ WRONG! 0 points`);
+          console.log(`�� WRONG! 0 points`);
         }
       } else {
         console.log(`❌ NO ANSWER`);
@@ -1212,21 +1212,13 @@ export default function QuizManagement() {
                 ) : (
                   <div className="space-y-6">
                     {/* Summary Statistics */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
                         <div className="text-2xl font-bold text-quiz-success">
                           {participants.length}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Total Students
-                        </div>
-                      </div>
-                      <div className="bg-muted/30 rounded-lg p-4 text-center">
-                        <div className="text-2xl font-bold text-primary">
-                          {calculateAverageScore().toFixed(1)}%
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Average Score
                         </div>
                       </div>
                       <div className="bg-muted/30 rounded-lg p-4 text-center">
