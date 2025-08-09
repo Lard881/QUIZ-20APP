@@ -573,8 +573,35 @@ export const submitQuiz: RequestHandler = (req, res) => {
     console.log(`Pass Status: ${grade !== 'F' ? 'PASSED' : 'FAILED'}`);
     console.log(`Submission Time: ${submissionTime}`);
 
+    // FORCE SAVE TO SERVER WITH VERIFICATION
+    console.log(`\n💾 FORCE SAVING PARTICIPANT SCORE DATA...`);
+    const participantIndex = participants.findIndex(p => p.id === participant.id);
+    if (participantIndex >= 0) {
+      participants[participantIndex] = { ...participant };
+      console.log(`✅ PARTICIPANT SCORE DATA SAVED AT INDEX: ${participantIndex}`);
+    } else {
+      participants.push({ ...participant });
+      console.log(`⚠️ PARTICIPANT ADDED TO MAIN ARRAY WITH SCORES`);
+    }
+
+    // VERIFICATION: Check that scores are actually saved
+    const savedParticipant = participants.find(p => p.id === participant.id);
+    if (savedParticipant && savedParticipant.score === totalScore) {
+      console.log(`✅ SCORE VERIFICATION PASSED: ${totalScore} points saved correctly`);
+    } else {
+      console.log(`❌ SCORE VERIFICATION FAILED! Expected: ${totalScore}, Found: ${savedParticipant?.score}`);
+    }
+
     console.log(`\n✅ PARTICIPANT DATA SAVED TO SERVER`);
     console.log(`Total participants with scores: ${participants.filter(p => p.score !== undefined).length}`);
+    console.log(`Saved participant details:`, {
+      id: participant.id,
+      name: participant.name,
+      score: participant.score,
+      percentage: participant.percentage,
+      grade: participant.grade,
+      submittedAt: participant.submittedAt
+    });
 
     res.json({
       success: true,
@@ -585,7 +612,10 @@ export const submitQuiz: RequestHandler = (req, res) => {
       questionsCorrect: questionsCorrect,
       questionsAnswered: questionsAnswered,
       submittedAt: participant.submittedAt,
-      message: `Quiz submitted successfully! Score: ${totalScore}/${totalPossiblePoints} (${grade})`,
+      participantId: participant.id,
+      saved: true,
+      verified: savedParticipant?.score === totalScore,
+      message: `Quiz submitted successfully! Score: ${totalScore}/${totalPossiblePoints} (${grade}) - SAVED TO SERVER`,
     });
   } catch (error) {
     const errorResponse: ErrorResponse = {
