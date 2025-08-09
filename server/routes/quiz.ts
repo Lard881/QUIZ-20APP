@@ -569,10 +569,11 @@ export const submitQuiz: RequestHandler = (req, res) => {
   }
 };
 
-// Get quiz results
+// Get quiz results with optional recalculation
 export const getQuizResults: RequestHandler = (req, res) => {
   try {
     const { quizId } = req.params;
+    const forceRecalculate = req.method === 'POST' || req.body?.forceRecalculate;
 
     const quiz = quizzes.find((q) => q.id === quizId);
     if (!quiz) {
@@ -587,6 +588,8 @@ export const getQuizResults: RequestHandler = (req, res) => {
     const allParticipants = participants.filter((p) =>
       sessions.some((s) => s.id === p.sessionId),
     );
+
+    console.log(`${forceRecalculate ? 'Force recalculating' : 'Getting'} scores for ${allParticipants.length} participants in quiz: ${quiz.title}`);
 
     // Calculate scores properly for all participants - ensure everyone gets a score
     const participantsWithScores = allParticipants.map((p) => {
