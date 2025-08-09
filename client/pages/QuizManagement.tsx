@@ -1216,24 +1216,18 @@ export default function QuizManagement() {
                           <tbody>
                             {participants
                               .map((participant) => {
-                                // Always recalculate score for each participant
-                                const scoreData =
-                                  calculateStudentScore(participant);
-                                const score = scoreData.score;
-                                const totalPossible = getTotalPossiblePoints();
-                                const percentage =
-                                  totalPossible > 0
-                                    ? (score / totalPossible) * 100
-                                    : 0;
-                                const grade = getGrade(percentage);
+                                // Use the new score calculation algorithm
+                                const performance = calculateStudentPerformance(participant);
+                                const totalPossible = performance.totalQuestions || getTotalPossiblePoints();
 
                                 return {
                                   participant,
-                                  scoreData,
-                                  score,
+                                  performance,
+                                  score: performance.score,
                                   totalPossible,
-                                  percentage,
-                                  grade,
+                                  percentage: performance.percentage,
+                                  grade: performance.grade,
+                                  submissionTime: performance.submissionTime,
                                 };
                               })
                               // Display students without ranking
