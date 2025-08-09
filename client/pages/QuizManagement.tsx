@@ -450,6 +450,7 @@ export default function QuizManagement() {
     let questionsCorrect = 0;
     const details: any[] = [];
 
+    // Ensure every participant gets proper score calculation
     quiz.questions.forEach((question) => {
       const studentAnswer = participant.answers.find(
         (a) => a.questionId === question.id,
@@ -457,6 +458,7 @@ export default function QuizManagement() {
       let isCorrect = false;
       let pointsEarned = 0;
 
+      // Check if student answered this question
       if (
         studentAnswer &&
         studentAnswer.answer !== undefined &&
@@ -468,16 +470,22 @@ export default function QuizManagement() {
           question.type === "multiple-choice" ||
           question.type === "true-false"
         ) {
-          // Handle both string and number answers properly
+          // Normalize answers for proper comparison
           let studentAns = studentAnswer.answer;
           let correctAns = question.correctAnswer;
 
-          // Convert to numbers if possible for accurate comparison
-          if (typeof studentAns === "string" && !isNaN(Number(studentAns))) {
-            studentAns = Number(studentAns);
+          // Convert string numbers to actual numbers for comparison
+          if (typeof studentAns === "string") {
+            const numericAns = Number(studentAns);
+            if (!isNaN(numericAns)) {
+              studentAns = numericAns;
+            }
           }
-          if (typeof correctAns === "string" && !isNaN(Number(correctAns))) {
-            correctAns = Number(correctAns);
+          if (typeof correctAns === "string") {
+            const numericAns = Number(correctAns);
+            if (!isNaN(numericAns)) {
+              correctAns = numericAns;
+            }
           }
 
           isCorrect = studentAns === correctAns;
@@ -493,6 +501,7 @@ export default function QuizManagement() {
           questionsCorrect++;
         }
       }
+      // Note: Unanswered questions contribute 0 points (already initialized)
 
       totalScore += pointsEarned;
       details.push({
