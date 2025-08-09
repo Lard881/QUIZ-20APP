@@ -624,7 +624,21 @@ export const getQuizResults: RequestHandler = (req, res) => {
           }
         });
       } else {
-        console.log(`${participantName} provided NO ANSWERS - Final Score: 0`);
+        console.log(`${participantName} provided NO VALID ANSWERS - Checking for any data...`);
+
+        // FALLBACK: Even if no answers array, check if participant has any stored data
+        if (participant.score !== undefined) {
+          console.log(`Found existing score for ${participantName}: ${participant.score}`);
+          totalScore = participant.score;
+        }
+        if (participant.questionsCorrect !== undefined) {
+          questionsCorrect = participant.questionsCorrect;
+        }
+        if (participant.questionsAnswered !== undefined) {
+          questionsAnswered = participant.questionsAnswered;
+        }
+
+        console.log(`${participantName} Final Score (fallback): ${totalScore}`);
       }
 
       // CALCULATE FINAL PERCENTAGE AND ASSIGN GRADE
