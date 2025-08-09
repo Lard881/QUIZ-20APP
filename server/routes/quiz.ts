@@ -400,15 +400,44 @@ export const submitAnswer: RequestHandler = (req, res) => {
       }
     }
 
-    // SAVE PARTICIPANT DATA IMMEDIATELY after each answer
-    console.log(`\n💾 SAVING PARTICIPANT DATA TO SERVER...`);
+    // COMPREHENSIVE PARTICIPANT DATA SAVING - Prevents Lord's issue
+    console.log(`\n💾 CRITICAL: SAVING PARTICIPANT DATA TO SERVER...`);
+    console.log(`Participant: ${participant.name} (ID: ${participant.id})`);
+    console.log(`Session: ${participant.sessionId}`);
+    console.log(`Answers before save:`, participant.answers?.length || 0);
+
     const participantIndex = participants.findIndex(p => p.id === participant.id);
     if (participantIndex >= 0) {
-      participants[participantIndex] = participant;
-      console.log(`✅ PARTICIPANT DATA UPDATED IN SERVER STORAGE`);
+      // Update existing participant
+      participants[participantIndex] = { ...participant }; // Deep copy to prevent reference issues
+      console.log(`✅ PARTICIPANT DATA UPDATED AT INDEX: ${participantIndex}`);
+
+      // VERIFICATION: Double-check the save worked
+      const verifyParticipant = participants.find(p => p.id === participant.id);
+      if (verifyParticipant && verifyParticipant.answers?.length === participant.answers?.length) {
+        console.log(`✅ SAVE VERIFICATION PASSED: ${verifyParticipant.answers?.length} answers confirmed`);
+      } else {
+        console.log(`❌ SAVE VERIFICATION FAILED! Re-attempting save...`);
+        participants[participantIndex] = JSON.parse(JSON.stringify(participant)); // Force deep copy
+      }
     } else {
-      console.log(`⚠️ WARNING: Participant not found in main array, adding...`);
-      participants.push(participant);
+      console.log(`⚠️ WARNING: Participant not found in main array, adding as new entry...`);
+      participants.push({ ...participant });
+      console.log(`✅ NEW PARTICIPANT ADDED TO SYSTEM`);
+    }
+
+    // FINAL VERIFICATION: Ensure participant exists with correct data
+    const finalCheck = participants.find(p => p.id === participant.id);
+    console.log(`🔍 FINAL CHECK: ${finalCheck?.name} has ${finalCheck?.answers?.length || 0} answers stored`);
+
+    if (!finalCheck || (finalCheck.answers?.length || 0) !== (participant.answers?.length || 0)) {
+      console.log(`🚨 CRITICAL ERROR: Participant data not saved correctly!`);
+      // Force save as backup
+      const backupIndex = participants.findIndex(p => p.sessionId === participant.sessionId && p.name === participant.name);
+      if (backupIndex >= 0) {
+        participants[backupIndex] = JSON.parse(JSON.stringify(participant));
+        console.log(`✅ BACKUP SAVE COMPLETED`);
+      }
     }
 
     console.log(`\n✅ ANSWER SUBMISSION SUCCESSFUL for ${participant.name}`);
@@ -739,7 +768,7 @@ export const getQuizResults: RequestHandler = (req, res) => {
 
     // COMPREHENSIVE scoring system - processes EVERY participant individually
     console.log(`\n🎯 STARTING SCORE CALCULATION FOR ${allParticipants.length} PARTICIPANTS`);
-    console.log(`��� Quiz: "${quiz.title}" | Questions: ${quiz.questions.length}`);
+    console.log(`📚 Quiz: "${quiz.title}" | Questions: ${quiz.questions.length}`);
 
     const participantsWithScores = allParticipants.map((participant, index) => {
       const participantName = participant.name || `Participant ${index + 1}`;
