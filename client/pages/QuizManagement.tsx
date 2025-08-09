@@ -542,12 +542,18 @@ export default function QuizManagement() {
       });
     });
 
-    const totalQuestions = quiz.questions.length;
+    // Calculate final score and percentage FIRST before grading
     const score = correctCount;
     const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
 
-    // Assign grade following the exact algorithm provided
-    let grade = 'F';
+    console.log(`Frontend calculation for ${participant.name}:`);
+    console.log(`- Questions answered: ${questionsAnswered}/${totalQuestions}`);
+    console.log(`- Correct answers: ${correctCount}`);
+    console.log(`- Score: ${score}/${totalQuestions}`);
+    console.log(`- Percentage: ${percentage.toFixed(2)}%`);
+
+    // NOW assign grade based on calculated percentage (not before calculation)
+    let grade = 'F'; // Default grade
     if (percentage >= 80) {
       grade = 'A';
     } else if (percentage >= 50) {
@@ -555,6 +561,9 @@ export default function QuizManagement() {
     } else if (percentage >= 30) {
       grade = 'C';
     }
+    // F is for anything below 30%
+
+    console.log(`- Final Grade: ${grade}`);
 
     // Use actual submission time if available, otherwise current time
     const submissionTime = participant.submittedAt
