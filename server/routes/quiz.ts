@@ -442,6 +442,22 @@ export const submitQuiz: RequestHandler = (req, res) => {
     console.log(`✅ FOUND PARTICIPANT: ${participant.name} (ID: ${participant.id})`);
     console.log(`Current answers: ${participant.answers?.length || 0}`);
 
+    // Ensure participant has answers array
+    if (!participant.answers) {
+      participant.answers = [];
+      console.log(`🔧 Initialized empty answers array for ${participant.name}`);
+    }
+
+    // Validate answer data
+    if (answer === undefined || answer === null) {
+      console.log(`⚠️ WARNING: Received null/undefined answer for question ${questionId}`);
+      const errorResponse: ErrorResponse = {
+        error: "INVALID_ANSWER",
+        message: "Answer cannot be null or undefined",
+      };
+      return res.status(400).json(errorResponse);
+    }
+
     const session = quizSessions.find((s) => s.id === participant.sessionId);
     if (!session) {
       const errorResponse: ErrorResponse = {
