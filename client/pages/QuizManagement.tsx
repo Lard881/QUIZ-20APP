@@ -1055,10 +1055,10 @@ export default function QuizManagement() {
                       id="maxAttempts"
                       type="number"
                       min="1"
-                      max="10"
+                      max="3"
                       value={maxAttempts}
                       onChange={(e) =>
-                        setMaxAttempts(parseInt(e.target.value) || 1)
+                        setMaxAttempts(parseInt(e.target.value) || 3)
                       }
                       className="w-24 mt-1"
                     />
