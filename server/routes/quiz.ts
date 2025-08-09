@@ -555,15 +555,19 @@ export const getQuizResults: RequestHandler = (req, res) => {
       console.log("Processing ALL participants with fresh score calculations...");
     }
 
-    // Calculate scores from REAL participant answers only (no demo data)
+    // Universal scoring system - works for ANY participant who takes the quiz
     const participantsWithScores = allParticipants.map((participant, index) => {
-      console.log(`\n=== Calculating Score for ${participant.name} ===`);
-      console.log(`Answers provided:`, participant.answers.length);
+      const participantName = participant.name || `Participant ${index + 1}`;
+      console.log(`\n=== Calculating Score for ${participantName} ===`);
+      console.log(`Answers provided:`, participant.answers?.length || 0);
 
       let totalScore = 0;
       let questionsAnswered = 0;
       let questionsCorrect = 0;
       const totalPossiblePoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
+
+      // Handle ANY participant - whether they have answers or not
+      const hasAnswers = participant.answers && Array.isArray(participant.answers) && participant.answers.length > 0;
 
       // Process each question and compare with participant's actual answers
       quiz.questions.forEach((question) => {
