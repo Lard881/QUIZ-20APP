@@ -59,6 +59,35 @@ export interface QuizParticipant {
   questionsAnswered?: number;
   totalPossiblePoints?: number;
   calculatedAt?: string;
+  // Optional multi-attempt analytics used by server
+  totalAttempts?: number;
+  latestScore?: number;
+  latestGrade?: string;
+  bestAttemptNumber?: number;
+  latestAttemptScore?: number;
+  latestAttemptGrade?: string;
+  improvementPoints?: number;
+  scoreDetails?: Array<{
+    questionId: string;
+    question: string;
+    studentAnswer: string | number | null;
+    correctAnswer: string | number;
+    isCorrect: boolean;
+    pointsEarned: number;
+  }>;
+  // Internal attempt storage for server-side analytics
+  attempts?: Map<
+    string,
+    {
+      s: number; // score
+      p: number; // percentage
+      g: string; // grade
+      c: number; // correct count
+      a: number; // answered count
+      t: string; // timestamp ISO string
+      attemptNumber: number;
+    }
+  >;
 }
 
 export interface QuizAnswer {

@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
-import { DemoResponse } from "@shared/api";
+// Demo response shape
+interface DemoResponse { message: string }
 
 export const handleDemo: RequestHandler = (req, res) => {
   const response: DemoResponse = {

@@ -347,7 +347,7 @@ export default function StudentAccess() {
                       maxLength={10}
                     />
                     <Button
-                      onClick={handleRoomCodeSubmit}
+                      onClick={() => handleRoomCodeSubmit()}
                       disabled={!roomCode.trim()}
                     >
                       Join Quiz

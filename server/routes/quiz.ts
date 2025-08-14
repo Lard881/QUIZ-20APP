@@ -248,8 +248,7 @@ export const joinQuiz: RequestHandler = (req, res) => {
         isActive: quiz.isActive,
         createdAt: quiz.createdAt,
         updatedAt: quiz.updatedAt,
-        questions: [], // Don't send questions until quiz starts
-      },
+      } as Omit<Quiz, "questions">,
       success: true,
     };
 
@@ -1268,12 +1267,15 @@ export const getQuizResults: RequestHandler = (req, res) => {
       // AUTO-MARK SUBMISSION: If student has answers but no submission timestamp, auto-mark as submitted
       if (hasAnswers && !participant.submittedAt && questionsAnswered > 0) {
         // Find the latest answer timestamp to use as submission time
-        const lastAnswerTime = participant.answers.reduce((latest, current) => {
-          if (!latest) return current.timeStamp;
-          const latestTime = new Date(latest).getTime();
-          const currentTime = new Date(current.timeStamp || 0).getTime();
-          return currentTime > latestTime ? current.timeStamp : latest;
-        }, null);
+        const lastAnswerTime: string | null = participant.answers.reduce(
+          (latest: string | null, current) => {
+            if (!latest) return current.timeStamp || null;
+            const latestTime = new Date(latest).getTime();
+            const currentTime = new Date(current.timeStamp || 0).getTime();
+            return currentTime > latestTime ? current.timeStamp || latest : latest;
+          },
+          null,
+        );
 
         participant.submittedAt = lastAnswerTime || new Date().toISOString();
         console.log(
