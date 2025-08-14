@@ -11,13 +11,26 @@ import {
   LoginRequest,
   SignupRequest,
 } from "@shared/api";
+import app, { auth } from "@/lib/firebase";
+import {
+  type User,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile as fbUpdateProfile,
+  updateEmail as fbUpdateEmail,
+  updatePassword as fbUpdatePassword,
+  signOut as fbSignOut,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from "firebase/auth";
 
 interface AuthContextType {
   instructor: Omit<Instructor, "password"> | null;
   isLoading: boolean;
   login: (credentials: LoginRequest) => Promise<AuthResponse>;
   signup: (data: SignupRequest) => Promise<AuthResponse>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateInstructor: (data: Partial<Instructor>) => Promise<boolean>;
 }
 
@@ -35,121 +48,166 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+function mapFirebaseUserToInstructor(user: User): Omit<Instructor, "password"> {
+  const createdAt = user.metadata?.creationTime
+    ? new Date(user.metadata.creationTime).toISOString()
+    : new Date().toISOString();
+  const lastLogin = user.metadata?.lastSignInTime
+    ? new Date(user.metadata.lastSignInTime).toISOString()
+    : new Date().toISOString();
+
+  return {
+    id: user.uid,
+    name: user.displayName || user.email || "Instructor",
+    email: user.email || "",
+    quizzes: [],
+    createdAt,
+    lastLogin,
+  };
+}
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [instructor, setInstructor] = useState<Omit<
-    Instructor,
-    "password"
-  > | null>(null);
+  const [instructor, setInstructor] = useState<Omit<Instructor, "password"> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for existing session on mount
   useEffect(() => {
-    const token = localStorage.getItem("quiz_token");
-    const savedInstructor = localStorage.getItem("quiz_instructor");
-
-    if (token && savedInstructor) {
-      try {
-        setInstructor(JSON.parse(savedInstructor));
-      } catch (error) {
-        console.error("Failed to parse saved instructor data:", error);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const mapped = mapFirebaseUserToInstructor(user);
+        setInstructor(mapped);
+        try {
+          const token = await user.getIdToken();
+          localStorage.setItem("quiz_token", token);
+          localStorage.setItem("quiz_instructor", JSON.stringify(mapped));
+        } catch (err) {
+          // Ignore token persistence issues
+        }
+      } else {
+        setInstructor(null);
         localStorage.removeItem("quiz_token");
         localStorage.removeItem("quiz_instructor");
       }
-    }
+      setIsLoading(false);
+    });
 
-    setIsLoading(false);
+    return () => unsubscribe();
   }, []);
 
   const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const data: AuthResponse = await response.json();
-
-      if (data.success && data.instructor && data.token) {
-        setInstructor(data.instructor);
-        localStorage.setItem("quiz_token", data.token);
-        localStorage.setItem(
-          "quiz_instructor",
-          JSON.stringify(data.instructor),
-        );
-      }
-
-      return data;
-    } catch (error) {
+      const { user } = await signInWithEmailAndPassword(
+        auth,
+        credentials.email,
+        credentials.password,
+      );
+      const token = await user.getIdToken();
+      const mapped = mapFirebaseUserToInstructor(user);
+      setInstructor(mapped);
+      localStorage.setItem("quiz_token", token);
+      localStorage.setItem("quiz_instructor", JSON.stringify(mapped));
       return {
-        success: false,
-        message: "Network error. Please try again.",
+        success: true,
+        instructor: mapped,
+        token,
       };
+    } catch (error: any) {
+      let message = "Login failed. Please try again.";
+      if (error?.code === "auth/invalid-credential" || error?.code === "auth/invalid-email") {
+        message = "Invalid email or password";
+      }
+      return { success: false, message };
     }
   };
 
   const signup = async (signupData: SignupRequest): Promise<AuthResponse> => {
     try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(signupData),
-      });
+      const { user } = await createUserWithEmailAndPassword(
+        auth,
+        signupData.email,
+        signupData.password,
+      );
 
-      const data: AuthResponse = await response.json();
-
-      if (data.success && data.instructor && data.token) {
-        setInstructor(data.instructor);
-        localStorage.setItem("quiz_token", data.token);
-        localStorage.setItem(
-          "quiz_instructor",
-          JSON.stringify(data.instructor),
-        );
+      if (signupData.name) {
+        await fbUpdateProfile(user, { displayName: signupData.name });
       }
 
-      return data;
-    } catch (error) {
+      const token = await user.getIdToken();
+      const mapped = mapFirebaseUserToInstructor({ ...user, displayName: signupData.name } as User);
+      setInstructor(mapped);
+      localStorage.setItem("quiz_token", token);
+      localStorage.setItem("quiz_instructor", JSON.stringify(mapped));
+
       return {
-        success: false,
-        message: "Network error. Please try again.",
+        success: true,
+        instructor: mapped,
+        token,
       };
+    } catch (error: any) {
+      let message = "Account creation failed. Please try again.";
+      if (error?.code === "auth/email-already-in-use") {
+        message = "An account with this email already exists";
+      } else if (error?.code === "auth/weak-password") {
+        message = "Password must be at least 6 characters long";
+      }
+      return { success: false, message };
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await fbSignOut(auth);
     setInstructor(null);
     localStorage.removeItem("quiz_token");
     localStorage.removeItem("quiz_instructor");
   };
 
-  const updateInstructor = async (
-    data: Partial<Instructor>,
-  ): Promise<boolean> => {
+  const updateInstructor = async (data: Partial<Instructor>): Promise<boolean> => {
     try {
-      const token = localStorage.getItem("quiz_token");
-      const response = await fetch("/api/auth/update", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      });
+      const user = auth.currentUser;
+      if (!user) return false;
 
-      if (response.ok) {
-        const updatedInstructor = { ...instructor, ...data };
-        setInstructor(updatedInstructor);
-        localStorage.setItem(
-          "quiz_instructor",
-          JSON.stringify(updatedInstructor),
-        );
-        return true;
+      let requiresReauth = false;
+      const extra = data as any;
+      const currentPassword: string | undefined = extra.currentPassword;
+      const newPassword: string | undefined = extra.newPassword;
+
+      // Update display name
+      if (typeof data.name === "string" && data.name.trim() && data.name !== user.displayName) {
+        await fbUpdateProfile(user, { displayName: data.name.trim() });
       }
-      return false;
+
+      // Determine if reauth is needed (email or password change)
+      if ((typeof data.email === "string" && data.email.trim() && data.email !== user.email) || newPassword) {
+        requiresReauth = true;
+      }
+
+      if (requiresReauth) {
+        const emailForCred = user.email || data.email || "";
+        if (!currentPassword || !emailForCred) {
+          return false;
+        }
+        const credential = EmailAuthProvider.credential(emailForCred, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+      }
+
+      if (typeof data.email === "string" && data.email.trim() && data.email !== user.email) {
+        await fbUpdateEmail(user, data.email.trim());
+      }
+
+      if (newPassword) {
+        await fbUpdatePassword(user, newPassword);
+      }
+
+      // Refresh token and context
+      const refreshedUser = auth.currentUser as User;
+      const mapped = mapFirebaseUserToInstructor(refreshedUser);
+      setInstructor(mapped);
+      try {
+        const token = await refreshedUser.getIdToken(true);
+        localStorage.setItem("quiz_token", token);
+        localStorage.setItem("quiz_instructor", JSON.stringify(mapped));
+      } catch {}
+
+      return true;
     } catch (error) {
       return false;
     }
