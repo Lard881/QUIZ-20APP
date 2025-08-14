@@ -215,7 +215,7 @@ export default function CreateQuiz() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label htmlFor={`type-${question.tempId}`}>Question Type</Label>
             <Select
@@ -491,7 +491,7 @@ export default function CreateQuiz() {
 
               <div>
                 <Label htmlFor="durationValue">Quiz Duration</Label>
-                <div className="flex items-center space-x-2 mt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0 mt-1">
                   <Input
                     id="durationValue"
                     type="number"
@@ -501,7 +501,7 @@ export default function CreateQuiz() {
                     onChange={(e) =>
                       setDurationValue(parseInt(e.target.value) || 30)
                     }
-                    className="w-24"
+                    className="w-full sm:w-24"
                   />
                   <Select
                     value={durationUnit}
@@ -509,7 +509,7 @@ export default function CreateQuiz() {
                       setDurationUnit(value)
                     }
                   >
-                    <SelectTrigger className="w-24">
+                    <SelectTrigger className="w-full sm:w-24">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

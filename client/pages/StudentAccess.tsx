@@ -335,7 +335,7 @@ export default function StudentAccess() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="roomCode">Room Code</Label>
-                  <div className="flex space-x-2 mt-1">
+                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mt-1">
                     <Input
                       id="roomCode"
                       placeholder="e.g., JS2024"

@@ -904,7 +904,7 @@ export default function QuizManagement() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="w-full overflow-x-auto sm:overflow-visible grid grid-cols-4 sm:grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
             <TabsTrigger value="participants">Participants</TabsTrigger>
@@ -1334,12 +1334,63 @@ export default function QuizManagement() {
                       </div>
                     </div>
 
-                    {/* Student Results Table */}
+                    {/* Student Results */}
                     <div className="border rounded-lg overflow-hidden">
                       <div className="bg-muted/50 px-4 py-3 border-b">
                         <h4 className="font-medium">Student Results</h4>
                       </div>
-                      <div className="overflow-x-auto">
+                      {/* Mobile list */}
+                      <div className="block md:hidden p-4 space-y-3">
+                        {(participants || [])
+                          .map((participant) => {
+                            try {
+                              const perf = calculateStudentPerformance(participant);
+                              return {
+                                participant,
+                                score: perf.score,
+                                totalPossible: getTotalPossiblePoints(),
+                                percentage: perf.percentage,
+                                grade: perf.grade,
+                                submissionTime: perf.submissionTime,
+                                questionsCorrect: perf.questionsCorrect,
+                                questionsAnswered: perf.questionsAnswered,
+                              };
+                            } catch (e) {
+                              return {
+                                participant,
+                                score: 0,
+                                totalPossible: getTotalPossiblePoints(),
+                                percentage: 0,
+                                grade: "F",
+                                submissionTime: "-",
+                                questionsCorrect: 0,
+                                questionsAnswered: 0,
+                              };
+                            }
+                          })
+                          .map(({ participant, score, totalPossible, percentage, grade, submissionTime, questionsCorrect, questionsAnswered }) => (
+                            <div key={participant.id} className="border rounded-lg p-3">
+                              <div className="flex items-center justify-between">
+                                <div className="font-medium truncate">
+                                  {participant.name}
+                                  {participant.attemptNumber && participant.attemptNumber > 1 && (
+                                    <span className="text-xs text-muted-foreground ml-2">(Attempt #{participant.attemptNumber})</span>
+                                  )}
+                                </div>
+                                <Badge variant={getGradeVariant(grade)} className="ml-2 flex-shrink-0">{grade}</Badge>
+                              </div>
+                              <div className="mt-2 text-sm">
+                                <div className="flex justify-between"><span className="text-muted-foreground">Score</span><span className="font-medium">{score} / {totalPossible}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Percent</span><span className={`font-medium ${getScoreColor(percentage)}`}>{percentage.toFixed(1)}%</span></div>
+                                <div className="flex justify-between text-xs text-muted-foreground mt-1"><span>Correct</span><span>{questionsCorrect || 0} / {questionsAnswered || 0}</span></div>
+                                <div className="text-xs text-muted-foreground mt-1">{submissionTime}</div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+
+                      {/* Desktop table */}
+                      <div className="hidden md:block overflow-x-auto">
                         <table className="w-full">
                           <thead className="bg-muted/30">
                             <tr>

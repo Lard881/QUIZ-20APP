@@ -90,7 +90,7 @@ export default function Home() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           <Card className="quiz-card-hover">
             <CardHeader>
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">

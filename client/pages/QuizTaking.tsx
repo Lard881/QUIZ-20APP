@@ -596,7 +596,7 @@ export default function QuizTaking() {
         {/* Navigation */}
         <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
           {/* Question indicators */}
-          <div className="flex flex-wrap justify-center space-x-1 md:space-x-2 order-2 md:order-2">
+          <div className="flex flex-wrap justify-center gap-1 md:gap-2 order-2 md:order-2">
             {quiz.questions.map((_, index) => (
               <button
                 key={index}
@@ -615,7 +615,7 @@ export default function QuizTaking() {
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex items-center space-x-4 w-full md:w-auto order-1 md:order-1">
+          <div className="flex items-center space-x-2 w-full md:w-auto order-1 md:order-1">
             <Button
               variant="outline"
               onClick={() =>
@@ -629,7 +629,7 @@ export default function QuizTaking() {
             </Button>
           </div>
 
-          <div className="flex items-center space-x-4 w-full md:w-auto order-3 md:order-3">
+          <div className="flex items-center space-x-2 w-full md:w-auto order-3 md:order-3">
             {isLastQuestion ? (
               <Button
                 onClick={submitQuiz}
